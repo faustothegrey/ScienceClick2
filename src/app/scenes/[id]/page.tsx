@@ -1,6 +1,7 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId, useState, useEffect } from "react";
+import { useParams } from "next/navigation";
 import {
   DndContext,
   DragEndEvent,
@@ -20,14 +21,22 @@ export interface DropTarget {
 }
 
 export default function SceneEditorPage() {
+  const { id } = useParams<{ id: string }>();
   const dndId = useId();
   const [mode, setMode] = useState<"editor" | "play">("editor");
-  const [availableTerms, setAvailableTerms] = useState([
-    { id: "term-1", label: "Rain" },
-    { id: "term-2", label: "Sun" },
-    { id: "term-3", label: "Cloud" },
-  ]);
+  const [availableTerms, setAvailableTerms] = useState<{ id: string; label: string }[]>([]);
   const [dropTargets, setDropTargets] = useState<DropTarget[]>([]);
+
+  useEffect(() => {
+    fetch(`/api/scenes/${id}/config`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data) {
+          setAvailableTerms(data.terms);
+          setDropTargets(data.dropTargets);
+        }
+      });
+  }, [id]);
   const [activeId, setActiveId] = useState<string | null>(null);
 
   function handleCanvasClick(xPercent: number, yPercent: number) {
@@ -73,6 +82,14 @@ export default function SceneEditorPage() {
     ]);
   }
 
+  function handleSave() {
+    fetch(`/api/scenes/${id}/config`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ terms: availableTerms, dropTargets }),
+    });
+  }
+
   const activeTerm = availableTerms.find((t) => t.id === activeId);
 
   return (
@@ -94,6 +111,7 @@ export default function SceneEditorPage() {
             terms={availableTerms}
             mode={mode}
             onAddTerm={handleAddTerm}
+            onSave={handleSave}
           />
         </div>
       </div>

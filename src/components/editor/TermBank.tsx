@@ -1,5 +1,5 @@
 import { useDraggable } from "@dnd-kit/core";
-import { Plus, Settings, GripVertical, MoreHorizontal } from "lucide-react";
+import { Plus, Save, Settings, GripVertical, MoreHorizontal } from "lucide-react";
 
 interface Term {
   id: string;
@@ -10,6 +10,7 @@ interface TermBankProps {
   terms: Term[];
   mode: "editor" | "play";
   onAddTerm: (label: string) => void;
+  onSave: () => void;
 }
 
 function DraggableTerm({ term }: { term: Term }) {
@@ -35,7 +36,7 @@ function DraggableTerm({ term }: { term: Term }) {
   );
 }
 
-export default function TermBank({ terms, mode, onAddTerm }: TermBankProps) {
+export default function TermBank({ terms, mode, onAddTerm, onSave }: TermBankProps) {
   function handleNewTerm() {
     const label = window.prompt("Enter term label:");
     if (label?.trim()) {
@@ -53,15 +54,22 @@ export default function TermBank({ terms, mode, onAddTerm }: TermBankProps) {
         </button>
       </div>
 
-      {/* New Term button (editor only) */}
+      {/* New Term + Save buttons (editor only) */}
       {mode === "editor" && (
-        <div className="p-3">
+        <div className="p-3 flex gap-2">
           <button
             onClick={handleNewTerm}
             className="flex items-center gap-1 px-3 py-1.5 text-sm text-gray-600 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 whitespace-nowrap"
           >
             <Plus className="w-3.5 h-3.5" />
             New Term
+          </button>
+          <button
+            onClick={onSave}
+            className="flex items-center gap-1 px-3 py-1.5 text-sm text-white bg-blue-600 rounded-lg hover:bg-blue-700 whitespace-nowrap"
+          >
+            <Save className="w-3.5 h-3.5" />
+            Save
           </button>
         </div>
       )}
