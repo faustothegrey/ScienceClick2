@@ -1,6 +1,11 @@
 import { ArrowLeft } from "lucide-react";
 
-export default function HeaderBar() {
+interface HeaderBarProps {
+  mode: "editor" | "play";
+  onModeChange: (mode: "editor" | "play") => void;
+}
+
+export default function HeaderBar({ mode, onModeChange }: HeaderBarProps) {
   return (
     <header className="flex items-center justify-between h-14 px-4 bg-gradient-to-b from-blue-50/80 to-white border-b border-blue-100">
       {/* Left: back link */}
@@ -18,10 +23,24 @@ export default function HeaderBar() {
 
       {/* Right: mode toggle */}
       <div className="flex items-center gap-1">
-        <button className="px-4 py-1.5 text-sm font-medium text-gray-500">
+        <button
+          onClick={() => onModeChange("editor")}
+          className={`px-4 py-1.5 text-sm font-medium rounded-full transition-colors ${
+            mode === "editor"
+              ? "bg-blue-600 text-white shadow-sm"
+              : "text-gray-500 hover:text-gray-700"
+          }`}
+        >
           Editor
         </button>
-        <button className="px-5 py-1.5 text-sm font-medium rounded-full bg-blue-600 text-white shadow-sm">
+        <button
+          onClick={() => onModeChange("play")}
+          className={`px-4 py-1.5 text-sm font-medium rounded-full transition-colors ${
+            mode === "play"
+              ? "bg-blue-600 text-white shadow-sm"
+              : "text-gray-500 hover:text-gray-700"
+          }`}
+        >
           Play
         </button>
       </div>

@@ -8,6 +8,8 @@ interface Term {
 
 interface TermBankProps {
   terms: Term[];
+  mode: "editor" | "play";
+  onAddTerm: (label: string) => void;
 }
 
 function DraggableTerm({ term }: { term: Term }) {
@@ -33,7 +35,14 @@ function DraggableTerm({ term }: { term: Term }) {
   );
 }
 
-export default function TermBank({ terms }: TermBankProps) {
+export default function TermBank({ terms, mode, onAddTerm }: TermBankProps) {
+  function handleNewTerm() {
+    const label = window.prompt("Enter term label:");
+    if (label?.trim()) {
+      onAddTerm(label.trim());
+    }
+  }
+
   return (
     <aside className="w-72 bg-white border-l border-gray-200 flex flex-col z-20">
       {/* Header */}
@@ -44,13 +53,18 @@ export default function TermBank({ terms }: TermBankProps) {
         </button>
       </div>
 
-      {/* New Term button */}
-      <div className="p-3">
-        <button className="flex items-center gap-1 px-3 py-1.5 text-sm text-gray-600 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 whitespace-nowrap">
-          <Plus className="w-3.5 h-3.5" />
-          New Term
-        </button>
-      </div>
+      {/* New Term button (editor only) */}
+      {mode === "editor" && (
+        <div className="p-3">
+          <button
+            onClick={handleNewTerm}
+            className="flex items-center gap-1 px-3 py-1.5 text-sm text-gray-600 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 whitespace-nowrap"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            New Term
+          </button>
+        </div>
+      )}
 
       {/* Category */}
       <div className="px-4 pt-2 flex-1 overflow-y-auto">

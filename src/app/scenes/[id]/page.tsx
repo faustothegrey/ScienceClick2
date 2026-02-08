@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import {
   DndContext,
   DragEndEvent,
@@ -12,61 +12,89 @@ import HeaderBar from "@/components/editor/HeaderBar";
 import Canvas from "@/components/editor/Canvas";
 import TermBank from "@/components/editor/TermBank";
 
+export interface DropTarget {
+  id: string;
+  x: number; // percentage of container width (0-100)
+  y: number; // percentage of container height (0-100)
+  assignedTerm: string | null;
+}
+
 export default function SceneEditorPage() {
+  const dndId = useId();
+  const [mode, setMode] = useState<"editor" | "play">("editor");
   const [availableTerms, setAvailableTerms] = useState([
     { id: "term-1", label: "Rain" },
     { id: "term-2", label: "Sun" },
     { id: "term-3", label: "Cloud" },
   ]);
-  const [placedItems, setPlacedItems] = useState<
-    Array<{ id: string; label: string; x: number; y: number }>
-  >([]);
+  const [dropTargets, setDropTargets] = useState<DropTarget[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
+
+  function handleCanvasClick(xPercent: number, yPercent: number) {
+    setDropTargets((targets) => [
+      ...targets,
+      {
+        id: `target-${Date.now()}`,
+        x: xPercent,
+        y: yPercent,
+        assignedTerm: null,
+      },
+    ]);
+  }
 
   function handleDragStart(event: DragStartEvent) {
     setActiveId(event.active.id as string);
   }
 
   function handleDragEnd(event: DragEndEvent) {
-    const { active, over, activatorEvent, delta } = event;
+    const { active, over } = event;
 
-    if (over && over.id === "canvas") {
-      const term = availableTerms.find((t) => t.id === active.id);
-      if (term) {
-        const pointerEvent = activatorEvent as PointerEvent;
-        const canvasRect = over.rect;
-
-        // Cursor position at drop = initial pointer + delta, relative to canvas
-        const x = pointerEvent.clientX + delta.x - canvasRect.left;
-        const y = pointerEvent.clientY + delta.y - canvasRect.top;
-
-        setPlacedItems((items) => [
-          ...items,
-          {
-            id: `${term.id}-${Date.now()}`,
-            label: term.label,
-            x,
-            y,
-          },
-        ]);
+    if (over) {
+      const targetId = over.id as string;
+      const target = dropTargets.find((t) => t.id === targetId);
+      if (target) {
+        const term = availableTerms.find((t) => t.id === active.id);
+        if (term) {
+          setDropTargets((targets) =>
+            targets.map((t) =>
+              t.id === targetId ? { ...t, assignedTerm: term.label } : t
+            )
+          );
+        }
       }
     }
     setActiveId(null);
+  }
+
+  function handleAddTerm(label: string) {
+    setAvailableTerms((terms) => [
+      ...terms,
+      { id: `term-${Date.now()}`, label },
+    ]);
   }
 
   const activeTerm = availableTerms.find((t) => t.id === activeId);
 
   return (
     <DndContext
+      id={dndId}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
       collisionDetection={pointerWithin}
     >
       <div className="flex flex-col h-screen">
-        <HeaderBar />
+        <HeaderBar mode={mode} onModeChange={setMode} />
         <div className="flex flex-1 overflow-hidden">
-          <Canvas placedItems={placedItems} />
-          <TermBank terms={availableTerms} />
+          <Canvas
+            dropTargets={dropTargets}
+            onCanvasClick={handleCanvasClick}
+            mode={mode}
+          />
+          <TermBank
+            terms={availableTerms}
+            mode={mode}
+            onAddTerm={handleAddTerm}
+          />
         </div>
       </div>
       <DragOverlay dropAnimation={null}>
