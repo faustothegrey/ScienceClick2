@@ -1,24 +1,27 @@
 import { useDroppable } from "@dnd-kit/core";
-import { Plus } from "lucide-react";
 import Toolbar from "./Toolbar";
 import type { DropTarget } from "@/app/scenes/[id]/page";
 
+interface Term {
+  id: string;
+  label: string;
+}
+
 interface CanvasProps {
   dropTargets: DropTarget[];
-  onCanvasClick: (xPercent: number, yPercent: number) => void;
+  terms: Term[];
   mode: "editor" | "play";
 }
 
-function DropZone({ target }: { target: DropTarget }) {
+function DropZone({ target, terms, mode }: { target: DropTarget; terms: Term[]; mode: "editor" | "play" }) {
   const { setNodeRef, isOver } = useDroppable({ id: target.id });
-
-  const filled = target.assignedTerm !== null;
+  const termLabel = terms.find((t) => t.id === target.assignedTerm)?.label ?? null;
 
   return (
     <div
       ref={setNodeRef}
       className={`absolute z-10 flex items-center justify-center -translate-x-1/2 -translate-y-1/2 w-24 h-10 rounded-lg text-sm font-medium transition-colors ${
-        filled
+        mode === "editor"
           ? "bg-white border-2 border-blue-400 text-gray-800 shadow-md"
           : isOver
             ? "border-2 border-dashed border-blue-400 bg-blue-50 text-blue-400"
@@ -29,19 +32,13 @@ function DropZone({ target }: { target: DropTarget }) {
         top: `${target.y}%`,
       }}
     >
-      {filled ? target.assignedTerm : <Plus className="w-4 h-4" />}
+      {mode === "editor" ? termLabel : null}
     </div>
   );
 }
 
-export default function Canvas({ dropTargets, onCanvasClick, mode }: CanvasProps) {
-  function handleClick(e: React.MouseEvent<HTMLDivElement>) {
-    if (mode !== "editor") return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    const xPercent = ((e.clientX - rect.left) / rect.width) * 100;
-    const yPercent = ((e.clientY - rect.top) / rect.height) * 100;
-    onCanvasClick(xPercent, yPercent);
-  }
+export default function Canvas({ dropTargets, terms, mode }: CanvasProps) {
+  const { setNodeRef, isOver } = useDroppable({ id: "canvas" });
 
   return (
     <div className="flex-1 flex flex-col bg-blue-50/50 relative">
@@ -50,12 +47,13 @@ export default function Canvas({ dropTargets, onCanvasClick, mode }: CanvasProps
       {/* Canvas area */}
       <div className="flex-1 flex items-center justify-center p-6">
         <div
-          onClick={handleClick}
-          className={`bg-white rounded-xl shadow-sm w-full h-full flex items-center justify-center relative border-2 border-transparent transition-colors ${
-            mode === "editor"
-              ? "hover:border-blue-200 cursor-crosshair"
-              : "cursor-default"
-          }`}
+          ref={setNodeRef}
+          id="canvas-drop-area"
+          className={`bg-white rounded-xl shadow-sm w-full h-full flex items-center justify-center relative border-2 transition-colors ${
+            isOver
+              ? "border-blue-300 bg-blue-50/30"
+              : "border-transparent"
+          } ${mode === "editor" ? "cursor-default" : "cursor-default"}`}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
@@ -66,19 +64,9 @@ export default function Canvas({ dropTargets, onCanvasClick, mode }: CanvasProps
 
           {/* Drop Targets */}
           {dropTargets.map((target) => (
-            <DropZone key={target.id} target={target} />
+            <DropZone key={target.id} target={target} terms={terms} mode={mode} />
           ))}
         </div>
-      </div>
-
-      {/* Bottom bar */}
-      <div className="absolute bottom-4 right-4 flex items-center gap-2 bg-white rounded-lg shadow-sm px-3 py-1.5 text-sm text-gray-500">
-        <button className="hover:text-gray-700">
-          <Plus className="w-4 h-4" />
-        </button>
-        <span>Fit</span>
-        <span className="text-gray-300">|</span>
-        <span>100%</span>
       </div>
     </div>
   );

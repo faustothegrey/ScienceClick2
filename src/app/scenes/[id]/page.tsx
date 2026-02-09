@@ -39,39 +39,70 @@ export default function SceneEditorPage() {
   }, [id]);
   const [activeId, setActiveId] = useState<string | null>(null);
 
-  function handleCanvasClick(xPercent: number, yPercent: number) {
-    setDropTargets((targets) => [
-      ...targets,
-      {
-        id: `target-${Date.now()}`,
-        x: xPercent,
-        y: yPercent,
-        assignedTerm: null,
-      },
-    ]);
-  }
-
   function handleDragStart(event: DragStartEvent) {
     setActiveId(event.active.id as string);
   }
 
   function handleDragEnd(event: DragEndEvent) {
-    const { active, over } = event;
+    const { active, over, activatorEvent, delta } = event;
 
-    if (over) {
+    if (!over) {
+      setActiveId(null);
+      return;
+    }
+
+    const term = availableTerms.find((t) => t.id === active.id);
+    if (!term) {
+      setActiveId(null);
+      return;
+    }
+
+    if (over.id === "canvas" && mode === "editor") {
+      // Dropped on canvas background — create or reposition drop target
+      const pointerEvent = activatorEvent as PointerEvent;
+      const finalX = pointerEvent.clientX + delta.x;
+      const finalY = pointerEvent.clientY + delta.y;
+
+      const canvasEl = document.getElementById("canvas-drop-area");
+      if (canvasEl) {
+        const rect = canvasEl.getBoundingClientRect();
+        const xPercent = ((finalX - rect.left) / rect.width) * 100;
+        const yPercent = ((finalY - rect.top) / rect.height) * 100;
+
+        const existing = dropTargets.find((t) => t.assignedTerm === term.id);
+        if (existing) {
+          // Reposition existing drop target
+          setDropTargets((targets) =>
+            targets.map((t) =>
+              t.id === existing.id ? { ...t, x: xPercent, y: yPercent } : t
+            )
+          );
+        } else {
+          // Create new drop target with term assigned
+          setDropTargets((targets) => [
+            ...targets,
+            {
+              id: `target-${Date.now()}`,
+              x: xPercent,
+              y: yPercent,
+              assignedTerm: term.id,
+            },
+          ]);
+        }
+      }
+    } else if (over.id !== "canvas") {
+      // Dropped on an existing drop target (play mode assignment)
       const targetId = over.id as string;
       const target = dropTargets.find((t) => t.id === targetId);
       if (target) {
-        const term = availableTerms.find((t) => t.id === active.id);
-        if (term) {
-          setDropTargets((targets) =>
-            targets.map((t) =>
-              t.id === targetId ? { ...t, assignedTerm: term.label } : t
-            )
-          );
-        }
+        setDropTargets((targets) =>
+          targets.map((t) =>
+            t.id === targetId ? { ...t, assignedTerm: term.id } : t
+          )
+        );
       }
     }
+
     setActiveId(null);
   }
 
@@ -104,7 +135,7 @@ export default function SceneEditorPage() {
         <div className="flex flex-1 overflow-hidden">
           <Canvas
             dropTargets={dropTargets}
-            onCanvasClick={handleCanvasClick}
+            terms={availableTerms}
             mode={mode}
           />
           <TermBank
