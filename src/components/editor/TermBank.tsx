@@ -1,5 +1,5 @@
 import { useDraggable } from "@dnd-kit/core";
-import { Plus, Save, Settings, GripVertical } from "lucide-react";
+import { Plus, Save, Settings, GripVertical, X } from "lucide-react";
 
 interface Term {
   id: string;
@@ -10,30 +10,39 @@ interface TermBankProps {
   terms: Term[];
   mode: "editor" | "play";
   onAddTerm: (label: string) => void;
+  onRemoveTerm: (termId: string) => void;
   onSave: () => void;
 }
 
-function DraggableTerm({ term }: { term: Term }) {
+function DraggableTerm({ term, mode, onRemove }: { term: Term; mode: "editor" | "play"; onRemove: (termId: string) => void }) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: term.id,
   });
 
   return (
-    <div
-      ref={setNodeRef}
-      {...listeners}
-      {...attributes}
-      className={`flex items-center justify-between px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg cursor-move hover:border-blue-400 transition-colors ${isDragging ? "opacity-30" : ""}`}
-    >
-      <div className="flex items-center gap-2">
-        <GripVertical className="w-4 h-4 text-gray-300" />
+    <div className={`flex items-center gap-1 ${isDragging ? "opacity-30" : ""}`}>
+      <div
+        ref={setNodeRef}
+        {...listeners}
+        {...attributes}
+        className="flex-1 flex items-center gap-2 px-2 py-1.5 bg-gray-50 border border-gray-200 rounded-lg cursor-move hover:border-blue-400 transition-colors"
+      >
+        <GripVertical className="w-3.5 h-3.5 text-gray-300" />
         <span className="text-sm font-medium text-gray-700">{term.label}</span>
       </div>
+      {mode === "editor" && (
+        <button
+          onClick={() => onRemove(term.id)}
+          className="p-1 text-gray-400 hover:text-red-500 transition-colors"
+        >
+          <X className="w-3.5 h-3.5" />
+        </button>
+      )}
     </div>
   );
 }
 
-export default function TermBank({ terms, mode, onAddTerm, onSave }: TermBankProps) {
+export default function TermBank({ terms, mode, onAddTerm, onRemoveTerm, onSave }: TermBankProps) {
   function handleNewTerm() {
     const label = window.prompt("Enter term label:");
     if (label?.trim()) {
@@ -76,7 +85,7 @@ export default function TermBank({ terms, mode, onAddTerm, onSave }: TermBankPro
         <div className="border-t border-gray-100 pt-3">
           <div className="space-y-2">
             {terms.map((term) => (
-              <DraggableTerm key={term.id} term={term} />
+              <DraggableTerm key={term.id} term={term} mode={mode} onRemove={onRemoveTerm} />
             ))}
           </div>
         </div>

@@ -119,6 +119,11 @@ export default function SceneEditorPage() {
     ]);
   }
 
+  function handleRemoveTerm(termId: string) {
+    setAvailableTerms((terms) => terms.filter((t) => t.id !== termId));
+    setDropTargets((targets) => targets.filter((t) => t.assignedTerm !== termId));
+  }
+
   function handleSave() {
     fetch(`/api/scenes/${id}/config`, {
       method: "PUT",
@@ -149,6 +154,7 @@ export default function SceneEditorPage() {
             terms={availableTerms}
             mode={mode}
             onAddTerm={handleAddTerm}
+            onRemoveTerm={handleRemoveTerm}
             onSave={handleSave}
           />
         </div>
