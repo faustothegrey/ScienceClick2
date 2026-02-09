@@ -74,25 +74,30 @@ export default function SceneEditorPage() {
         const yPercent = ((finalY - rect.top) / rect.height) * 100;
 
         const existing = dropTargets.find((t) => t.assignedTerm === term.id);
+        let nextTargets: DropTarget[];
         if (existing) {
-          // Reposition existing drop target
-          setDropTargets((targets) =>
-            targets.map((t) =>
-              t.id === existing.id ? { ...t, x: xPercent, y: yPercent } : t
-            )
+          nextTargets = dropTargets.map((t) =>
+            t.id === existing.id ? { ...t, x: xPercent, y: yPercent } : t
           );
         } else {
-          // Create new drop target with term assigned
-          setDropTargets((targets) => [
-            ...targets,
+          nextTargets = [
+            ...dropTargets,
             {
               id: `target-${Date.now()}`,
               x: xPercent,
               y: yPercent,
               assignedTerm: term.id,
             },
-          ]);
+          ];
         }
+        setDropTargets(nextTargets);
+
+        // Persist reposition
+        fetch(`/api/scenes/${id}/config`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ terms: availableTerms, dropTargets: nextTargets }),
+        });
       }
     } else if (over.id !== "canvas" && mode === "play") {
       // Dropped on an existing drop target in play mode
@@ -125,28 +130,35 @@ export default function SceneEditorPage() {
 
   function handleCanvasClick(xPercent: number, yPercent: number) {
     if (!placingTermId) return;
-    setDropTargets((targets) => [
-      ...targets,
-      {
-        id: `target-${Date.now()}`,
-        x: xPercent,
-        y: yPercent,
-        assignedTerm: placingTermId,
-      },
-    ]);
+    const newTarget: DropTarget = {
+      id: `target-${Date.now()}`,
+      x: xPercent,
+      y: yPercent,
+      assignedTerm: placingTermId,
+    };
+    const nextTargets = [...dropTargets, newTarget];
+    setDropTargets(nextTargets);
     setPlacingTermId(null);
-  }
 
-  function handleRemoveTerm(termId: string) {
-    setAvailableTerms((terms) => terms.filter((t) => t.id !== termId));
-    setDropTargets((targets) => targets.filter((t) => t.assignedTerm !== termId));
-  }
-
-  function handleSave() {
+    // Persist now that both term and drop target are defined
     fetch(`/api/scenes/${id}/config`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ terms: availableTerms, dropTargets }),
+      body: JSON.stringify({ terms: availableTerms, dropTargets: nextTargets }),
+    });
+  }
+
+  function handleRemoveTerm(termId: string) {
+    const nextTerms = availableTerms.filter((t) => t.id !== termId);
+    const nextTargets = dropTargets.filter((t) => t.assignedTerm !== termId);
+    setAvailableTerms(nextTerms);
+    setDropTargets(nextTargets);
+
+    // Persist removal
+    fetch(`/api/scenes/${id}/config`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ terms: nextTerms, dropTargets: nextTargets }),
     });
   }
 
@@ -175,7 +187,6 @@ export default function SceneEditorPage() {
             mode={mode}
             onAddTerm={handleAddTerm}
             onRemoveTerm={handleRemoveTerm}
-            onSave={handleSave}
           />
         </div>
       </div>
