@@ -38,6 +38,8 @@ export default function SceneEditorPage() {
       });
   }, [id]);
   const [activeId, setActiveId] = useState<string | null>(null);
+  // Play mode: player's guesses, mapping drop target id → term id
+  const [playerGuesses, setPlayerGuesses] = useState<Record<string, string>>({});
 
   function handleDragStart(event: DragStartEvent) {
     setActiveId(event.active.id as string);
@@ -90,16 +92,20 @@ export default function SceneEditorPage() {
           ]);
         }
       }
-    } else if (over.id !== "canvas") {
-      // Dropped on an existing drop target (play mode assignment)
+    } else if (over.id !== "canvas" && mode === "play") {
+      // Dropped on an existing drop target in play mode
       const targetId = over.id as string;
       const target = dropTargets.find((t) => t.id === targetId);
       if (target) {
-        setDropTargets((targets) =>
-          targets.map((t) =>
-            t.id === targetId ? { ...t, assignedTerm: term.id } : t
-          )
-        );
+        setPlayerGuesses((prev) => {
+          const next = { ...prev };
+          // Remove this term from any other target (one-to-one)
+          for (const key of Object.keys(next)) {
+            if (next[key] === term.id) delete next[key];
+          }
+          next[targetId] = term.id;
+          return next;
+        });
       }
     }
 
@@ -131,12 +137,13 @@ export default function SceneEditorPage() {
       collisionDetection={pointerWithin}
     >
       <div className="flex flex-col h-screen">
-        <HeaderBar mode={mode} onModeChange={setMode} />
+        <HeaderBar mode={mode} onModeChange={(m) => { setMode(m); if (m === "play") setPlayerGuesses({}); }} />
         <div className="flex flex-1 overflow-hidden">
           <Canvas
             dropTargets={dropTargets}
             terms={availableTerms}
             mode={mode}
+            playerGuesses={playerGuesses}
           />
           <TermBank
             terms={availableTerms}

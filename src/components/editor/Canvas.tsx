@@ -11,17 +11,21 @@ interface CanvasProps {
   dropTargets: DropTarget[];
   terms: Term[];
   mode: "editor" | "play";
+  playerGuesses: Record<string, string>;
 }
 
-function DropZone({ target, terms, mode }: { target: DropTarget; terms: Term[]; mode: "editor" | "play" }) {
+function DropZone({ target, terms, mode, guessTermId }: { target: DropTarget; terms: Term[]; mode: "editor" | "play"; guessTermId?: string }) {
   const { setNodeRef, isOver } = useDroppable({ id: target.id });
-  const termLabel = terms.find((t) => t.id === target.assignedTerm)?.label ?? null;
+  const editorLabel = terms.find((t) => t.id === target.assignedTerm)?.label ?? null;
+  const guessLabel = guessTermId ? terms.find((t) => t.id === guessTermId)?.label ?? null : null;
+
+  const filled = mode === "editor" ? !!editorLabel : !!guessLabel;
 
   return (
     <div
       ref={setNodeRef}
       className={`absolute z-10 flex items-center justify-center -translate-x-1/2 -translate-y-1/2 w-24 h-10 rounded-lg text-sm font-medium transition-colors ${
-        mode === "editor"
+        filled
           ? "bg-white border-2 border-blue-400 text-gray-800 shadow-md"
           : isOver
             ? "border-2 border-dashed border-blue-400 bg-blue-50 text-blue-400"
@@ -32,12 +36,12 @@ function DropZone({ target, terms, mode }: { target: DropTarget; terms: Term[]; 
         top: `${target.y}%`,
       }}
     >
-      {mode === "editor" ? termLabel : null}
+      {mode === "editor" ? editorLabel : guessLabel}
     </div>
   );
 }
 
-export default function Canvas({ dropTargets, terms, mode }: CanvasProps) {
+export default function Canvas({ dropTargets, terms, mode, playerGuesses }: CanvasProps) {
   const { setNodeRef, isOver } = useDroppable({ id: "canvas" });
 
   return (
@@ -64,7 +68,7 @@ export default function Canvas({ dropTargets, terms, mode }: CanvasProps) {
 
           {/* Drop Targets */}
           {dropTargets.map((target) => (
-            <DropZone key={target.id} target={target} terms={terms} mode={mode} />
+            <DropZone key={target.id} target={target} terms={terms} mode={mode} guessTermId={playerGuesses[target.id]} />
           ))}
         </div>
       </div>
