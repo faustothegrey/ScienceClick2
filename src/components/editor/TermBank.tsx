@@ -1,5 +1,5 @@
 import { useDraggable } from "@dnd-kit/core";
-import { Plus, Save, Settings, GripVertical, MoreHorizontal } from "lucide-react";
+import { Plus, Save, Settings, GripVertical } from "lucide-react";
 
 interface Term {
   id: string;
@@ -29,9 +29,6 @@ function DraggableTerm({ term }: { term: Term }) {
         <GripVertical className="w-4 h-4 text-gray-300" />
         <span className="text-sm font-medium text-gray-700">{term.label}</span>
       </div>
-      <button className="text-gray-400 hover:text-gray-600">
-        <MoreHorizontal className="w-4 h-4" />
-      </button>
     </div>
   );
 }
@@ -77,9 +74,6 @@ export default function TermBank({ terms, mode, onAddTerm, onSave }: TermBankPro
       {/* Category */}
       <div className="px-4 pt-2 flex-1 overflow-y-auto">
         <div className="border-t border-gray-100 pt-3">
-          <h3 className="text-sm font-medium text-gray-500 mb-3">
-            Weather Terms
-          </h3>
           <div className="space-y-2">
             {terms.map((term) => (
               <DraggableTerm key={term.id} term={term} />
