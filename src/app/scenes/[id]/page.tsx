@@ -40,6 +40,8 @@ export default function SceneEditorPage() {
   const [activeId, setActiveId] = useState<string | null>(null);
   // Play mode: player's guesses, mapping drop target id → term id
   const [playerGuesses, setPlayerGuesses] = useState<Record<string, string>>({});
+  // Editor mode: term awaiting placement on canvas
+  const [placingTermId, setPlacingTermId] = useState<string | null>(null);
 
   function handleDragStart(event: DragStartEvent) {
     setActiveId(event.active.id as string);
@@ -113,10 +115,26 @@ export default function SceneEditorPage() {
   }
 
   function handleAddTerm(label: string) {
+    const termId = `term-${Date.now()}`;
     setAvailableTerms((terms) => [
       ...terms,
-      { id: `term-${Date.now()}`, label },
+      { id: termId, label },
     ]);
+    setPlacingTermId(termId);
+  }
+
+  function handleCanvasClick(xPercent: number, yPercent: number) {
+    if (!placingTermId) return;
+    setDropTargets((targets) => [
+      ...targets,
+      {
+        id: `target-${Date.now()}`,
+        x: xPercent,
+        y: yPercent,
+        assignedTerm: placingTermId,
+      },
+    ]);
+    setPlacingTermId(null);
   }
 
   function handleRemoveTerm(termId: string) {
@@ -149,6 +167,8 @@ export default function SceneEditorPage() {
             terms={availableTerms}
             mode={mode}
             playerGuesses={playerGuesses}
+            placingTermId={placingTermId}
+            onCanvasClick={handleCanvasClick}
           />
           <TermBank
             terms={availableTerms}

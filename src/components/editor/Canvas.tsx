@@ -12,6 +12,8 @@ interface CanvasProps {
   terms: Term[];
   mode: "editor" | "play";
   playerGuesses: Record<string, string>;
+  placingTermId: string | null;
+  onCanvasClick: (xPercent: number, yPercent: number) => void;
 }
 
 function DropZone({ target, terms, mode, guessTermId, allPlaced }: { target: DropTarget; terms: Term[]; mode: "editor" | "play"; guessTermId?: string; allPlaced: boolean }) {
@@ -55,24 +57,44 @@ function DropZone({ target, terms, mode, guessTermId, allPlaced }: { target: Dro
   );
 }
 
-export default function Canvas({ dropTargets, terms, mode, playerGuesses }: CanvasProps) {
+export default function Canvas({ dropTargets, terms, mode, playerGuesses, placingTermId, onCanvasClick }: CanvasProps) {
   const { setNodeRef, isOver } = useDroppable({ id: "canvas" });
   const allPlaced = dropTargets.length > 0 && dropTargets.every((t) => playerGuesses[t.id]);
+  const isPlacing = !!placingTermId;
+  const placingLabel = isPlacing ? terms.find((t) => t.id === placingTermId)?.label : null;
+
+  function handleClick(e: React.MouseEvent<HTMLDivElement>) {
+    if (!isPlacing) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const xPercent = ((e.clientX - rect.left) / rect.width) * 100;
+    const yPercent = ((e.clientY - rect.top) / rect.height) * 100;
+    onCanvasClick(xPercent, yPercent);
+  }
 
   return (
     <div className="flex-1 flex flex-col bg-blue-50/50 relative">
       <Toolbar />
+
+      {/* Placing indicator */}
+      {isPlacing && (
+        <div className="absolute top-2 left-1/2 -translate-x-1/2 z-20 px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg shadow-md">
+          Click on the image to place &ldquo;{placingLabel}&rdquo;
+        </div>
+      )}
 
       {/* Canvas area */}
       <div className="flex-1 flex items-center justify-center p-6">
         <div
           ref={setNodeRef}
           id="canvas-drop-area"
+          onClick={handleClick}
           className={`bg-white rounded-xl shadow-sm w-full h-full flex items-center justify-center relative border-2 transition-colors ${
-            isOver
-              ? "border-blue-300 bg-blue-50/30"
-              : "border-transparent"
-          } ${mode === "editor" ? "cursor-default" : "cursor-default"}`}
+            isPlacing
+              ? "border-blue-400 cursor-crosshair"
+              : isOver
+                ? "border-blue-300 bg-blue-50/30"
+                : "border-transparent"
+          } ${!isPlacing ? "cursor-default" : ""}`}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
