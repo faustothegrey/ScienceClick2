@@ -1,0 +1,126 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800">
+  <!-- Background -->
+  <rect width="1200" height="800" fill="#f0f5fa"/>
+
+  <!-- Microscope field of view (circular light area) -->
+  <defs>
+    <radialGradient id="fieldGrad" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#f8fbff"/>
+      <stop offset="70%" stop-color="#e8f0f8"/>
+      <stop offset="100%" stop-color="#d0dce8"/>
+    </radialGradient>
+  </defs>
+  <circle cx="600" cy="400" r="380" fill="url(#fieldGrad)"/>
+
+  <!-- Cell Membrane (outer boundary, irregular blob shape) -->
+  <path d="M600,80 Q820,90 900,200 Q970,310 950,420 Q930,540 850,620
+           Q750,710 600,720 Q450,715 350,630 Q260,540 240,420
+           Q230,300 290,200 Q380,90 600,80 Z"
+        fill="#e8f4e8" stroke="#4caf50" stroke-width="4" opacity="0.9"/>
+
+  <!-- Inner cell membrane highlight -->
+  <path d="M600,95 Q800,105 880,210 Q945,315 925,420 Q905,530 835,605
+           Q740,695 600,705 Q465,700 365,618 Q280,530 262,420
+           Q252,310 310,210 Q395,105 600,95 Z"
+        fill="#f0f8f0" stroke="none" opacity="0.5"/>
+
+  <!-- Cytoplasm texture (small dots) -->
+  <g fill="#c8e0c8" opacity="0.3">
+    <circle cx="380" cy="250" r="3"/><circle cx="450" cy="300" r="2"/>
+    <circle cx="350" cy="400" r="2.5"/><circle cx="420" cy="500" r="2"/>
+    <circle cx="500" cy="200" r="2"/><circle cx="780" cy="300" r="3"/>
+    <circle cx="820" cy="400" r="2"/><circle cx="750" cy="550" r="2.5"/>
+    <circle cx="700" cy="250" r="2"/><circle cx="500" cy="600" r="3"/>
+    <circle cx="680" cy="600" r="2"/><circle cx="400" cy="600" r="2.5"/>
+    <circle cx="550" cy="150" r="2"/><circle cx="650" cy="650" r="2"/>
+  </g>
+
+  <!-- Endoplasmic Reticulum (wavy lines near nucleus) -->
+  <g fill="none" stroke="#90a4ae" stroke-width="2.5" opacity="0.5">
+    <path d="M480,300 Q500,280 520,300 Q540,320 560,300 Q580,280 600,300"/>
+    <path d="M470,330 Q490,310 510,330 Q530,350 550,330 Q570,310 590,330"/>
+    <path d="M690,320 Q710,300 730,320 Q750,340 770,320"/>
+    <path d="M700,350 Q720,330 740,350 Q760,370 780,350"/>
+    <path d="M500,480 Q520,460 540,480 Q560,500 580,480 Q600,460 620,480"/>
+    <path d="M490,510 Q510,490 530,510 Q550,530 570,510 Q590,490 610,510"/>
+  </g>
+
+  <!-- Nucleus -->
+  <ellipse cx="600" cy="400" rx="130" ry="110" fill="#d4e4f4" stroke="#5c7aa0" stroke-width="3"/>
+  <!-- Nuclear membrane (double line effect) -->
+  <ellipse cx="600" cy="400" rx="125" ry="105" fill="none" stroke="#7094b8" stroke-width="1.5" stroke-dasharray="8,4" opacity="0.5"/>
+
+  <!-- Nucleolus (inside nucleus) -->
+  <circle cx="620" cy="390" r="30" fill="#8aacc4" stroke="#5c7aa0" stroke-width="2"/>
+  <circle cx="615" cy="385" r="20" fill="#9bbcd4" opacity="0.5"/>
+
+  <!-- Chromatin (threads inside nucleus) -->
+  <g fill="none" stroke="#5c7aa0" stroke-width="2" opacity="0.4">
+    <path d="M540,370 Q560,350 580,370 Q600,390 560,400"/>
+    <path d="M640,430 Q660,410 680,430 Q660,450 640,430"/>
+    <path d="M570,440 Q590,420 610,440"/>
+    <path d="M620,360 Q640,340 660,360"/>
+  </g>
+
+  <!-- Nuclear pores -->
+  <g fill="#7094b8">
+    <circle cx="490" cy="350" r="4"/><circle cx="500" cy="440" r="4"/>
+    <circle cx="540" cy="300" r="4"/><circle cx="660" cy="300" r="4"/>
+    <circle cx="710" cy="360" r="4"/><circle cx="700" cy="450" r="4"/>
+    <circle cx="660" cy="500" r="4"/><circle cx="540" cy="500" r="4"/>
+  </g>
+
+  <!-- Mitochondria (bean-shaped, scattered) -->
+  <!-- Mitochondrion 1 -->
+  <ellipse cx="380" cy="350" rx="40" ry="20" fill="#ff9e80" stroke="#e65100" stroke-width="2" transform="rotate(-20 380 350)"/>
+  <path d="M355,345 Q370,335 385,345 Q400,355 385,360" fill="none" stroke="#e65100" stroke-width="1.5" opacity="0.5"/>
+  <path d="M365,355 Q380,345 395,355" fill="none" stroke="#e65100" stroke-width="1.5" opacity="0.5"/>
+
+  <!-- Mitochondrion 2 -->
+  <ellipse cx="800" cy="450" rx="35" ry="18" fill="#ff9e80" stroke="#e65100" stroke-width="2" transform="rotate(15 800 450)"/>
+  <path d="M778,445 Q793,435 808,445" fill="none" stroke="#e65100" stroke-width="1.5" opacity="0.5"/>
+  <path d="M785,455 Q800,445 815,455" fill="none" stroke="#e65100" stroke-width="1.5" opacity="0.5"/>
+
+  <!-- Mitochondrion 3 -->
+  <ellipse cx="450" cy="570" rx="35" ry="17" fill="#ff9e80" stroke="#e65100" stroke-width="2" transform="rotate(30 450 570)"/>
+  <path d="M430,565 Q445,555 460,565" fill="none" stroke="#e65100" stroke-width="1.5" opacity="0.5"/>
+
+  <!-- Golgi Apparatus (stacked curved sacs) -->
+  <g transform="translate(790, 240)">
+    <path d="M-40,0 Q0,-15 40,0" fill="#ce93d8" stroke="#9c27b0" stroke-width="2.5"/>
+    <path d="M-35,15 Q0,0 35,15" fill="#ce93d8" stroke="#9c27b0" stroke-width="2.5"/>
+    <path d="M-30,30 Q0,15 30,30" fill="#ce93d8" stroke="#9c27b0" stroke-width="2.5"/>
+    <path d="M-25,45 Q0,30 25,45" fill="#ce93d8" stroke="#9c27b0" stroke-width="2.5"/>
+    <path d="M-20,60 Q0,45 20,60" fill="#ce93d8" stroke="#9c27b0" stroke-width="2.5"/>
+    <!-- Vesicles budding off -->
+    <circle cx="50" cy="10" r="6" fill="#e1bee7" stroke="#9c27b0" stroke-width="1.5"/>
+    <circle cx="55" cy="35" r="5" fill="#e1bee7" stroke="#9c27b0" stroke-width="1.5"/>
+    <circle cx="-48" cy="50" r="5" fill="#e1bee7" stroke="#9c27b0" stroke-width="1.5"/>
+  </g>
+
+  <!-- Ribosomes (small dots scattered in cytoplasm) -->
+  <g fill="#5d4037">
+    <circle cx="440" cy="230" r="4"/><circle cx="460" cy="245" r="4"/>
+    <circle cx="420" cy="260" r="4"/><circle cx="445" cy="270" r="4"/>
+    <circle cx="350" cy="470" r="4"/><circle cx="370" cy="485" r="4"/>
+    <circle cx="340" cy="500" r="4"/><circle cx="365" cy="510" r="4"/>
+    <circle cx="700" cy="560" r="4"/><circle cx="720" cy="575" r="4"/>
+    <circle cx="690" cy="580" r="4"/><circle cx="715" cy="595" r="4"/>
+    <circle cx="830" cy="340" r="4"/><circle cx="850" cy="355" r="4"/>
+    <circle cx="825" cy="365" r="4"/>
+  </g>
+
+  <!-- Lysosomes -->
+  <circle cx="340" cy="320" r="14" fill="#ffcc80" stroke="#ff9800" stroke-width="2"/>
+  <circle cx="338" cy="318" r="8" fill="#ffe0a0" opacity="0.5"/>
+  <circle cx="750" cy="600" r="12" fill="#ffcc80" stroke="#ff9800" stroke-width="2"/>
+
+  <!-- Vacuole (small in animal cell) -->
+  <ellipse cx="470" cy="170" rx="30" ry="22" fill="#b3e5fc" stroke="#0288d1" stroke-width="2" opacity="0.7"/>
+
+  <!-- Centrioles (near nucleus) -->
+  <g transform="translate(720, 520)">
+    <rect x="-12" y="-8" width="24" height="16" rx="4" fill="none" stroke="#607d8b" stroke-width="2.5"/>
+    <rect x="-4" y="-16" width="16" height="24" rx="4" fill="none" stroke="#607d8b" stroke-width="2.5" transform="rotate(90 4 -4)"/>
+  </g>
+</svg>

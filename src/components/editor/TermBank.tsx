@@ -80,7 +80,7 @@ export default function TermBank({ terms, mode, onAddTerm, onRemoveTerm, locale 
     <aside className="w-72 bg-white border-l border-gray-200 flex flex-col z-20">
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-gray-100">
-        <h2 className="text-lg font-bold text-gray-900">Term Bank</h2>
+        <h2 className="text-lg font-bold text-gray-900">Word List</h2>
         <button className="text-gray-400 hover:text-gray-600">
           <Settings className="w-5 h-5" />
         </button>

@@ -26,18 +26,18 @@ export async function GET() {
           // No config yet — new scene
         }
 
-        let hasImage = false;
-        for (const name of ["scene.png", "scene.jpeg", "scene.jpg"]) {
+        let image: string | null = null;
+        for (const name of ["scene.svg", "scene.png", "scene.jpeg", "scene.jpg"]) {
           try {
             await stat(path.join(entryPath, name));
-            hasImage = true;
+            image = name;
             break;
           } catch {
             // not found
           }
         }
 
-        return { id: entry, termCount, hasImage };
+        return { id: entry, termCount, image };
       })
     );
 

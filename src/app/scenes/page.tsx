@@ -7,7 +7,7 @@ import Link from "next/link";
 interface Scene {
   id: string;
   termCount: number;
-  hasImage: boolean;
+  image: string | null;
 }
 
 function formatName(id: string) {
@@ -64,9 +64,9 @@ export default function ScenesGalleryPage() {
                 className="group block rounded-xl border border-gray-800 bg-gray-900 overflow-hidden hover:border-gray-600 transition-colors"
               >
                 <div className="h-40 bg-gray-800 flex items-center justify-center">
-                  {scene.hasImage ? (
+                  {scene.image ? (
                     <img
-                      src={`/scenes/${scene.id}/scene.png`}
+                      src={`/scenes/${scene.id}/${scene.image}`}
                       alt={formatName(scene.id)}
                       className="w-full h-full object-cover"
                     />

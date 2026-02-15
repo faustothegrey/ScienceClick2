@@ -1,0 +1,172 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800">
+  <defs>
+    <linearGradient id="oceanGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1565c0"/>
+      <stop offset="100%" stop-color="#0d47a1"/>
+    </linearGradient>
+    <linearGradient id="mantleGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e65100"/>
+      <stop offset="40%" stop-color="#ff6d00"/>
+      <stop offset="100%" stop-color="#ff9100"/>
+    </linearGradient>
+    <linearGradient id="contCrustGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#8d6e63"/>
+      <stop offset="100%" stop-color="#a1887f"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Deep mantle background -->
+  <rect width="1200" height="800" fill="#bf360c"/>
+
+  <!-- Upper mantle -->
+  <rect x="0" y="250" width="1200" height="550" fill="url(#mantleGrad)"/>
+
+  <!-- Convection currents in mantle -->
+  <g fill="none" stroke="#ffab00" stroke-width="2.5" opacity="0.3">
+    <!-- Left convection cell -->
+    <path d="M150,450 Q150,350 300,350 Q450,350 450,450"/>
+    <path d="M450,550 Q450,650 300,650 Q150,650 150,550"/>
+    <!-- Arrows on left cell -->
+    <polygon points="300,345 295,355 305,355" fill="#ffab00"/>
+    <polygon points="300,655 295,645 305,645" fill="#ffab00"/>
+
+    <!-- Center convection cell -->
+    <path d="M450,450 Q450,350 600,350 Q750,350 750,450"/>
+    <path d="M750,550 Q750,650 600,650 Q450,650 450,550"/>
+    <polygon points="600,345 595,355 605,355" fill="#ffab00"/>
+    <polygon points="600,655 595,645 605,645" fill="#ffab00"/>
+
+    <!-- Right convection cell -->
+    <path d="M750,450 Q750,350 900,350 Q1050,350 1050,450"/>
+    <path d="M1050,550 Q1050,650 900,650 Q750,650 750,550"/>
+    <polygon points="900,345 895,355 905,355" fill="#ffab00"/>
+    <polygon points="900,655 895,645 905,645" fill="#ffab00"/>
+  </g>
+
+  <!-- Magma pockets -->
+  <g opacity="0.4">
+    <ellipse cx="300" cy="500" rx="40" ry="20" fill="#ff6d00"/>
+    <ellipse cx="600" cy="480" rx="35" ry="18" fill="#ff6d00"/>
+    <ellipse cx="900" cy="510" rx="38" ry="20" fill="#ff6d00"/>
+  </g>
+
+  <!-- Ocean water -->
+  <rect x="0" y="0" width="1200" height="250" fill="url(#oceanGrad)"/>
+  <!-- Water surface -->
+  <path d="M0,30 Q100,20 200,30 Q300,40 400,30 Q500,20 600,30 Q700,40 800,30 Q900,20 1000,30 Q1100,40 1200,30 L1200,0 L0,0 Z" fill="#1976d2" opacity="0.5"/>
+
+  <!-- ===== LEFT: Continental crust ===== -->
+  <!-- Thick continental crust -->
+  <path d="M0,140 L0,280 Q50,290 120,285 Q200,280 280,290 Q340,295 380,300 L380,200 Q340,190 280,180 Q200,170 120,175 Q50,178 0,140 Z"
+        fill="url(#contCrustGrad)"/>
+  <!-- Land surface above water -->
+  <path d="M0,0 L0,140 Q50,178 120,175 Q200,170 280,180 Q340,190 380,200 L380,160 Q350,120 300,100 Q240,80 180,90 Q100,100 50,80 Q20,70 0,0 Z"
+        fill="#689f38"/>
+  <!-- Mountains on continent -->
+  <polygon points="80,80 120,30 160,80" fill="#558b2f"/>
+  <polygon points="140,90 190,20 240,90" fill="#689f38"/>
+  <polygon points="200,85 240,40 290,90" fill="#558b2f"/>
+  <!-- Snow caps -->
+  <polygon points="120,30 110,50 130,50" fill="#ffffff" opacity="0.7"/>
+  <polygon points="190,20 178,42 202,42" fill="#ffffff" opacity="0.7"/>
+  <polygon points="240,40 230,55 250,55" fill="#ffffff" opacity="0.6"/>
+
+  <!-- ===== RIGHT: Continental crust ===== -->
+  <path d="M820,200 L820,300 Q880,295 950,290 Q1050,280 1120,285 Q1170,288 1200,280 L1200,140 Q1170,178 1120,175 Q1050,170 950,180 Q880,188 820,200 Z"
+        fill="url(#contCrustGrad)"/>
+  <!-- Land surface -->
+  <path d="M820,160 L820,200 Q880,188 950,180 Q1050,170 1120,175 Q1170,178 1200,140 L1200,0 Q1170,70 1120,80 Q1050,90 980,85 Q920,100 870,120 Q840,135 820,160 Z"
+        fill="#689f38"/>
+  <!-- Mountains -->
+  <polygon points="920,100 950,50 990,100" fill="#558b2f"/>
+  <polygon points="980,90 1020,35 1060,92" fill="#689f38"/>
+  <polygon points="1050,85 1090,40 1130,88" fill="#558b2f"/>
+  <!-- Snow -->
+  <polygon points="950,50 940,68 960,68" fill="#ffffff" opacity="0.7"/>
+  <polygon points="1020,35 1010,55 1030,55" fill="#ffffff" opacity="0.7"/>
+
+  <!-- ===== CENTER: Oceanic crust (thin, dark) ===== -->
+  <rect x="380" y="230" width="440" height="30" rx="2" fill="#455a64"/>
+  <!-- Sediment layer on oceanic crust -->
+  <rect x="380" y="225" width="440" height="8" fill="#607d8b" opacity="0.5"/>
+
+  <!-- ===== Mid-Ocean Ridge (center) ===== -->
+  <g transform="translate(600, 220)">
+    <!-- Ridge shape -->
+    <polygon points="-40,15 0,-30 40,15" fill="#bf360c"/>
+    <polygon points="-30,10 0,-20 30,10" fill="#e65100"/>
+    <!-- Lava glow -->
+    <ellipse cx="0" cy="-5" rx="10" ry="15" fill="#ff6d00" opacity="0.6"/>
+    <!-- Rising magma -->
+    <line x1="0" y1="15" x2="0" y2="80" stroke="#ff6d00" stroke-width="6" opacity="0.5"/>
+    <line x1="0" y1="15" x2="0" y2="80" stroke="#ffab00" stroke-width="3" opacity="0.4"/>
+    <!-- New crust forming (spreading arrows) -->
+    <g stroke="#ffffff" stroke-width="2" fill="#ffffff" opacity="0.4">
+      <line x1="-10" y1="10" x2="-40" y2="10"/>
+      <polygon points="-40,10 -32,6 -32,14"/>
+      <line x1="10" y1="10" x2="40" y2="10"/>
+      <polygon points="40,10 32,6 32,14"/>
+    </g>
+    <!-- Hydrothermal vent bubbles -->
+    <g fill="#ffffff" opacity="0.3">
+      <circle cx="-5" cy="-35" r="3"/><circle cx="4" cy="-45" r="2.5"/>
+      <circle cx="-2" cy="-55" r="2"/><circle cx="3" cy="-65" r="1.5"/>
+    </g>
+  </g>
+
+  <!-- ===== LEFT: Subduction zone ===== -->
+  <!-- Oceanic plate diving under continental -->
+  <path d="M380,260 Q370,280 360,320 Q350,380 340,450 Q330,520 320,580"
+        fill="none" stroke="#455a64" stroke-width="25" opacity="0.6"/>
+  <path d="M380,260 Q370,280 360,320 Q350,380 340,450 Q330,520 320,580"
+        fill="none" stroke="#607d8b" stroke-width="15" opacity="0.4"/>
+  <!-- Friction/melting zone -->
+  <g opacity="0.5">
+    <circle cx="365" cy="310" r="5" fill="#ff6d00"/><circle cx="358" cy="340" r="4" fill="#ff6d00"/>
+    <circle cx="352" cy="370" r="5" fill="#ff6d00"/><circle cx="345" cy="400" r="4" fill="#ff6d00"/>
+  </g>
+
+  <!-- ===== RIGHT: Subduction zone ===== -->
+  <path d="M820,260 Q830,280 840,320 Q850,380 860,450 Q870,520 880,580"
+        fill="none" stroke="#455a64" stroke-width="25" opacity="0.6"/>
+  <path d="M820,260 Q830,280 840,320 Q850,380 860,450 Q870,520 880,580"
+        fill="none" stroke="#607d8b" stroke-width="15" opacity="0.4"/>
+  <g opacity="0.5">
+    <circle cx="835" cy="310" r="5" fill="#ff6d00"/><circle cx="842" cy="340" r="4" fill="#ff6d00"/>
+    <circle cx="848" cy="370" r="5" fill="#ff6d00"/><circle cx="855" cy="400" r="4" fill="#ff6d00"/>
+  </g>
+
+  <!-- Trench markers (V-shapes at subduction) -->
+  <!-- Left trench -->
+  <path d="M370,225 L380,250 L390,225" fill="none" stroke="#0d47a1" stroke-width="3"/>
+  <!-- Right trench -->
+  <path d="M810,225 L820,250 L830,225" fill="none" stroke="#0d47a1" stroke-width="3"/>
+
+  <!-- Volcano on left continent (from subduction) -->
+  <polygon points="280,90 310,55 340,95" fill="#8d6e63"/>
+  <!-- Eruption -->
+  <ellipse cx="310" cy="50" rx="12" ry="8" fill="#9e9e9e" opacity="0.5"/>
+  <ellipse cx="310" cy="42" rx="8" ry="6" fill="#bdbdbd" opacity="0.4"/>
+
+  <!-- Fish in ocean -->
+  <g transform="translate(500, 100)" opacity="0.5">
+    <ellipse cx="0" cy="0" rx="12" ry="6" fill="#90caf9"/>
+    <polygon points="12,0 20,-5 20,5" fill="#90caf9"/>
+    <circle cx="-5" cy="-2" r="1.5" fill="#1a237e"/>
+  </g>
+  <g transform="translate(700, 150)" opacity="0.4">
+    <ellipse cx="0" cy="0" rx="10" ry="5" fill="#90caf9"/>
+    <polygon points="10,0 17,-4 17,4" fill="#90caf9"/>
+    <circle cx="-4" cy="-1.5" r="1.5" fill="#1a237e"/>
+  </g>
+
+  <!-- Plate movement arrows on surface -->
+  <g stroke="#ffffff" stroke-width="2" fill="#ffffff" opacity="0.3">
+    <!-- Left plate moving right -->
+    <line x1="200" y1="270" x2="250" y2="270"/>
+    <polygon points="250,270 242,266 242,274"/>
+    <!-- Right plate moving left -->
+    <line x1="1000" y1="270" x2="950" y2="270"/>
+    <polygon points="950,270 958,266 958,274"/>
+  </g>
+</svg>

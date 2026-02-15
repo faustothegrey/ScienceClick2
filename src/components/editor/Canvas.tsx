@@ -1,7 +1,10 @@
+import { useState, useCallback } from "react";
 import { useDroppable } from "@dnd-kit/core";
 import Toolbar from "./Toolbar";
 import type { DropTarget } from "@/app/scenes/[id]/page";
 import { Term, getTermLabel } from "@/lib/i18n";
+
+const IMAGE_FORMATS = ["scene.svg", "scene.png", "scene.jpeg", "scene.jpg"];
 
 interface CanvasProps {
   sceneId: string;
@@ -63,6 +66,13 @@ export default function Canvas({ sceneId, dropTargets, terms, mode, playerGuesse
   const isPlacing = !!placingTermId;
   const placingTerm = isPlacing ? terms.find((t) => t.id === placingTermId) : null;
   const placingLabel = placingTerm ? getTermLabel(placingTerm, locale) : null;
+  const [imageIndex, setImageIndex] = useState(0);
+  const imageSrc = imageIndex < IMAGE_FORMATS.length
+    ? `/scenes/${sceneId}/${IMAGE_FORMATS[imageIndex]}`
+    : null;
+  const handleImageError = useCallback(() => {
+    setImageIndex((i) => i + 1);
+  }, []);
 
   function handleClick(e: React.MouseEvent<HTMLDivElement>) {
     if (!isPlacing) return;
@@ -99,11 +109,14 @@ export default function Canvas({ sceneId, dropTargets, terms, mode, playerGuesse
           style={{ aspectRatio: "3 / 2" }}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={`/scenes/${sceneId}/scene.png`}
-            alt={`${sceneId} scene`}
-            className="absolute inset-0 w-full h-full object-cover rounded-lg pointer-events-none select-none"
-          />
+          {imageSrc && (
+            <img
+              src={imageSrc}
+              alt={`${sceneId} scene`}
+              className="absolute inset-0 w-full h-full object-cover rounded-lg pointer-events-none select-none"
+              onError={handleImageError}
+            />
+          )}
 
           {/* Drop Targets */}
           {dropTargets.map((target) => (
