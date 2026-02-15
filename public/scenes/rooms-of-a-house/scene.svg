@@ -1,0 +1,196 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="1200" height="800">
+  <!-- Sky background -->
+  <rect width="800" height="600" fill="#e8f4f8"/>
+
+  <!-- Ground -->
+  <rect x="0" y="480" width="800" height="120" fill="#8bc34a"/>
+  <rect x="0" y="480" width="800" height="8" fill="#7cb342"/>
+
+  <!-- Grass tufts -->
+  <ellipse cx="100" cy="485" rx="30" ry="6" fill="#7cb342"/>
+  <ellipse cx="650" cy="488" rx="25" ry="5" fill="#7cb342"/>
+
+  <!-- Sun -->
+  <circle cx="700" cy="80" r="45" fill="#ffd54f"/>
+  <circle cx="700" cy="80" r="38" fill="#ffecb3"/>
+
+  <!-- Clouds -->
+  <g fill="#ffffff" opacity="0.8">
+    <ellipse cx="150" cy="70" rx="50" ry="25"/>
+    <ellipse cx="190" cy="60" rx="40" ry="22"/>
+    <ellipse cx="120" cy="65" rx="35" ry="20"/>
+    <ellipse cx="450" cy="50" rx="45" ry="20"/>
+    <ellipse cx="490" cy="45" rx="35" ry="18"/>
+  </g>
+
+  <!-- House outer walls -->
+  <rect x="120" y="180" width="560" height="300" rx="4" fill="#f5e6d3" stroke="#c9a96e" stroke-width="3"/>
+
+  <!-- Roof (triangle) -->
+  <polygon points="100,180 400,60 700,180" fill="#c62828" stroke="#b71c1c" stroke-width="3"/>
+  <!-- Roof shingles lines -->
+  <line x1="160" y1="168" x2="640" y2="168" stroke="#a51c1c" stroke-width="1" opacity="0.4"/>
+  <line x1="200" y1="150" x2="600" y2="150" stroke="#a51c1c" stroke-width="1" opacity="0.4"/>
+  <line x1="240" y1="132" x2="560" y2="132" stroke="#a51c1c" stroke-width="1" opacity="0.4"/>
+  <line x1="280" y1="114" x2="520" y2="114" stroke="#a51c1c" stroke-width="1" opacity="0.4"/>
+  <line x1="320" y1="96" x2="480" y2="96" stroke="#a51c1c" stroke-width="1" opacity="0.4"/>
+
+  <!-- Chimney -->
+  <rect x="550" y="90" width="40" height="90" fill="#8d6e63" stroke="#6d4c41" stroke-width="2"/>
+  <rect x="545" y="85" width="50" height="12" rx="2" fill="#6d4c41"/>
+
+  <!-- Attic area (inside roof) -->
+  <polygon points="160,180 400,85 640,180" fill="#ffe0b2" opacity="0.6"/>
+
+  <!-- Attic window (circular) -->
+  <circle cx="400" cy="145" r="25" fill="#bbdefb" stroke="#c9a96e" stroke-width="3"/>
+  <line x1="400" y1="120" x2="400" y2="170" stroke="#c9a96e" stroke-width="2"/>
+  <line x1="375" y1="145" x2="425" y2="145" stroke="#c9a96e" stroke-width="2"/>
+
+  <!-- Floor divider (1st and 2nd floor) -->
+  <line x1="120" y1="330" x2="680" y2="330" stroke="#c9a96e" stroke-width="3"/>
+
+  <!-- Vertical wall dividers -->
+  <!-- 2nd floor: bedroom | bathroom -->
+  <line x1="400" y1="180" x2="400" y2="330" stroke="#c9a96e" stroke-width="3"/>
+  <!-- 1st floor: living room | kitchen -->
+  <line x1="400" y1="330" x2="400" y2="480" stroke="#c9a96e" stroke-width="3"/>
+
+  <!-- === BEDROOM (top-left) === -->
+  <!-- Bed -->
+  <rect x="180" y="250" width="100" height="60" rx="4" fill="#7986cb" stroke="#5c6bc0" stroke-width="2"/>
+  <rect x="175" y="260" width="10" height="50" rx="3" fill="#9fa8da"/>
+  <rect x="185" y="248" width="90" height="15" rx="3" fill="#e8eaf6"/>
+  <!-- Pillow -->
+  <rect x="190" y="252" width="25" height="10" rx="5" fill="#ffffff" stroke="#c5cae9" stroke-width="1"/>
+  <!-- Nightstand -->
+  <rect x="290" y="280" width="30" height="30" rx="2" fill="#a1887f" stroke="#8d6e63" stroke-width="1.5"/>
+  <!-- Lamp on nightstand -->
+  <rect x="301" y="266" width="8" height="14" fill="#ffcc80"/>
+  <polygon points="295,266 315,266 308,252 302,252" fill="#fff9c4" stroke="#ffcc80" stroke-width="1"/>
+  <!-- Window -->
+  <rect x="160" y="210" width="60" height="50" rx="2" fill="#bbdefb" stroke="#c9a96e" stroke-width="2"/>
+  <line x1="190" y1="210" x2="190" y2="260" stroke="#c9a96e" stroke-width="1.5"/>
+  <line x1="160" y1="235" x2="220" y2="235" stroke="#c9a96e" stroke-width="1.5"/>
+
+  <!-- === BATHROOM (top-right) === -->
+  <!-- Bathtub -->
+  <rect x="450" y="260" width="100" height="45" rx="20" fill="#ffffff" stroke="#90a4ae" stroke-width="2.5"/>
+  <rect x="455" y="265" width="90" height="35" rx="17" fill="#e3f2fd"/>
+  <!-- Faucet -->
+  <rect x="540" y="248" width="6" height="18" rx="2" fill="#bdbdbd"/>
+  <rect x="535" y="245" width="16" height="6" rx="3" fill="#9e9e9e"/>
+  <!-- Toilet -->
+  <rect x="590" y="275" width="35" height="35" rx="12" fill="#ffffff" stroke="#90a4ae" stroke-width="2"/>
+  <rect x="595" y="268" width="25" height="12" rx="4" fill="#eceff1" stroke="#90a4ae" stroke-width="1.5"/>
+  <!-- Sink -->
+  <rect x="430" y="210" width="40" height="25" rx="10" fill="#ffffff" stroke="#90a4ae" stroke-width="2"/>
+  <circle cx="450" cy="222" r="3" fill="#90a4ae"/>
+  <!-- Mirror above sink -->
+  <rect x="435" y="190" width="30" height="20" rx="2" fill="#e1f5fe" stroke="#b0bec5" stroke-width="1.5"/>
+  <!-- Floor tiles pattern -->
+  <g stroke="#e0e0e0" stroke-width="0.5" opacity="0.5">
+    <line x1="400" y1="300" x2="680" y2="300"/>
+    <line x1="450" y1="280" x2="450" y2="330"/>
+    <line x1="500" y1="280" x2="500" y2="330"/>
+    <line x1="550" y1="280" x2="550" y2="330"/>
+    <line x1="600" y1="280" x2="600" y2="330"/>
+    <line x1="650" y1="280" x2="650" y2="330"/>
+  </g>
+
+  <!-- === LIVING ROOM (bottom-left) === -->
+  <!-- Sofa -->
+  <rect x="160" y="390" width="120" height="50" rx="8" fill="#ef9a9a" stroke="#e57373" stroke-width="2"/>
+  <rect x="155" y="395" width="15" height="40" rx="5" fill="#ef9a9a" stroke="#e57373" stroke-width="1.5"/>
+  <rect x="275" y="395" width="15" height="40" rx="5" fill="#ef9a9a" stroke="#e57373" stroke-width="1.5"/>
+  <!-- Cushions -->
+  <rect x="170" y="395" width="30" height="20" rx="5" fill="#ffcdd2"/>
+  <rect x="210" y="395" width="30" height="20" rx="5" fill="#ffcdd2"/>
+  <rect x="250" y="395" width="30" height="20" rx="5" fill="#ffcdd2"/>
+  <!-- Coffee table -->
+  <rect x="190" y="450" width="70" height="20" rx="3" fill="#a1887f" stroke="#8d6e63" stroke-width="1.5"/>
+  <!-- Book on table -->
+  <rect x="210" y="453" width="20" height="14" rx="1" fill="#81d4fa"/>
+  <!-- TV on wall -->
+  <rect x="300" y="345" width="70" height="45" rx="3" fill="#37474f" stroke="#263238" stroke-width="2"/>
+  <rect x="305" y="350" width="60" height="35" rx="1" fill="#4fc3f7"/>
+  <!-- TV stand -->
+  <rect x="310" y="390" width="50" height="8" rx="2" fill="#8d6e63"/>
+  <!-- Rug -->
+  <ellipse cx="230" cy="460" rx="60" ry="15" fill="#ffcc80" opacity="0.4"/>
+  <!-- Window -->
+  <rect x="160" y="350" width="60" height="50" rx="2" fill="#bbdefb" stroke="#c9a96e" stroke-width="2"/>
+  <line x1="190" y1="350" x2="190" y2="400" stroke="#c9a96e" stroke-width="1.5"/>
+  <line x1="160" y1="375" x2="220" y2="375" stroke="#c9a96e" stroke-width="1.5"/>
+
+  <!-- === KITCHEN (bottom-right) === -->
+  <!-- Counter / cabinets -->
+  <rect x="420" y="350" width="240" height="35" rx="2" fill="#a1887f" stroke="#8d6e63" stroke-width="2"/>
+  <!-- Cabinet doors -->
+  <rect x="425" y="355" width="45" height="25" rx="2" fill="#bcaaa4" stroke="#8d6e63" stroke-width="1"/>
+  <rect x="475" y="355" width="45" height="25" rx="2" fill="#bcaaa4" stroke="#8d6e63" stroke-width="1"/>
+  <rect x="525" y="355" width="45" height="25" rx="2" fill="#bcaaa4" stroke="#8d6e63" stroke-width="1"/>
+  <!-- Cabinet handles -->
+  <line x1="445" y1="365" x2="455" y2="365" stroke="#6d4c41" stroke-width="2" stroke-linecap="round"/>
+  <line x1="495" y1="365" x2="505" y2="365" stroke="#6d4c41" stroke-width="2" stroke-linecap="round"/>
+  <line x1="545" y1="365" x2="555" y2="365" stroke="#6d4c41" stroke-width="2" stroke-linecap="round"/>
+  <!-- Stove -->
+  <rect x="580" y="350" width="70" height="35" rx="2" fill="#78909c" stroke="#546e7a" stroke-width="2"/>
+  <circle cx="600" cy="367" r="8" fill="#455a64" stroke="#37474f" stroke-width="1"/>
+  <circle cx="630" cy="367" r="8" fill="#455a64" stroke="#37474f" stroke-width="1"/>
+  <!-- Pot on stove -->
+  <rect x="593" y="356" width="14" height="10" rx="2" fill="#bdbdbd" stroke="#9e9e9e" stroke-width="1"/>
+  <!-- Fridge -->
+  <rect x="420" y="400" width="50" height="80" rx="3" fill="#eceff1" stroke="#b0bec5" stroke-width="2"/>
+  <line x1="420" y1="440" x2="470" y2="440" stroke="#b0bec5" stroke-width="1.5"/>
+  <rect x="460" y="415" width="4" height="15" rx="2" fill="#90a4ae"/>
+  <rect x="460" y="450" width="4" height="20" rx="2" fill="#90a4ae"/>
+  <!-- Dining table -->
+  <rect x="500" y="420" width="80" height="45" rx="4" fill="#a1887f" stroke="#8d6e63" stroke-width="2"/>
+  <!-- Plate -->
+  <circle cx="530" cy="440" r="10" fill="#ffffff" stroke="#e0e0e0" stroke-width="1"/>
+  <circle cx="560" cy="440" r="10" fill="#ffffff" stroke="#e0e0e0" stroke-width="1"/>
+  <!-- Chairs -->
+  <rect x="505" y="468" width="20" height="10" rx="3" fill="#8d6e63"/>
+  <rect x="555" y="468" width="20" height="10" rx="3" fill="#8d6e63"/>
+
+  <!-- === GARAGE (far right, ground level) === -->
+  <rect x="680" y="380" width="100" height="100" fill="#e0e0e0" stroke="#bdbdbd" stroke-width="2"/>
+  <!-- Garage door -->
+  <rect x="690" y="400" width="80" height="75" rx="2" fill="#bdbdbd" stroke="#9e9e9e" stroke-width="2"/>
+  <line x1="690" y1="420" x2="770" y2="420" stroke="#9e9e9e" stroke-width="1"/>
+  <line x1="690" y1="440" x2="770" y2="440" stroke="#9e9e9e" stroke-width="1"/>
+  <line x1="690" y1="460" x2="770" y2="460" stroke="#9e9e9e" stroke-width="1"/>
+  <!-- Garage handle -->
+  <rect x="725" y="468" width="12" height="4" rx="2" fill="#757575"/>
+  <!-- Car silhouette inside -->
+  <rect x="700" y="445" width="50" height="25" rx="8" fill="#90a4ae" opacity="0.5"/>
+  <rect x="695" y="455" width="60" height="15" rx="4" fill="#78909c" opacity="0.5"/>
+  <!-- Garage roof extension -->
+  <rect x="675" y="375" width="110" height="10" fill="#8d6e63" stroke="#6d4c41" stroke-width="1"/>
+
+  <!-- Front door -->
+  <rect x="370" y="410" width="60" height="70" rx="3" fill="#6d4c41" stroke="#5d4037" stroke-width="2"/>
+  <circle cx="418" cy="448" r="4" fill="#ffd54f"/>
+  <!-- Door top arch -->
+  <path d="M370,410 Q400,395 430,410" fill="#5d4037"/>
+
+  <!-- Path to door -->
+  <rect x="385" y="480" width="30" height="40" rx="2" fill="#d7ccc8"/>
+  <rect x="380" y="490" width="40" height="8" rx="1" fill="#bcaaa4"/>
+  <rect x="375" y="505" width="50" height="8" rx="1" fill="#bcaaa4"/>
+
+  <!-- Bush left of door -->
+  <ellipse cx="355" cy="470" rx="20" ry="15" fill="#66bb6a"/>
+  <ellipse cx="345" cy="475" rx="15" ry="10" fill="#4caf50"/>
+
+  <!-- Bush right of door -->
+  <ellipse cx="445" cy="470" rx="20" ry="15" fill="#66bb6a"/>
+  <ellipse cx="455" cy="475" rx="15" ry="10" fill="#4caf50"/>
+
+  <!-- Tree on far left -->
+  <rect x="55" y="380" width="20" height="100" fill="#8d6e63"/>
+  <ellipse cx="65" cy="370" rx="40" ry="50" fill="#66bb6a"/>
+  <ellipse cx="50" cy="355" rx="30" ry="35" fill="#4caf50"/>
+  <ellipse cx="80" cy="360" rx="25" ry="30" fill="#81c784"/>
+</svg>

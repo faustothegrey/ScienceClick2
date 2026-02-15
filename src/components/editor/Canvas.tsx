@@ -1,25 +1,25 @@
 import { useDroppable } from "@dnd-kit/core";
 import Toolbar from "./Toolbar";
 import type { DropTarget } from "@/app/scenes/[id]/page";
-
-interface Term {
-  id: string;
-  label: string;
-}
+import { Term, getTermLabel } from "@/lib/i18n";
 
 interface CanvasProps {
+  sceneId: string;
   dropTargets: DropTarget[];
   terms: Term[];
   mode: "editor" | "play";
   playerGuesses: Record<string, string>;
   placingTermId: string | null;
   onCanvasClick: (xPercent: number, yPercent: number) => void;
+  locale: string;
 }
 
-function DropZone({ target, terms, mode, guessTermId, allPlaced }: { target: DropTarget; terms: Term[]; mode: "editor" | "play"; guessTermId?: string; allPlaced: boolean }) {
+function DropZone({ target, terms, mode, guessTermId, allPlaced, locale }: { target: DropTarget; terms: Term[]; mode: "editor" | "play"; guessTermId?: string; allPlaced: boolean; locale: string }) {
   const { setNodeRef, isOver } = useDroppable({ id: target.id });
-  const editorLabel = terms.find((t) => t.id === target.assignedTerm)?.label ?? null;
-  const guessLabel = guessTermId ? terms.find((t) => t.id === guessTermId)?.label ?? null : null;
+  const assignedTerm = terms.find((t) => t.id === target.assignedTerm);
+  const editorLabel = assignedTerm ? getTermLabel(assignedTerm, locale) : null;
+  const guessTerm = guessTermId ? terms.find((t) => t.id === guessTermId) : null;
+  const guessLabel = guessTerm ? getTermLabel(guessTerm, locale) : null;
 
   const filled = mode === "editor" ? !!editorLabel : !!guessLabel;
   const showFeedback = mode === "play" && allPlaced;
@@ -57,11 +57,12 @@ function DropZone({ target, terms, mode, guessTermId, allPlaced }: { target: Dro
   );
 }
 
-export default function Canvas({ dropTargets, terms, mode, playerGuesses, placingTermId, onCanvasClick }: CanvasProps) {
+export default function Canvas({ sceneId, dropTargets, terms, mode, playerGuesses, placingTermId, onCanvasClick, locale }: CanvasProps) {
   const { setNodeRef, isOver } = useDroppable({ id: "canvas" });
   const allPlaced = dropTargets.length > 0 && dropTargets.every((t) => playerGuesses[t.id]);
   const isPlacing = !!placingTermId;
-  const placingLabel = isPlacing ? terms.find((t) => t.id === placingTermId)?.label : null;
+  const placingTerm = isPlacing ? terms.find((t) => t.id === placingTermId) : null;
+  const placingLabel = placingTerm ? getTermLabel(placingTerm, locale) : null;
 
   function handleClick(e: React.MouseEvent<HTMLDivElement>) {
     if (!isPlacing) return;
@@ -82,30 +83,31 @@ export default function Canvas({ dropTargets, terms, mode, playerGuesses, placin
         </div>
       )}
 
-      {/* Canvas area */}
+      {/* Canvas area — fixed 3:2 aspect ratio (1200×800 standard) */}
       <div className="flex-1 flex items-center justify-center p-6">
         <div
           ref={setNodeRef}
           id="canvas-drop-area"
           onClick={handleClick}
-          className={`bg-white rounded-xl shadow-sm w-full h-full flex items-center justify-center relative border-2 transition-colors ${
+          className={`bg-white rounded-xl shadow-sm w-full relative border-2 transition-colors ${
             isPlacing
               ? "border-blue-400 cursor-crosshair"
               : isOver
                 ? "border-blue-300 bg-blue-50/30"
                 : "border-transparent"
           } ${!isPlacing ? "cursor-default" : ""}`}
+          style={{ aspectRatio: "3 / 2" }}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/scenes/demo/scene.png"
-            alt="Water Cycle Diagram"
-            className="w-full h-full object-contain pointer-events-none select-none"
+            src={`/scenes/${sceneId}/scene.png`}
+            alt={`${sceneId} scene`}
+            className="absolute inset-0 w-full h-full object-cover rounded-lg pointer-events-none select-none"
           />
 
           {/* Drop Targets */}
           {dropTargets.map((target) => (
-            <DropZone key={target.id} target={target} terms={terms} mode={mode} guessTermId={playerGuesses[target.id]} allPlaced={allPlaced} />
+            <DropZone key={target.id} target={target} terms={terms} mode={mode} guessTermId={playerGuesses[target.id]} allPlaced={allPlaced} locale={locale} />
           ))}
         </div>
       </div>

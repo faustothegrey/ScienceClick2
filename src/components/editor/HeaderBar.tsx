@@ -3,15 +3,17 @@
 import { useState, useRef, useEffect } from "react";
 import { ArrowLeft, ChevronDown } from "lucide-react";
 import { SUPPORTED_LOCALES } from "@/lib/i18n";
+import Link from "next/link";
 
 interface HeaderBarProps {
+  sceneName: string;
   mode: "editor" | "play";
   onModeChange: (mode: "editor" | "play") => void;
   locale: string;
   onLocaleChange: (locale: string) => void;
 }
 
-export default function HeaderBar({ mode, onModeChange, locale, onLocaleChange }: HeaderBarProps) {
+export default function HeaderBar({ sceneName, mode, onModeChange, locale, onLocaleChange }: HeaderBarProps) {
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -33,15 +35,17 @@ export default function HeaderBar({ mode, onModeChange, locale, onLocaleChange }
     }`}>
       {/* Left: back link */}
       <div className="flex items-center gap-2 text-sm text-gray-400">
-        <ArrowLeft className="w-4 h-4" />
-        <span>Scenes</span>
+        <Link href="/scenes" className="flex items-center gap-2 hover:text-gray-600 transition-colors">
+          <ArrowLeft className="w-4 h-4" />
+          <span>Scenes</span>
+        </Link>
         <span className="text-gray-300">/</span>
-        <span className="text-gray-900 font-semibold">Demo Scene</span>
+        <span className="text-gray-900 font-semibold">{sceneName}</span>
       </div>
 
       {/* Center: title + language switcher */}
       <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-3">
-        <h1 className="text-lg font-bold text-gray-900">Demo Scene</h1>
+        <h1 className="text-lg font-bold text-gray-900">{sceneName}</h1>
 
         {/* Language Switcher */}
         <div ref={dropdownRef} className="relative">

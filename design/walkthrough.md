@@ -8,9 +8,11 @@ ScienceClick2 is an interactive educational tool where teachers create labeled d
 
 The app is a full-screen single-page interface divided into three areas:
 
-1. **Header Bar** (top) — Shows the scene name with a breadcrumb ("Scenes / Demo Scene") and an Editor/Play mode toggle on the right.
-2. **Canvas** (center) — Displays the scene image with positioned drop targets overlaid on it.
-3. **Term Bank** (right sidebar, 288px wide) — Lists all terms that can be dragged onto the canvas.
+1.  **Header Bar** (top) — Shows the scene name with a breadcrumb ("Scenes / Demo Scene") and an Editor/Play mode toggle on the right.
+2.  **Canvas** (center) — Displays the scene image with positioned drop targets overlaid on it.
+3.  **Term Bank** (right sidebar, 288px wide) — Lists all terms that can be dragged onto the canvas.
+
+![Editor Mode Overview](./editor_overview.png)
 
 ## Editor Mode
 
@@ -20,13 +22,19 @@ Editor mode is the authoring environment where a teacher sets up the scene by cr
 
 1. Click the **"New Term"** button in the Term Bank sidebar.
 2. An inline text input appears below the button with a placeholder "Enter term label".
+
+![Creating a Term](./editor_create_term.png)
 3. Type the term name (e.g., "Evaporation").
 4. Click **"Save"** or press **Enter** to confirm. The Save button is disabled until text is entered. Press **Escape** or click **"Cancel"** to discard.
 5. After saving, the canvas enters **placing mode**:
    - A blue banner appears at the top of the canvas: *'Click on the image to place "Evaporation"'*.
    - The canvas border turns blue and the cursor becomes a crosshair.
    - Click anywhere on the scene image to place the drop target at that position.
+
+![Placing Mode](./editor_placing_mode.png)
 6. Once placed, the term and its drop target are **automatically persisted** to the server. No manual save step is needed.
+
+![Term Placed](./editor_term_placed.png)
 
 ### How Drop Targets Work in Editor Mode
 
@@ -56,7 +64,11 @@ Play mode is the student-facing experience. Switch to it by clicking **"Play"** 
 1. All player guesses are **reset** when entering play mode.
 2. Drop targets appear as empty dashed-border slots on the canvas (the answer labels are hidden).
 3. The Term Bank sidebar lists all terms. Students drag terms from the sidebar onto drop targets on the canvas.
+
+![Play Mode Overview](./play_mode_overview.png)
 4. When a term is dropped on a drop target, the target fills in with the term label and shows a solid blue border.
+
+![Term Placed in Play Mode](./play_mode_interaction.png)
 5. Each term can only be placed on one target at a time. Dropping a term on a new target removes it from the previous one.
 
 ### Feedback

@@ -21,6 +21,10 @@ export interface DropTarget {
   assignedTerm: string | null;
 }
 
+function formatName(id: string) {
+  return id.replace(/[-_]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
 export default function SceneEditorPage() {
   const { id } = useParams<{ id: string }>();
   const dndId = useId();
@@ -185,6 +189,7 @@ export default function SceneEditorPage() {
     >
       <div className="flex flex-col h-screen">
         <HeaderBar
+          sceneName={formatName(id)}
           mode={mode}
           onModeChange={(m) => { setMode(m); if (m === "play") setPlayerGuesses({}); }}
           locale={locale}
@@ -192,6 +197,7 @@ export default function SceneEditorPage() {
         />
         <div className="flex flex-1 overflow-hidden">
           <Canvas
+            sceneId={id}
             dropTargets={dropTargets}
             terms={availableTerms}
             mode={mode}

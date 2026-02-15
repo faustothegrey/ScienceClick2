@@ -17,6 +17,8 @@
 - [x] Click-to-place drop target flow after creating a term
 - [x] Auto-persist on create, remove, and reposition
 - [x] Separate player guesses from editor answer key
+- [x] Fix z-index issue for language dropdown
+- [x] Add Wolof language support
 
 ## To Do
 
@@ -25,3 +27,5 @@
 - [ ] Scene catalog (`catalog.json`) and scene selection page
 - [ ] Image upload for new scenes
 - [ ] Unassign/reassign term from drop target (editor mode)
+- [x] Add screenshots to walkthrough
+

@@ -1,20 +1,36 @@
 import { useState } from "react";
 import { useDraggable } from "@dnd-kit/core";
 import { Plus, Save, Settings, GripVertical, X } from "lucide-react";
-
-interface Term {
-  id: string;
-  label: string;
-}
+import { Term, getTermLabel, SUPPORTED_LOCALES } from "@/lib/i18n";
 
 interface TermBankProps {
   terms: Term[];
   mode: "editor" | "play";
   onAddTerm: (label: string) => void;
   onRemoveTerm: (termId: string) => void;
+  locale: string;
 }
 
-function DraggableTerm({ term, mode, onRemove }: { term: Term; mode: "editor" | "play"; onRemove: (termId: string) => void }) {
+function LocaleBadges({ term }: { term: Term }) {
+  return (
+    <div className="flex gap-0.5 ml-auto">
+      {SUPPORTED_LOCALES.map((loc) => (
+        <span
+          key={loc.code}
+          className={`text-[10px] font-semibold uppercase leading-none px-1 py-0.5 rounded ${
+            term.translations[loc.code]
+              ? "text-blue-600 bg-blue-50"
+              : "text-gray-300 bg-gray-50"
+          }`}
+        >
+          {loc.code}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function DraggableTerm({ term, mode, onRemove, locale }: { term: Term; mode: "editor" | "play"; onRemove: (termId: string) => void; locale: string }) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: term.id,
   });
@@ -27,8 +43,9 @@ function DraggableTerm({ term, mode, onRemove }: { term: Term; mode: "editor" | 
         {...attributes}
         className="flex-1 flex items-center gap-2 px-2 py-1.5 bg-gray-50 border border-gray-200 rounded-lg cursor-move hover:border-blue-400 transition-colors"
       >
-        <GripVertical className="w-3.5 h-3.5 text-gray-300" />
-        <span className="text-sm font-medium text-gray-700">{term.label}</span>
+        <GripVertical className="w-3.5 h-3.5 text-gray-300 shrink-0" />
+        <span className="text-sm font-medium text-gray-700">{getTermLabel(term, locale)}</span>
+        <LocaleBadges term={term} />
       </div>
       {mode === "editor" && (
         <button
@@ -42,7 +59,7 @@ function DraggableTerm({ term, mode, onRemove }: { term: Term; mode: "editor" | 
   );
 }
 
-export default function TermBank({ terms, mode, onAddTerm, onRemoveTerm }: TermBankProps) {
+export default function TermBank({ terms, mode, onAddTerm, onRemoveTerm, locale }: TermBankProps) {
   const [isCreating, setIsCreating] = useState(false);
   const [newLabel, setNewLabel] = useState("");
 
@@ -120,7 +137,7 @@ export default function TermBank({ terms, mode, onAddTerm, onRemoveTerm }: TermB
         <div className="border-t border-gray-100 pt-3">
           <div className="space-y-2">
             {terms.map((term) => (
-              <DraggableTerm key={term.id} term={term} mode={mode} onRemove={onRemoveTerm} />
+              <DraggableTerm key={term.id} term={term} mode={mode} onRemove={onRemoveTerm} locale={locale} />
             ))}
           </div>
         </div>
