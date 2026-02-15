@@ -12,6 +12,7 @@ import {
 import HeaderBar from "@/components/editor/HeaderBar";
 import Canvas from "@/components/editor/Canvas";
 import TermBank from "@/components/editor/TermBank";
+import { Term, migrateTerm, getTermLabel } from "@/lib/i18n";
 
 export interface DropTarget {
   id: string;
@@ -23,16 +24,27 @@ export interface DropTarget {
 export default function SceneEditorPage() {
   const { id } = useParams<{ id: string }>();
   const dndId = useId();
-  const [mode, setMode] = useState<"editor" | "play">("editor");
-  const [availableTerms, setAvailableTerms] = useState<{ id: string; label: string }[]>([]);
+  const [mode, setMode] = useState<"editor" | "play">("play");
+  const [availableTerms, setAvailableTerms] = useState<Term[]>([]);
   const [dropTargets, setDropTargets] = useState<DropTarget[]>([]);
+  const [locale, setLocale] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem(`sc2:scene:${id}:locale`) ?? "en";
+    }
+    return "en";
+  });
+
+  function handleLocaleChange(newLocale: string) {
+    setLocale(newLocale);
+    localStorage.setItem(`sc2:scene:${id}:locale`, newLocale);
+  }
 
   useEffect(() => {
     fetch(`/api/scenes/${id}/config`)
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data) {
-          setAvailableTerms(data.terms);
+          setAvailableTerms(data.terms.map((t: Record<string, unknown>) => migrateTerm(t)));
           setDropTargets(data.dropTargets);
         }
       });
@@ -123,7 +135,7 @@ export default function SceneEditorPage() {
     const termId = `term-${Date.now()}`;
     setAvailableTerms((terms) => [
       ...terms,
-      { id: termId, label },
+      { id: termId, translations: { [locale]: label }, defaultLocale: locale },
     ]);
     setPlacingTermId(termId);
   }
@@ -172,7 +184,12 @@ export default function SceneEditorPage() {
       collisionDetection={pointerWithin}
     >
       <div className="flex flex-col h-screen">
-        <HeaderBar mode={mode} onModeChange={(m) => { setMode(m); if (m === "play") setPlayerGuesses({}); }} />
+        <HeaderBar
+          mode={mode}
+          onModeChange={(m) => { setMode(m); if (m === "play") setPlayerGuesses({}); }}
+          locale={locale}
+          onLocaleChange={handleLocaleChange}
+        />
         <div className="flex flex-1 overflow-hidden">
           <Canvas
             dropTargets={dropTargets}
@@ -181,19 +198,21 @@ export default function SceneEditorPage() {
             playerGuesses={playerGuesses}
             placingTermId={placingTermId}
             onCanvasClick={handleCanvasClick}
+            locale={locale}
           />
           <TermBank
             terms={availableTerms}
             mode={mode}
             onAddTerm={handleAddTerm}
             onRemoveTerm={handleRemoveTerm}
+            locale={locale}
           />
         </div>
       </div>
       <DragOverlay dropAnimation={null}>
         {activeTerm ? (
           <div className="px-3 py-2.5 bg-white border border-blue-400 rounded-lg shadow-lg font-medium text-sm text-gray-700 cursor-move">
-            {activeTerm.label}
+            {getTermLabel(activeTerm, locale)}
           </div>
         ) : null}
       </DragOverlay>
