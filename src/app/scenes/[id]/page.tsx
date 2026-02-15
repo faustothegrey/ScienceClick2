@@ -11,7 +11,7 @@ import {
 } from "@dnd-kit/core";
 import HeaderBar from "@/components/editor/HeaderBar";
 import Canvas from "@/components/editor/Canvas";
-import TermBank from "@/components/editor/TermBank";
+import WordList from "@/components/editor/WordList";
 import { Term, migrateTerm, getTermLabel } from "@/lib/i18n";
 
 export interface DropTarget {
@@ -206,7 +206,7 @@ export default function SceneEditorPage() {
             onCanvasClick={handleCanvasClick}
             locale={locale}
           />
-          <TermBank
+          <WordList
             terms={availableTerms}
             mode={mode}
             onAddTerm={handleAddTerm}

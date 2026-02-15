@@ -3,7 +3,7 @@ import { useDraggable } from "@dnd-kit/core";
 import { Plus, Save, Settings, GripVertical, X } from "lucide-react";
 import { Term, getTermLabel, SUPPORTED_LOCALES } from "@/lib/i18n";
 
-interface TermBankProps {
+interface WordListProps {
   terms: Term[];
   mode: "editor" | "play";
   onAddTerm: (label: string) => void;
@@ -59,7 +59,7 @@ function DraggableTerm({ term, mode, onRemove, locale }: { term: Term; mode: "ed
   );
 }
 
-export default function TermBank({ terms, mode, onAddTerm, onRemoveTerm, locale }: TermBankProps) {
+export default function WordList({ terms, mode, onAddTerm, onRemoveTerm, locale }: WordListProps) {
   const [isCreating, setIsCreating] = useState(false);
   const [newLabel, setNewLabel] = useState("");
 
