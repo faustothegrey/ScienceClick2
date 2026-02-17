@@ -5,15 +5,23 @@ import { ArrowLeft, ChevronDown } from "lucide-react";
 import { SUPPORTED_LOCALES } from "@/lib/i18n";
 import Link from "next/link";
 
+interface FeedbackInfo {
+  allCorrect: boolean;
+  correctCount: number;
+  totalCount: number;
+}
+
 interface HeaderBarProps {
   sceneName: string;
   mode: "editor" | "play";
   onModeChange: (mode: "editor" | "play") => void;
   locale: string;
   onLocaleChange: (locale: string) => void;
+  feedback?: FeedbackInfo;
+  onRetry?: () => void;
 }
 
-export default function HeaderBar({ sceneName, mode, onModeChange, locale, onLocaleChange }: HeaderBarProps) {
+export default function HeaderBar({ sceneName, mode, onModeChange, locale, onLocaleChange, feedback, onRetry }: HeaderBarProps) {
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -43,35 +51,57 @@ export default function HeaderBar({ sceneName, mode, onModeChange, locale, onLoc
         <span className="text-gray-900 font-semibold">{sceneName}</span>
       </div>
 
-      {/* Center: title + language switcher */}
+      {/* Center: feedback or title + language switcher */}
       <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-3">
-        <h1 className="text-lg font-bold text-gray-900">{sceneName}</h1>
+        {feedback ? (
+          <div className="flex items-center gap-3">
+            <span className={`text-sm font-semibold ${feedback.allCorrect ? "text-green-700" : "text-amber-700"}`}>
+              {feedback.allCorrect
+                ? "All correct! Well done!"
+                : `${feedback.correctCount} of ${feedback.totalCount} correct`}
+            </span>
+            <button
+              onClick={onRetry}
+              className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+                feedback.allCorrect
+                  ? "bg-green-600 text-white hover:bg-green-700"
+                  : "bg-amber-600 text-white hover:bg-amber-700"
+              }`}
+            >
+              {feedback.allCorrect ? "Play Again" : "Retry"}
+            </button>
+          </div>
+        ) : (
+          <>
+            <h1 className="text-lg font-bold text-gray-900">{sceneName}</h1>
 
-        {/* Language Switcher */}
-        <div ref={dropdownRef} className="relative">
-          <button
-            onClick={() => setOpen(!open)}
-            className="flex items-center gap-1 px-2 py-1 text-sm font-medium text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
-          >
-            {locale.toUpperCase()}
-            <ChevronDown className="w-3.5 h-3.5" />
-          </button>
+            {/* Language Switcher */}
+            <div ref={dropdownRef} className="relative">
+              <button
+                onClick={() => setOpen(!open)}
+                className="flex items-center gap-1 px-2 py-1 text-sm font-medium text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+              >
+                {locale.toUpperCase()}
+                <ChevronDown className="w-3.5 h-3.5" />
+              </button>
 
-          {open && (
-            <div className="absolute top-full mt-1 right-0 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-50 min-w-[140px]">
-              {SUPPORTED_LOCALES.map((loc) => (
-                <button
-                  key={loc.code}
-                  onClick={() => { onLocaleChange(loc.code); setOpen(false); }}
-                  className={`w-full text-left px-3 py-1.5 text-sm hover:bg-gray-50 transition-colors ${locale === loc.code ? "font-semibold text-blue-600" : "text-gray-700"
-                    }`}
-                >
-                  {loc.label}
-                </button>
-              ))}
+              {open && (
+                <div className="absolute top-full mt-1 right-0 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-50 min-w-[140px]">
+                  {SUPPORTED_LOCALES.map((loc) => (
+                    <button
+                      key={loc.code}
+                      onClick={() => { onLocaleChange(loc.code); setOpen(false); }}
+                      className={`w-full text-left px-3 py-1.5 text-sm hover:bg-gray-50 transition-colors ${locale === loc.code ? "font-semibold text-blue-600" : "text-gray-700"
+                        }`}
+                    >
+                      {loc.label}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
-          )}
-        </div>
+          </>
+        )}
       </div>
 
       {/* Right: mode toggle */}

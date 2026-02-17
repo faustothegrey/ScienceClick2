@@ -9,6 +9,7 @@ interface WordListProps {
   onAddTerm: (label: string) => void;
   onRemoveTerm: (termId: string) => void;
   locale: string;
+  placedTermIds?: Set<string>;
 }
 
 function LocaleBadges({ term }: { term: Term }) {
@@ -30,22 +31,26 @@ function LocaleBadges({ term }: { term: Term }) {
   );
 }
 
-function DraggableTerm({ term, mode, onRemove, locale }: { term: Term; mode: "editor" | "play"; onRemove: (termId: string) => void; locale: string }) {
+function DraggableTerm({ term, mode, onRemove, locale, isPlaced }: { term: Term; mode: "editor" | "play"; onRemove: (termId: string) => void; locale: string; isPlaced: boolean }) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: term.id,
   });
 
   return (
-    <div className={`flex items-center gap-1 ${isDragging ? "opacity-30" : ""}`}>
+    <div className={`flex items-center gap-1 ${isDragging ? "opacity-30" : ""} ${isPlaced ? "opacity-40" : ""}`}>
       <div
         ref={setNodeRef}
         {...listeners}
         {...attributes}
-        className="flex-1 flex items-center gap-2 px-2 py-1.5 bg-gray-50 border border-gray-200 rounded-lg cursor-move hover:border-blue-400 transition-colors"
+        className={`flex-1 flex items-center gap-2 px-2 py-1.5 rounded-lg transition-colors ${
+          isPlaced
+            ? "bg-gray-100 border border-gray-100 cursor-default"
+            : "bg-gray-50 border border-gray-200 cursor-move hover:border-blue-400"
+        }`}
       >
-        <GripVertical className="w-3.5 h-3.5 text-gray-300 shrink-0" />
-        <span className="text-sm font-medium text-gray-700">{getTermLabel(term, locale)}</span>
-        <LocaleBadges term={term} />
+        <GripVertical className={`w-3.5 h-3.5 shrink-0 ${isPlaced ? "text-gray-200" : "text-gray-300"}`} />
+        <span className={`text-sm font-medium ${isPlaced ? "text-gray-400 line-through" : "text-gray-700"}`}>{getTermLabel(term, locale)}</span>
+        {!isPlaced && <LocaleBadges term={term} />}
       </div>
       {mode === "editor" && (
         <button
@@ -59,7 +64,7 @@ function DraggableTerm({ term, mode, onRemove, locale }: { term: Term; mode: "ed
   );
 }
 
-export default function WordList({ terms, mode, onAddTerm, onRemoveTerm, locale }: WordListProps) {
+export default function WordList({ terms, mode, onAddTerm, onRemoveTerm, locale, placedTermIds }: WordListProps) {
   const [isCreating, setIsCreating] = useState(false);
   const [newLabel, setNewLabel] = useState("");
 
@@ -137,7 +142,7 @@ export default function WordList({ terms, mode, onAddTerm, onRemoveTerm, locale 
         <div className="border-t border-gray-100 pt-3">
           <div className="space-y-2">
             {terms.map((term) => (
-              <DraggableTerm key={term.id} term={term} mode={mode} onRemove={onRemoveTerm} locale={locale} />
+              <DraggableTerm key={term.id} term={term} mode={mode} onRemove={onRemoveTerm} locale={locale} isPlaced={placedTermIds?.has(term.id) ?? false} />
             ))}
           </div>
         </div>

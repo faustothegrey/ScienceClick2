@@ -12,12 +12,13 @@ interface CanvasProps {
   terms: Term[];
   mode: "editor" | "play";
   playerGuesses: Record<string, string>;
+  showFeedback: boolean;
   placingTermId: string | null;
   onCanvasClick: (xPercent: number, yPercent: number) => void;
   locale: string;
 }
 
-function DropZone({ target, terms, mode, guessTermId, allPlaced, locale }: { target: DropTarget; terms: Term[]; mode: "editor" | "play"; guessTermId?: string; allPlaced: boolean; locale: string }) {
+function DropZone({ target, terms, mode, guessTermId, showFeedback, locale }: { target: DropTarget; terms: Term[]; mode: "editor" | "play"; guessTermId?: string; showFeedback: boolean; locale: string }) {
   const { setNodeRef, isOver } = useDroppable({ id: target.id });
   const assignedTerm = terms.find((t) => t.id === target.assignedTerm);
   const editorLabel = assignedTerm ? getTermLabel(assignedTerm, locale) : null;
@@ -25,7 +26,6 @@ function DropZone({ target, terms, mode, guessTermId, allPlaced, locale }: { tar
   const guessLabel = guessTerm ? getTermLabel(guessTerm, locale) : null;
 
   const filled = mode === "editor" ? !!editorLabel : !!guessLabel;
-  const showFeedback = mode === "play" && allPlaced;
   const isCorrect = showFeedback && guessTermId === target.assignedTerm;
   const isIncorrect = showFeedback && guessTermId !== target.assignedTerm;
 
@@ -60,9 +60,8 @@ function DropZone({ target, terms, mode, guessTermId, allPlaced, locale }: { tar
   );
 }
 
-export default function Canvas({ sceneId, dropTargets, terms, mode, playerGuesses, placingTermId, onCanvasClick, locale }: CanvasProps) {
+export default function Canvas({ sceneId, dropTargets, terms, mode, playerGuesses, showFeedback, placingTermId, onCanvasClick, locale }: CanvasProps) {
   const { setNodeRef, isOver } = useDroppable({ id: "canvas" });
-  const allPlaced = dropTargets.length > 0 && dropTargets.every((t) => playerGuesses[t.id]);
   const isPlacing = !!placingTermId;
   const placingTerm = isPlacing ? terms.find((t) => t.id === placingTermId) : null;
   const placingLabel = placingTerm ? getTermLabel(placingTerm, locale) : null;
@@ -120,7 +119,7 @@ export default function Canvas({ sceneId, dropTargets, terms, mode, playerGuesse
 
           {/* Drop Targets */}
           {dropTargets.map((target) => (
-            <DropZone key={target.id} target={target} terms={terms} mode={mode} guessTermId={playerGuesses[target.id]} allPlaced={allPlaced} locale={locale} />
+            <DropZone key={target.id} target={target} terms={terms} mode={mode} guessTermId={playerGuesses[target.id]} showFeedback={showFeedback} locale={locale} />
           ))}
         </div>
       </div>

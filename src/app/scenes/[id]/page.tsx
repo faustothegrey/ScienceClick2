@@ -1,6 +1,7 @@
 "use client";
 
-import { useId, useState, useEffect } from "react";
+import { useId, useState, useEffect, useCallback } from "react";
+import confetti from "canvas-confetti";
 import { useParams } from "next/navigation";
 import {
   DndContext,
@@ -56,6 +57,8 @@ export default function SceneEditorPage() {
   const [activeId, setActiveId] = useState<string | null>(null);
   // Play mode: player's guesses, mapping drop target id → term id
   const [playerGuesses, setPlayerGuesses] = useState<Record<string, string>>({});
+  // Whether to reveal correct/incorrect feedback on drop zones
+  const [showFeedback, setShowFeedback] = useState(false);
   // Editor mode: term awaiting placement on canvas
   const [placingTermId, setPlacingTermId] = useState<string | null>(null);
 
@@ -180,6 +183,31 @@ export default function SceneEditorPage() {
 
   const activeTerm = availableTerms.find((t) => t.id === activeId);
 
+  const fireConfetti = useCallback(() => {
+    const end = Date.now() + 1500;
+    const colors = ["#22c55e", "#3b82f6", "#f59e0b", "#ec4899"];
+    (function frame() {
+      confetti({ particleCount: 3, angle: 60, spread: 55, origin: { x: 0 }, colors });
+      confetti({ particleCount: 3, angle: 120, spread: 55, origin: { x: 1 }, colors });
+      if (Date.now() < end) requestAnimationFrame(frame);
+    })();
+  }, []);
+
+  const placedTermIds = new Set(Object.values(playerGuesses));
+  const allPlaced = mode === "play" && dropTargets.length > 0 && dropTargets.every((t) => playerGuesses[t.id]);
+  const correctCount = allPlaced
+    ? dropTargets.filter((t) => playerGuesses[t.id] === t.assignedTerm).length
+    : 0;
+  const allCorrect = allPlaced && correctCount === dropTargets.length;
+
+  // Auto-check as soon as the last term is placed
+  useEffect(() => {
+    if (allPlaced && !showFeedback) {
+      setShowFeedback(true);
+      if (correctCount === dropTargets.length) fireConfetti();
+    }
+  }, [allPlaced, showFeedback, correctCount, dropTargets.length, fireConfetti]);
+
   return (
     <DndContext
       id={dndId}
@@ -191,9 +219,11 @@ export default function SceneEditorPage() {
         <HeaderBar
           sceneName={formatName(id)}
           mode={mode}
-          onModeChange={(m) => { setMode(m); if (m === "play") setPlayerGuesses({}); }}
+          onModeChange={(m) => { setMode(m); if (m === "play") { setPlayerGuesses({}); setShowFeedback(false); } }}
           locale={locale}
           onLocaleChange={handleLocaleChange}
+          feedback={showFeedback ? { allCorrect, correctCount, totalCount: dropTargets.length } : undefined}
+          onRetry={() => { setPlayerGuesses({}); setShowFeedback(false); }}
         />
         <div className="flex flex-1 overflow-hidden">
           <Canvas
@@ -202,6 +232,7 @@ export default function SceneEditorPage() {
             terms={availableTerms}
             mode={mode}
             playerGuesses={playerGuesses}
+            showFeedback={showFeedback}
             placingTermId={placingTermId}
             onCanvasClick={handleCanvasClick}
             locale={locale}
@@ -212,6 +243,7 @@ export default function SceneEditorPage() {
             onAddTerm={handleAddTerm}
             onRemoveTerm={handleRemoveTerm}
             locale={locale}
+            placedTermIds={placedTermIds}
           />
         </div>
       </div>
