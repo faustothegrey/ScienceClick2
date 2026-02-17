@@ -59,6 +59,8 @@ export default function SceneEditorPage() {
   const [playerGuesses, setPlayerGuesses] = useState<Record<string, string>>({});
   // Whether to reveal correct/incorrect feedback on drop zones
   const [showFeedback, setShowFeedback] = useState(false);
+  // Incremented on each play reset to re-mount term components
+  const [playKey, setPlayKey] = useState(0);
   // Editor mode: term awaiting placement on canvas
   const [placingTermId, setPlacingTermId] = useState<string | null>(null);
 
@@ -219,11 +221,11 @@ export default function SceneEditorPage() {
         <HeaderBar
           sceneName={formatName(id)}
           mode={mode}
-          onModeChange={(m) => { setMode(m); if (m === "play") { setPlayerGuesses({}); setShowFeedback(false); } }}
+          onModeChange={(m) => { setMode(m); if (m === "play") { setPlayerGuesses({}); setShowFeedback(false); setPlayKey((k) => k + 1); } }}
           locale={locale}
           onLocaleChange={handleLocaleChange}
           feedback={showFeedback ? { allCorrect, correctCount, totalCount: dropTargets.length } : undefined}
-          onRetry={() => { setPlayerGuesses({}); setShowFeedback(false); }}
+          onRetry={() => { setPlayerGuesses({}); setShowFeedback(false); setPlayKey((k) => k + 1); }}
         />
         <div className="flex flex-1 overflow-hidden">
           <Canvas
@@ -244,6 +246,7 @@ export default function SceneEditorPage() {
             onRemoveTerm={handleRemoveTerm}
             locale={locale}
             placedTermIds={placedTermIds}
+            playKey={playKey}
           />
         </div>
       </div>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useDraggable } from "@dnd-kit/core";
 import { Plus, Save, Settings, GripVertical, X } from "lucide-react";
 import { Term, getTermLabel, SUPPORTED_LOCALES } from "@/lib/i18n";
@@ -10,31 +10,45 @@ interface WordListProps {
   onRemoveTerm: (termId: string) => void;
   locale: string;
   placedTermIds?: Set<string>;
+  playKey?: number;
 }
 
-function LocaleBadges({ term }: { term: Term }) {
+function LocaleBadges({ term, activeLocale, onLocaleClick }: { term: Term; activeLocale: string; onLocaleClick: (code: string) => void }) {
   return (
     <div className="flex gap-0.5 ml-auto">
-      {SUPPORTED_LOCALES.map((loc) => (
-        <span
-          key={loc.code}
-          className={`text-[10px] font-semibold uppercase leading-none px-1 py-0.5 rounded ${
-            term.translations[loc.code]
-              ? "text-blue-600 bg-blue-50"
-              : "text-gray-300 bg-gray-50"
-          }`}
-        >
-          {loc.code}
-        </span>
-      ))}
+      {SUPPORTED_LOCALES.map((loc) => {
+        const hasTranslation = !!term.translations[loc.code];
+        const isActive = loc.code === activeLocale;
+        return (
+          <button
+            key={loc.code}
+            type="button"
+            disabled={!hasTranslation}
+            onPointerDown={(e) => { e.stopPropagation(); onLocaleClick(loc.code); }}
+            className={`text-[10px] font-semibold uppercase leading-none px-1 py-0.5 rounded transition-colors ${
+              isActive && hasTranslation
+                ? "text-white bg-blue-600"
+                : hasTranslation
+                  ? "text-blue-600 bg-blue-50 hover:bg-blue-100 cursor-pointer"
+                  : "text-gray-300 bg-gray-50 cursor-default"
+            }`}
+          >
+            {loc.code}
+          </button>
+        );
+      })}
     </div>
   );
 }
 
 function DraggableTerm({ term, mode, onRemove, locale, isPlaced }: { term: Term; mode: "editor" | "play"; onRemove: (termId: string) => void; locale: string; isPlaced: boolean }) {
+  const [termLocale, setTermLocale] = useState(locale);
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: term.id,
   });
+
+  // Reset per-term locale when global locale changes
+  useEffect(() => { setTermLocale(locale); }, [locale]);
 
   return (
     <div className={`flex items-center gap-1 ${isDragging ? "opacity-30" : ""} ${isPlaced ? "opacity-40" : ""}`}>
@@ -49,8 +63,8 @@ function DraggableTerm({ term, mode, onRemove, locale, isPlaced }: { term: Term;
         }`}
       >
         <GripVertical className={`w-3.5 h-3.5 shrink-0 ${isPlaced ? "text-gray-200" : "text-gray-300"}`} />
-        <span className={`text-sm font-medium ${isPlaced ? "text-gray-400 line-through" : "text-gray-700"}`}>{getTermLabel(term, locale)}</span>
-        {!isPlaced && <LocaleBadges term={term} />}
+        <span className={`text-sm font-medium ${isPlaced ? "text-gray-400 line-through" : "text-gray-700"}`}>{getTermLabel(term, termLocale)}</span>
+        {!isPlaced && <LocaleBadges term={term} activeLocale={termLocale} onLocaleClick={setTermLocale} />}
       </div>
       {mode === "editor" && (
         <button
@@ -64,7 +78,7 @@ function DraggableTerm({ term, mode, onRemove, locale, isPlaced }: { term: Term;
   );
 }
 
-export default function WordList({ terms, mode, onAddTerm, onRemoveTerm, locale, placedTermIds }: WordListProps) {
+export default function WordList({ terms, mode, onAddTerm, onRemoveTerm, locale, placedTermIds, playKey }: WordListProps) {
   const [isCreating, setIsCreating] = useState(false);
   const [newLabel, setNewLabel] = useState("");
 
@@ -142,7 +156,7 @@ export default function WordList({ terms, mode, onAddTerm, onRemoveTerm, locale,
         <div className="border-t border-gray-100 pt-3">
           <div className="space-y-2">
             {terms.map((term) => (
-              <DraggableTerm key={term.id} term={term} mode={mode} onRemove={onRemoveTerm} locale={locale} isPlaced={placedTermIds?.has(term.id) ?? false} />
+              <DraggableTerm key={`${term.id}-${playKey ?? 0}`} term={term} mode={mode} onRemove={onRemoveTerm} locale={locale} isPlaced={placedTermIds?.has(term.id) ?? false} />
             ))}
           </div>
         </div>
