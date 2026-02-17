@@ -1,0 +1,135 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto" fill="#64748b">
+      <polygon points="0 0, 10 3.5, 0 7" />
+    </marker>
+    <!-- Particle gradients -->
+    <radialGradient id="solidGrad" cx="50%" cy="40%" r="50%">
+      <stop offset="0%" stop-color="#93c5fd" />
+      <stop offset="100%" stop-color="#3b82f6" />
+    </radialGradient>
+    <radialGradient id="liquidGrad" cx="50%" cy="40%" r="50%">
+      <stop offset="0%" stop-color="#5eead4" />
+      <stop offset="100%" stop-color="#14b8a6" />
+    </radialGradient>
+    <radialGradient id="gasGrad" cx="50%" cy="40%" r="50%">
+      <stop offset="0%" stop-color="#fdba74" />
+      <stop offset="100%" stop-color="#f97316" />
+    </radialGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="800" fill="#f8fafc" rx="12" />
+
+  <!-- ==================== STATE CONTAINERS ==================== -->
+
+  <!-- SOLID (bottom-left) — tightly packed grid of particles in a rigid box -->
+  <g transform="translate(140, 480)">
+    <rect x="0" y="0" width="160" height="140" rx="8" fill="#eff6ff" stroke="#3b82f6" stroke-width="2.5" />
+    <!-- Row 1 -->
+    <circle cx="30" cy="25" r="14" fill="url(#solidGrad)" />
+    <circle cx="60" cy="25" r="14" fill="url(#solidGrad)" />
+    <circle cx="90" cy="25" r="14" fill="url(#solidGrad)" />
+    <circle cx="120" cy="25" r="14" fill="url(#solidGrad)" />
+    <!-- Row 2 -->
+    <circle cx="30" cy="55" r="14" fill="url(#solidGrad)" />
+    <circle cx="60" cy="55" r="14" fill="url(#solidGrad)" />
+    <circle cx="90" cy="55" r="14" fill="url(#solidGrad)" />
+    <circle cx="120" cy="55" r="14" fill="url(#solidGrad)" />
+    <!-- Row 3 -->
+    <circle cx="30" cy="85" r="14" fill="url(#solidGrad)" />
+    <circle cx="60" cy="85" r="14" fill="url(#solidGrad)" />
+    <circle cx="90" cy="85" r="14" fill="url(#solidGrad)" />
+    <circle cx="120" cy="85" r="14" fill="url(#solidGrad)" />
+    <!-- Row 4 -->
+    <circle cx="30" cy="115" r="14" fill="url(#solidGrad)" />
+    <circle cx="60" cy="115" r="14" fill="url(#solidGrad)" />
+    <circle cx="90" cy="115" r="14" fill="url(#solidGrad)" />
+    <circle cx="120" cy="115" r="14" fill="url(#solidGrad)" />
+  </g>
+
+  <!-- LIQUID (bottom-right) — loosely packed particles in a beaker shape -->
+  <g transform="translate(900, 480)">
+    <!-- Beaker outline -->
+    <path d="M0,0 L0,140 Q0,155 15,155 L145,155 Q160,155 160,140 L160,0" fill="#f0fdfa" stroke="#14b8a6" stroke-width="2.5" fill-opacity="0.8" />
+    <!-- Particles — loosely arranged -->
+    <circle cx="35" cy="120" r="14" fill="url(#liquidGrad)" />
+    <circle cx="65" cy="125" r="14" fill="url(#liquidGrad)" />
+    <circle cx="95" cy="118" r="14" fill="url(#liquidGrad)" />
+    <circle cx="125" cy="122" r="14" fill="url(#liquidGrad)" />
+    <circle cx="25" cy="90" r="14" fill="url(#liquidGrad)" />
+    <circle cx="55" cy="85" r="14" fill="url(#liquidGrad)" />
+    <circle cx="85" cy="92" r="14" fill="url(#liquidGrad)" />
+    <circle cx="115" cy="88" r="14" fill="url(#liquidGrad)" />
+    <circle cx="140" cy="95" r="14" fill="url(#liquidGrad)" />
+    <circle cx="45" cy="55" r="14" fill="url(#liquidGrad)" />
+    <circle cx="80" cy="60" r="14" fill="url(#liquidGrad)" />
+    <circle cx="115" cy="52" r="14" fill="url(#liquidGrad)" />
+  </g>
+
+  <!-- GAS (top-center) — scattered particles in a large dashed container -->
+  <g transform="translate(460, 80)">
+    <rect x="0" y="0" width="280" height="200" rx="12" fill="#fff7ed" stroke="#f97316" stroke-width="2.5" stroke-dasharray="8,4" />
+    <!-- Scattered particles -->
+    <circle cx="45" cy="35" r="12" fill="url(#gasGrad)" />
+    <circle cx="200" cy="50" r="12" fill="url(#gasGrad)" />
+    <circle cx="120" cy="80" r="12" fill="url(#gasGrad)" />
+    <circle cx="250" cy="140" r="12" fill="url(#gasGrad)" />
+    <circle cx="60" cy="160" r="12" fill="url(#gasGrad)" />
+    <circle cx="170" cy="155" r="12" fill="url(#gasGrad)" />
+    <circle cx="30" cy="100" r="12" fill="url(#gasGrad)" />
+    <circle cx="230" cy="80" r="12" fill="url(#gasGrad)" />
+  </g>
+
+  <!-- ==================== ARROWS ==================== -->
+
+  <!-- BOTTOM: Solid ↔ Liquid -->
+  <!-- Fusione: Solid → Liquid (upper curved arrow, left to right) -->
+  <path d="M320,560 Q600,490 880,560" fill="none" stroke="#ef4444" stroke-width="2.5" marker-end="url(#arrow)" />
+  <!-- Solidificazione: Liquid → Solid (lower curved arrow, right to left) -->
+  <path d="M880,600 Q600,670 320,600" fill="none" stroke="#6366f1" stroke-width="2.5" marker-end="url(#arrow)" />
+
+  <!-- RIGHT: Liquid ↔ Gas -->
+  <!-- Evaporazione: Liquid → Gas (right curved arrow, going up) -->
+  <path d="M1000,470 Q1060,320 780,200" fill="none" stroke="#ef4444" stroke-width="2.5" marker-end="url(#arrow)" />
+  <!-- Condensazione: Gas → Liquid (left curved arrow, going down) -->
+  <path d="M730,260 Q920,340 950,470" fill="none" stroke="#6366f1" stroke-width="2.5" marker-end="url(#arrow)" />
+
+  <!-- LEFT: Solid ↔ Gas -->
+  <!-- Sublimazione: Solid → Gas (left curved arrow, going up) -->
+  <path d="M200,470 Q140,320 420,200" fill="none" stroke="#ef4444" stroke-width="2.5" marker-end="url(#arrow)" />
+  <!-- Brinamento: Gas → Solid (right curved arrow, going down) -->
+  <path d="M470,260 Q280,340 250,470" fill="none" stroke="#6366f1" stroke-width="2.5" marker-end="url(#arrow)" />
+
+  <!-- ==================== SMALL HEAT/COLD ICONS ==================== -->
+  <!-- Heat icon (flame) near red arrows -->
+  <g transform="translate(585,500)" opacity="0.5">
+    <path d="M0,12 Q2,-2 6,6 Q8,-4 12,6 Q14,-2 16,12 Q16,20 8,22 Q0,20 0,12Z" fill="#ef4444" />
+  </g>
+  <g transform="translate(1020,330)" opacity="0.5">
+    <path d="M0,12 Q2,-2 6,6 Q8,-4 12,6 Q14,-2 16,12 Q16,20 8,22 Q0,20 0,12Z" fill="#ef4444" />
+  </g>
+  <g transform="translate(148,330)" opacity="0.5">
+    <path d="M0,12 Q2,-2 6,6 Q8,-4 12,6 Q14,-2 16,12 Q16,20 8,22 Q0,20 0,12Z" fill="#ef4444" />
+  </g>
+
+  <!-- Cold icon (snowflake) near blue arrows -->
+  <g transform="translate(585,650)" opacity="0.4">
+    <line x1="8" y1="0" x2="8" y2="16" stroke="#6366f1" stroke-width="2" />
+    <line x1="0" y1="8" x2="16" y2="8" stroke="#6366f1" stroke-width="2" />
+    <line x1="2" y1="2" x2="14" y2="14" stroke="#6366f1" stroke-width="1.5" />
+    <line x1="14" y1="2" x2="2" y2="14" stroke="#6366f1" stroke-width="1.5" />
+  </g>
+  <g transform="translate(910,360)" opacity="0.4">
+    <line x1="8" y1="0" x2="8" y2="16" stroke="#6366f1" stroke-width="2" />
+    <line x1="0" y1="8" x2="16" y2="8" stroke="#6366f1" stroke-width="2" />
+    <line x1="2" y1="2" x2="14" y2="14" stroke="#6366f1" stroke-width="1.5" />
+    <line x1="14" y1="2" x2="2" y2="14" stroke="#6366f1" stroke-width="1.5" />
+  </g>
+  <g transform="translate(268,360)" opacity="0.4">
+    <line x1="8" y1="0" x2="8" y2="16" stroke="#6366f1" stroke-width="2" />
+    <line x1="0" y1="8" x2="16" y2="8" stroke="#6366f1" stroke-width="2" />
+    <line x1="2" y1="2" x2="14" y2="14" stroke="#6366f1" stroke-width="1.5" />
+    <line x1="14" y1="2" x2="2" y2="14" stroke="#6366f1" stroke-width="1.5" />
+  </g>
+</svg>
