@@ -10,10 +10,94 @@ interface Scene {
   image: string | null;
 }
 
+interface Category {
+  label: string;
+  icon: string;
+  sceneIds: string[];
+}
+
+const CATEGORIES: Category[] = [
+  {
+    label: "Universe & Earth",
+    icon: "🌍",
+    sceneIds: [
+      "solar-system",
+      "atmosphere",
+      "earth-interior",
+      "earth-motions",
+      "earthquake",
+      "hydrosphere",
+      "rock-cycle",
+      "tectonic-plates",
+      "volcano",
+      "water-cycle",
+    ],
+  },
+  {
+    label: "The Matter",
+    icon: "🔬",
+    sceneIds: [
+      "states-of-matter",
+      "passaggi-di-stato",
+      "proprieta-della-materia",
+      "molecole",
+    ],
+  },
+  {
+    label: "Biology & Human Body",
+    icon: "🧬",
+    sceneIds: [
+      "animal-cell",
+      "dna-structure",
+      "food-chain",
+      "human-body",
+      "photosynthesis",
+    ],
+  },
+];
+
+function getCategoryForScene(id: string): string | null {
+  for (const cat of CATEGORIES) {
+    if (cat.sceneIds.includes(id)) return cat.label;
+  }
+  return null;
+}
+
 function formatName(id: string) {
   return id
     .replace(/[-_]/g, " ")
     .replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function SceneCard({ scene }: { scene: Scene }) {
+  return (
+    <Link
+      href={`/scenes/${scene.id}`}
+      className="group block rounded-xl border border-gray-800 bg-gray-900 overflow-hidden hover:border-gray-600 transition-colors"
+    >
+      <div className="h-40 bg-gray-800 flex items-center justify-center">
+        {scene.image ? (
+          <img
+            src={`/scenes/${scene.id}/${scene.image}`}
+            alt={formatName(scene.id)}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <span className="text-4xl text-gray-600">
+            {formatName(scene.id).charAt(0)}
+          </span>
+        )}
+      </div>
+      <div className="p-4">
+        <h3 className="text-lg font-semibold group-hover:text-amber-400 transition-colors">
+          {formatName(scene.id)}
+        </h3>
+        <p className="text-sm text-gray-400 mt-1">
+          {scene.termCount} {scene.termCount === 1 ? "term" : "terms"}
+        </p>
+      </div>
+    </Link>
+  );
 }
 
 export default function ScenesGalleryPage() {
@@ -56,36 +140,42 @@ export default function ScenesGalleryPage() {
             No scenes yet. Click &quot;Create Scene&quot; to get started.
           </p>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {scenes.map((scene) => (
-              <Link
-                key={scene.id}
-                href={`/scenes/${scene.id}`}
-                className="group block rounded-xl border border-gray-800 bg-gray-900 overflow-hidden hover:border-gray-600 transition-colors"
-              >
-                <div className="h-40 bg-gray-800 flex items-center justify-center">
-                  {scene.image ? (
-                    <img
-                      src={`/scenes/${scene.id}/${scene.image}`}
-                      alt={formatName(scene.id)}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <span className="text-4xl text-gray-600">
-                      {formatName(scene.id).charAt(0)}
-                    </span>
-                  )}
-                </div>
-                <div className="p-4">
-                  <h2 className="text-lg font-semibold group-hover:text-amber-400 transition-colors">
-                    {formatName(scene.id)}
+          <div className="space-y-12">
+            {CATEGORIES.map((cat) => {
+              const catScenes = scenes.filter((s) => cat.sceneIds.includes(s.id));
+              if (catScenes.length === 0) return null;
+              return (
+                <section key={cat.label}>
+                  <h2 className="text-xl font-bold text-gray-200 mb-4 flex items-center gap-2">
+                    <span>{cat.icon}</span>
+                    {cat.label}
+                    <span className="text-sm font-normal text-gray-500">({catScenes.length})</span>
                   </h2>
-                  <p className="text-sm text-gray-400 mt-1">
-                    {scene.termCount} {scene.termCount === 1 ? "term" : "terms"}
-                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {catScenes.map((scene) => (
+                      <SceneCard key={scene.id} scene={scene} />
+                    ))}
+                  </div>
+                </section>
+              );
+            })}
+            {/* Uncategorized scenes */}
+            {scenes.filter((s) => !getCategoryForScene(s.id)).length > 0 && (
+              <section>
+                <h2 className="text-xl font-bold text-gray-200 mb-4 flex items-center gap-2">
+                  <span>📁</span>
+                  Other
+                  <span className="text-sm font-normal text-gray-500">
+                    ({scenes.filter((s) => !getCategoryForScene(s.id)).length})
+                  </span>
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {scenes.filter((s) => !getCategoryForScene(s.id)).map((scene) => (
+                    <SceneCard key={scene.id} scene={scene} />
+                  ))}
                 </div>
-              </Link>
-            ))}
+              </section>
+            )}
           </div>
         )}
       </div>
