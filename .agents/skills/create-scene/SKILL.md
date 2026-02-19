@@ -17,7 +17,7 @@ The user provides a short description of the scene topic (e.g., "parts of a flow
 
 Before generating anything:
 
-1. Read `public/scenes/volcano/config.json` as a reference for config structure.
+1. Read `public/scenes/water-cycle/config.json` as a reference for config structure.
 2. Propose the **scene ID** (kebab-case, ASCII only, derived from the topic).
 3. Propose **5–8 terms** with their English labels and a brief note on what each represents visually.
 4. Ask the user to confirm or adjust the term list before proceeding.
@@ -178,8 +178,94 @@ Read back both generated files and report a summary:
 
 ---
 
+## Bad Examples — Common Mistakes to Avoid
+
+### ❌ Clustered drop targets
+
+All targets bunched in the center of the canvas. Students can't tell which zone belongs to which element.
+
+```json
+"dropTargets": [
+  { "id": "target-core", "x": 48, "y": 45, "assignedTerm": "term-core" },
+  { "id": "target-mantle", "x": 50, "y": 50, "assignedTerm": "term-mantle" },
+  { "id": "target-crust", "x": 52, "y": 47, "assignedTerm": "term-crust" }
+]
+```
+
+**Why it's wrong:** Targets are within 4% of each other — the 96×40px boxes overlap completely.
+**Fix:** Space them to match where each element actually appears in the SVG, with at least 8% separation.
+
+### ❌ Text labels baked into the SVG
+
+```xml
+<text x="300" y="150" font-size="18" fill="#333">Magma Chamber</text>
+```
+
+**Why it's wrong:** The app renders labels via drop targets. Text in the SVG means the answer is always visible, defeating the exercise.
+**Fix:** Remove all `<text>` elements. Use only shapes to illustrate the scene.
+
+### ❌ Fake or repeated translations
+
+```json
+{
+  "id": "term-magma-chamber",
+  "translations": {
+    "en": "Magma Chamber",
+    "it": "Magma Chamber",
+    "es": "Magma Chamber",
+    "fr": "Magma Chamber",
+    "wo": "Magma Chamber"
+  }
+}
+```
+
+**Why it's wrong:** Every locale has the English text repeated. Students using Italian or Wolof see nonsense.
+**Fix:** Use real translations: `"it": "Camera magmatica"`, `"es": "Cámara magmática"`, `"fr": "Chambre magmatique"`, `"wo": "Nëgu magma"`.
+
+### ❌ White background
+
+```xml
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800">
+  <rect width="1200" height="800" fill="#ffffff"/>
+  <!-- ... elements ... -->
+</svg>
+```
+
+**Why it's wrong:** Drop target labels are white boxes — they become invisible against a white background.
+**Fix:** Use a colored or gradient background (sky blue, light tan, etc.).
+
+### ❌ Tiny, indistinguishable elements
+
+```xml
+<!-- Mitochondria -->
+<ellipse cx="600" cy="400" rx="8" ry="5" fill="#e57373"/>
+<!-- Nucleus -->
+<circle cx="610" cy="405" r="6" fill="#7986cb"/>
+```
+
+**Why it's wrong:** Elements are under 20px and placed right next to each other. Students can't see or distinguish them.
+**Fix:** Make each element at least 80×80px in SVG units and spread them across the canvas.
+
+### ❌ Mismatched term and target IDs
+
+```json
+{
+  "terms": [
+    { "id": "term-1", "translations": { "en": "Crater" }, "defaultLocale": "en" }
+  ],
+  "dropTargets": [
+    { "id": "target-crater", "x": 50, "y": 15, "assignedTerm": "term-crater" }
+  ]
+}
+```
+
+**Why it's wrong:** The term ID is `term-1` but the target references `term-crater`. The drop target will never match, so the scene is unplayable.
+**Fix:** Use consistent slugs — `term-crater` in both the term and the target's `assignedTerm`.
+
+---
+
 ## Reference
 
 For a working example of a well-structured scene, read:
-- `public/scenes/volcano/config.json` — config with 6 terms and kebab-case IDs
-- `public/scenes/volcano/scene.svg` — ~114-line SVG with gradients, layered shapes, and clear structure
+- `public/scenes/water-cycle/config.json` — config with 5 terms, kebab-case IDs, all 5 locale translations, and well-spaced drop targets
+- `public/scenes/water-cycle/scene.svg` — SVG with gradients, layered shapes, and clear structure
