@@ -3,11 +3,13 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { Trash2 } from "lucide-react";
 
 interface Scene {
   id: string;
   termCount: number;
   image: string | null;
+  agent: string | null;
 }
 
 interface Category {
@@ -27,10 +29,16 @@ const CATEGORIES: Category[] = [
       "earth-motions",
       "earthquake",
       "hydrosphere",
+      "mineral-properties",
+      "plate-boundaries",
       "rock-cycle",
       "tectonic-plates",
       "volcano",
+      "struttura-vulcano",
+      "water-distribution",
       "water-cycle",
+      "tipi-di-rocce",
+      "grotta-carsica",
     ],
   },
   {
@@ -69,34 +77,45 @@ function formatName(id: string) {
     .replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-function SceneCard({ scene }: { scene: Scene }) {
+function SceneCard({ scene, onDelete }: { scene: Scene; onDelete: (id: string) => void }) {
   return (
-    <Link
-      href={`/scenes/${scene.id}`}
-      className="group block rounded-xl border border-gray-800 bg-gray-900 overflow-hidden hover:border-gray-600 transition-colors"
-    >
-      <div className="h-40 bg-gray-800 flex items-center justify-center">
-        {scene.image ? (
-          <img
-            src={`/scenes/${scene.id}/${scene.image}`}
-            alt={formatName(scene.id)}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <span className="text-4xl text-gray-600">
-            {formatName(scene.id).charAt(0)}
-          </span>
-        )}
-      </div>
-      <div className="p-4">
-        <h3 className="text-lg font-semibold group-hover:text-amber-400 transition-colors">
-          {formatName(scene.id)}
-        </h3>
-        <p className="text-sm text-gray-400 mt-1">
-          {scene.termCount} {scene.termCount === 1 ? "term" : "terms"}
-        </p>
-      </div>
-    </Link>
+    <div className="group relative rounded-xl border border-gray-800 bg-gray-900 overflow-hidden hover:border-gray-600 transition-colors">
+      <button
+        onClick={(e) => {
+          e.preventDefault();
+          if (confirm(`Delete "${formatName(scene.id)}"? This cannot be undone.`)) {
+            onDelete(scene.id);
+          }
+        }}
+        className="absolute top-2 right-2 z-10 p-1.5 rounded-lg bg-gray-900/80 text-gray-500 opacity-0 group-hover:opacity-100 hover:text-red-400 hover:bg-gray-900 transition-all"
+      >
+        <Trash2 className="w-4 h-4" />
+      </button>
+      <Link href={`/scenes/${scene.id}`} className="block">
+        <div className="h-40 bg-gray-800 flex items-center justify-center">
+          {scene.image ? (
+            <img
+              src={`/scenes/${scene.id}/${scene.image}`}
+              alt={formatName(scene.id)}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <span className="text-4xl text-gray-600">
+              {formatName(scene.id).charAt(0)}
+            </span>
+          )}
+        </div>
+        <div className="p-4">
+          <h3 className="text-lg font-semibold group-hover:text-amber-400 transition-colors">
+            {formatName(scene.id)}
+          </h3>
+          <p className="text-sm text-gray-400 mt-1">
+            {scene.termCount} {scene.termCount === 1 ? "term" : "terms"}
+                    {scene.agent && <span className="ml-2 text-xs text-gray-500">by {scene.agent}</span>}
+          </p>
+        </div>
+      </Link>
+    </div>
   );
 }
 
@@ -111,6 +130,13 @@ export default function ScenesGalleryPage() {
       .then((data) => setScenes(data))
       .finally(() => setLoading(false));
   }, []);
+
+  function handleDeleteScene(sceneId: string) {
+    fetch(`/api/scenes/${sceneId}`, { method: "DELETE" })
+      .then((res) => {
+        if (res.ok) setScenes((prev) => prev.filter((s) => s.id !== sceneId));
+      });
+  }
 
   function handleCreateScene() {
     const name = prompt("Enter a name for the new scene:")?.trim();
@@ -153,7 +179,7 @@ export default function ScenesGalleryPage() {
                   </h2>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     {catScenes.map((scene) => (
-                      <SceneCard key={scene.id} scene={scene} />
+                      <SceneCard key={scene.id} scene={scene} onDelete={handleDeleteScene} />
                     ))}
                   </div>
                 </section>
@@ -171,7 +197,7 @@ export default function ScenesGalleryPage() {
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {scenes.filter((s) => !getCategoryForScene(s.id)).map((scene) => (
-                    <SceneCard key={scene.id} scene={scene} />
+                    <SceneCard key={scene.id} scene={scene} onDelete={handleDeleteScene} />
                   ))}
                 </div>
               </section>
