@@ -45,3 +45,6 @@ next-env.d.ts
 
 # scene data (images + config)
 public/scenes/
+
+# source materials
+sources/
