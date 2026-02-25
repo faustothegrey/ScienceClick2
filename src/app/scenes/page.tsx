@@ -59,6 +59,8 @@ const CATEGORIES: Category[] = [
       "dna-structure",
       "food-chain",
       "human-body",
+      "scheletric-apparatus",
+      "digestive-system",
       "photosynthesis",
     ],
   },
