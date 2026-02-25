@@ -143,7 +143,7 @@ The canvas uses a **3:2 aspect ratio** (1200×800 pixels standard). Your source 
 - **Format:** PNG is preferred. The app tries these formats in order: `scene.svg`, `scene.png`, `scene.jpeg`, `scene.jpg`
 - **Filename:** Must be one of the above (e.g., `scene.png`)
 - **No baked-in text labels** — the app renders labels via drop targets; text in the image gives away answers
-- **Avoid pure white backgrounds** — drop target labels are white boxes and become invisible against white. If your image has a white background, tint it (e.g., light blue-gray `rgb(225, 232, 240)`)
+- **White backgrounds:** Drop target labels have white backgrounds, so they can be hard to see on pure white images. Consider tinting the background (e.g., light blue-gray `rgb(225, 232, 240)`) or setting `"opaqueTargets": true` in the config. Use your judgement based on the specific image.
 
 **Converting a non-standard image to 1200×800:**
 
