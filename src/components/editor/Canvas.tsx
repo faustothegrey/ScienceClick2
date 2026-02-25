@@ -6,6 +6,8 @@ import { Term, getTermLabel } from "@/lib/i18n";
 
 const IMAGE_FORMATS = ["scene.svg", "scene.png", "scene.jpeg", "scene.jpg"];
 
+export type MatchStatus = "playing" | "submitted" | "reveal";
+
 interface CanvasProps {
   sceneId: string;
   dropTargets: DropTarget[];
@@ -17,14 +19,28 @@ interface CanvasProps {
   onCanvasClick: (xPercent: number, yPercent: number) => void;
   locale: string;
   opaqueTargets?: boolean;
+  rivalGuesses?: Record<string, string>;
+  matchStatus?: MatchStatus;
+  teamLabel?: string;
 }
 
-function DropZone({ target, terms, mode, guessTermId, showFeedback, locale, opaqueTargets }: { target: DropTarget; terms: Term[]; mode: "editor" | "play"; guessTermId?: string; showFeedback: boolean; locale: string; opaqueTargets?: boolean }) {
+function DropZone({
+  target, terms, mode, guessTermId, showFeedback, locale, opaqueTargets,
+  rivalGuessTermId, showRivalFeedback,
+}: {
+  target: DropTarget; terms: Term[]; mode: "editor" | "play";
+  guessTermId?: string; showFeedback: boolean; locale: string; opaqueTargets?: boolean;
+  rivalGuessTermId?: string; showRivalFeedback?: boolean;
+}) {
   const { setNodeRef, isOver } = useDroppable({ id: target.id });
   const assignedTerm = terms.find((t) => t.id === target.assignedTerm);
   const editorLabel = assignedTerm ? getTermLabel(assignedTerm, locale) : null;
   const guessTerm = guessTermId ? terms.find((t) => t.id === guessTermId) : null;
   const guessLabel = guessTerm ? getTermLabel(guessTerm, locale) : null;
+
+  const rivalTerm = rivalGuessTermId ? terms.find((t) => t.id === rivalGuessTermId) : null;
+  const rivalLabel = rivalTerm ? getTermLabel(rivalTerm, locale) : null;
+  const rivalCorrect = rivalGuessTermId === target.assignedTerm;
 
   const filled = mode === "editor" ? !!editorLabel : !!guessLabel;
   const isCorrect = showFeedback && guessTermId === target.assignedTerm;
@@ -49,21 +65,28 @@ function DropZone({ target, terms, mode, guessTermId, showFeedback, locale, opaq
     className = `border-2 border-dashed border-gray-400 ${emptyBg} text-gray-500 shadow-sm`;
   }
 
+  const showRival = showRivalFeedback && rivalLabel;
+
   return (
     <div
       ref={setNodeRef}
-      className={`absolute z-10 flex items-center justify-center -translate-x-1/2 -translate-y-1/2 w-32 h-10 rounded-lg text-sm font-medium transition-colors ${className}`}
+      className={`absolute z-10 flex flex-col items-center justify-center -translate-x-1/2 -translate-y-1/2 w-32 rounded-lg text-sm font-medium transition-colors ${showRival ? "h-16" : "h-10"} ${className}`}
       style={{
         left: `${target.x}%`,
         top: `${target.y}%`,
       }}
     >
-      {mode === "editor" ? editorLabel : guessLabel}
+      <span>{mode === "editor" ? editorLabel : guessLabel}</span>
+      {showRival && (
+        <span className={`text-xs mt-0.5 px-1.5 py-0.5 rounded ${rivalCorrect ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
+          vs {rivalLabel}
+        </span>
+      )}
     </div>
   );
 }
 
-export default function Canvas({ sceneId, dropTargets, terms, mode, playerGuesses, showFeedback, placingTermId, onCanvasClick, locale, opaqueTargets }: CanvasProps) {
+export default function Canvas({ sceneId, dropTargets, terms, mode, playerGuesses, showFeedback, placingTermId, onCanvasClick, locale, opaqueTargets, rivalGuesses, matchStatus, teamLabel }: CanvasProps) {
   const { setNodeRef, isOver } = useDroppable({ id: "canvas" });
   const isPlacing = !!placingTermId;
   const placingTerm = isPlacing ? terms.find((t) => t.id === placingTermId) : null;
@@ -122,8 +145,31 @@ export default function Canvas({ sceneId, dropTargets, terms, mode, playerGuesse
 
           {/* Drop Targets */}
           {dropTargets.map((target) => (
-            <DropZone key={target.id} target={target} terms={terms} mode={mode} guessTermId={playerGuesses[target.id]} showFeedback={showFeedback} locale={locale} opaqueTargets={opaqueTargets} />
+            <DropZone
+              key={target.id}
+              target={target}
+              terms={terms}
+              mode={mode}
+              guessTermId={playerGuesses[target.id]}
+              showFeedback={showFeedback}
+              locale={locale}
+              opaqueTargets={opaqueTargets}
+              rivalGuessTermId={rivalGuesses?.[target.id]}
+              showRivalFeedback={matchStatus === "reveal"}
+            />
           ))}
+
+          {/* Waiting overlay for match mode */}
+          {matchStatus === "submitted" && (
+            <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/60 rounded-xl">
+              <div className="flex items-center gap-3">
+                <div className="w-5 h-5 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+                <p className="text-lg font-semibold text-amber-700">
+                  {teamLabel ? `${teamLabel} done!` : "Done!"} Waiting for the other team...
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

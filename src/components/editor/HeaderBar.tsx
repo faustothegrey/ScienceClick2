@@ -9,6 +9,7 @@ interface FeedbackInfo {
   allCorrect: boolean;
   correctCount: number;
   totalCount: number;
+  rivalScore?: { correctCount: number; totalCount: number; teamLabel: string };
 }
 
 interface HeaderBarProps {
@@ -19,16 +20,45 @@ interface HeaderBarProps {
   onLocaleChange: (locale: string) => void;
   feedback?: FeedbackInfo;
   onRetry?: () => void;
+  playerName: string | null;
+  onLogin: () => void;
+  onLogout: () => void;
+  resultSummary?: string | null;
+  resultsByScene?: Array<{ sceneId: string; correctCount: number; totalCount: number }>;
+  matchStatus?: "playing" | "submitted" | "reveal";
+  teamLabel?: string;
+  onNewMatch?: () => void;
 }
 
-export default function HeaderBar({ sceneName, mode, onModeChange, locale, onLocaleChange, feedback, onRetry }: HeaderBarProps) {
+export default function HeaderBar({
+  sceneName,
+  mode,
+  onModeChange,
+  locale,
+  onLocaleChange,
+  feedback,
+  onRetry,
+  playerName,
+  onLogin,
+  onLogout,
+  resultSummary,
+  resultsByScene,
+  matchStatus,
+  teamLabel,
+  onNewMatch,
+}: HeaderBarProps) {
   const [open, setOpen] = useState(false);
+  const [resultsOpen, setResultsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const resultsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setOpen(false);
+      }
+      if (resultsRef.current && !resultsRef.current.contains(e.target as Node)) {
+        setResultsOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -49,11 +79,48 @@ export default function HeaderBar({ sceneName, mode, onModeChange, locale, onLoc
         </Link>
         <span className="text-gray-300">/</span>
         <span className="text-gray-900 font-semibold">{sceneName}</span>
+        {teamLabel && (
+          <span className="ml-2 px-2 py-0.5 text-xs font-bold rounded-full bg-purple-100 text-purple-700">{teamLabel}</span>
+        )}
       </div>
 
       {/* Center: feedback or title + language switcher */}
       <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-3">
-        {feedback ? (
+        {matchStatus === "submitted" ? (
+          <div className="flex items-center gap-3">
+            <div className="w-4 h-4 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+            <span className="text-sm font-semibold text-amber-700">
+              {teamLabel} done! Waiting for the other team...
+            </span>
+          </div>
+        ) : feedback?.rivalScore ? (
+          <div className="flex items-center gap-3">
+            <span className="text-sm font-semibold text-blue-700">
+              {teamLabel}: {feedback.correctCount}/{feedback.totalCount}
+            </span>
+            <span className="text-sm text-gray-400">vs</span>
+            <span className="text-sm font-semibold text-purple-700">
+              {feedback.rivalScore.teamLabel}: {feedback.rivalScore.correctCount}/{feedback.rivalScore.totalCount}
+            </span>
+            {feedback.correctCount > feedback.rivalScore.correctCount && (
+              <span className="text-sm font-bold text-green-600">{teamLabel} wins!</span>
+            )}
+            {feedback.correctCount < feedback.rivalScore.correctCount && (
+              <span className="text-sm font-bold text-red-600">{feedback.rivalScore.teamLabel} wins!</span>
+            )}
+            {feedback.correctCount === feedback.rivalScore.correctCount && (
+              <span className="text-sm font-bold text-amber-600">Tie!</span>
+            )}
+            {onNewMatch && (
+              <button
+                onClick={onNewMatch}
+                className="px-3 py-1 rounded-md text-sm font-medium bg-purple-600 text-white hover:bg-purple-700 transition-colors"
+              >
+                New Match
+              </button>
+            )}
+          </div>
+        ) : feedback ? (
           <div className="flex items-center gap-3">
             <span className={`text-sm font-semibold ${feedback.allCorrect ? "text-green-700" : "text-amber-700"}`}>
               {feedback.allCorrect
@@ -105,7 +172,50 @@ export default function HeaderBar({ sceneName, mode, onModeChange, locale, onLoc
       </div>
 
       {/* Right: mode toggle */}
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-3">
+        {playerName ? (
+          <div ref={resultsRef} className="relative flex items-center gap-2 text-sm text-gray-600">
+            <button
+              onClick={() => setResultsOpen((v) => !v)}
+              className="px-2.5 py-1 rounded-full bg-white/70 border border-gray-200 hover:bg-white transition-colors"
+            >
+              Player: <span className="font-semibold text-gray-900">{playerName}</span>
+            </button>
+            {resultSummary ? (
+              <span className="text-xs text-gray-500">{resultSummary}</span>
+            ) : null}
+            <button
+              onClick={onLogout}
+              className="text-xs font-medium text-gray-500 hover:text-gray-700"
+            >
+              Logout
+            </button>
+            {resultsOpen ? (
+              <div className="absolute right-0 top-full mt-2 w-64 rounded-lg border border-gray-200 bg-white shadow-lg p-3 z-50">
+                <div className="text-xs font-semibold text-gray-500 mb-2">Results by scene</div>
+                {resultsByScene && resultsByScene.length > 0 ? (
+                  <div className="space-y-1">
+                    {resultsByScene.map((r) => (
+                      <div key={r.sceneId} className="flex items-center justify-between text-sm text-gray-700">
+                        <span className="truncate pr-2">{r.sceneId.replace(/[-_]/g, " ")}</span>
+                        <span className="text-xs text-gray-500">{r.correctCount}/{r.totalCount}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-sm text-gray-500">No results yet.</div>
+                )}
+              </div>
+            ) : null}
+          </div>
+        ) : (
+          <button
+            onClick={onLogin}
+            className="px-3 py-1.5 text-sm font-medium rounded-full bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+          >
+            Login
+          </button>
+        )}
         <button
           onClick={() => onModeChange("editor")}
           className={`px-4 py-1.5 text-sm font-medium rounded-full transition-colors ${mode === "editor"

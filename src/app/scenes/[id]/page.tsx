@@ -1,8 +1,8 @@
 "use client";
 
-import { useId, useState, useEffect, useCallback, useRef } from "react";
+import { Suspense, useId, useState, useEffect, useCallback, useRef } from "react";
 import confetti from "canvas-confetti";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import {
   DndContext,
   DragEndEvent,
@@ -12,6 +12,7 @@ import {
 } from "@dnd-kit/core";
 import HeaderBar from "@/components/editor/HeaderBar";
 import Canvas from "@/components/editor/Canvas";
+import type { MatchStatus } from "@/components/editor/Canvas";
 import WordList from "@/components/editor/WordList";
 import { Term, migrateTerm, getTermLabel } from "@/lib/i18n";
 
@@ -26,10 +27,20 @@ function formatName(id: string) {
   return id.replace(/[-_]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-export default function SceneEditorPage() {
+function formatTeamLabel(team: string): string {
+  return team === "team-a" ? "Team A" : "Team B";
+}
+
+function SceneEditorPage() {
   const { id } = useParams<{ id: string }>();
+  const searchParams = useSearchParams();
+  const teamParam = searchParams.get("team") as "team-a" | "team-b" | null;
+  const isMatchMode = !!teamParam;
+  const teamLabel = teamParam ? formatTeamLabel(teamParam) : undefined;
+  const rivalTeam = teamParam === "team-a" ? "team-b" : "team-a";
+
   const dndId = useId();
-  const [mode, setMode] = useState<"editor" | "play">("play");
+  const [mode, setMode] = useState<"editor" | "play">(isMatchMode ? "play" : "play");
   const [availableTerms, setAvailableTerms] = useState<Term[]>([]);
   const [dropTargets, setDropTargets] = useState<DropTarget[]>([]);
   const [opaqueTargets, setOpaqueTargets] = useState(false);
@@ -48,6 +59,12 @@ export default function SceneEditorPage() {
   const [resultSummary, setResultSummary] = useState<string | null>(null);
   const [resultsByScene, setResultsByScene] = useState<Array<{ sceneId: string; correctCount: number; totalCount: number }>>([]);
   const lastRecordedPlayKeyRef = useRef<number | null>(null);
+
+  // Match mode state
+  const [matchStatus, setMatchStatus] = useState<MatchStatus>("playing");
+  const [rivalGuesses, setRivalGuesses] = useState<Record<string, string> | null>(null);
+  const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const hasSubmittedRef = useRef(false);
 
   function handleLocaleChange(newLocale: string) {
     setLocale(newLocale);
@@ -156,6 +173,9 @@ export default function SceneEditorPage() {
         });
       }
     } else if (over.id !== "canvas" && mode === "play") {
+      // Don't allow dragging after submission in match mode
+      if (isMatchMode && matchStatus !== "playing") return;
+
       // Dropped on an existing drop target in play mode
       const targetId = over.id as string;
       const target = dropTargets.find((t) => t.id === targetId);
@@ -237,6 +257,11 @@ export default function SceneEditorPage() {
     : 0;
   const allCorrect = allPlaced && correctCount === dropTargets.length;
 
+  // Compute rival score when available
+  const rivalCorrectCount = rivalGuesses
+    ? dropTargets.filter((t) => rivalGuesses[t.id] === t.assignedTerm).length
+    : 0;
+
   useEffect(() => {
     if (!playerName) return;
     fetch(`/api/results?name=${encodeURIComponent(playerName)}&sceneId=${encodeURIComponent(id)}`)
@@ -275,13 +300,58 @@ export default function SceneEditorPage() {
 
   // Auto-check as soon as the last term is placed
   useEffect(() => {
-    if (allPlaced && !showFeedback) {
+    if (!allPlaced || showFeedback) return;
+
+    if (isMatchMode) {
+      // Match mode: submit guesses and start polling
+      if (hasSubmittedRef.current) return;
+      hasSubmittedRef.current = true;
+      setMatchStatus("submitted");
+
+      fetch(`/api/scenes/${id}/match`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ team: teamParam, guesses: playerGuesses }),
+      });
+    } else {
+      // Single player: show feedback immediately
       setShowFeedback(true);
       if (correctCount === dropTargets.length) fireConfetti();
     }
-  }, [allPlaced, showFeedback, correctCount, dropTargets.length, fireConfetti]);
+  }, [allPlaced, showFeedback, isMatchMode, correctCount, dropTargets.length, fireConfetti, id, teamParam, playerGuesses]);
+
+  // Match mode polling
+  useEffect(() => {
+    if (!isMatchMode || matchStatus !== "submitted") return;
+
+    pollIntervalRef.current = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/scenes/${id}/match`);
+        const data = await res.json();
+        if (data.status === "complete") {
+          clearInterval(pollIntervalRef.current!);
+          setRivalGuesses(data.teams[rivalTeam].guesses);
+          setMatchStatus("reveal");
+          setShowFeedback(true);
+          // Fire confetti if this team won
+          const ownScore = dropTargets.filter((t) => playerGuesses[t.id] === t.assignedTerm).length;
+          const otherScore = dropTargets.filter((t) => data.teams[rivalTeam].guesses[t.id] === t.assignedTerm).length;
+          if (ownScore > otherScore || ownScore === dropTargets.length) {
+            fireConfetti();
+          }
+        }
+      } catch {
+        // ignore poll errors
+      }
+    }, 2000);
+
+    return () => {
+      if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
+    };
+  }, [isMatchMode, matchStatus, id, rivalTeam, dropTargets, playerGuesses, fireConfetti]);
 
   useEffect(() => {
+    if (isMatchMode) return; // Skip result recording in match mode
     if (!playerName || !showFeedback || !allPlaced) return;
     if (lastRecordedPlayKeyRef.current === playKey) return;
     lastRecordedPlayKeyRef.current = playKey;
@@ -304,7 +374,25 @@ export default function SceneEditorPage() {
         return next;
       });
     });
-  }, [playerName, showFeedback, allPlaced, playKey, correctCount, dropTargets.length, allCorrect, id]);
+  }, [isMatchMode, playerName, showFeedback, allPlaced, playKey, correctCount, dropTargets.length, allCorrect, id]);
+
+  // Build feedback prop
+  const feedbackProp = showFeedback
+    ? {
+        allCorrect,
+        correctCount,
+        totalCount: dropTargets.length,
+        ...(isMatchMode && rivalGuesses
+          ? {
+              rivalScore: {
+                correctCount: rivalCorrectCount,
+                totalCount: dropTargets.length,
+                teamLabel: formatTeamLabel(rivalTeam),
+              },
+            }
+          : {}),
+      }
+    : undefined;
 
   return (
     <DndContext
@@ -317,16 +405,31 @@ export default function SceneEditorPage() {
         <HeaderBar
           sceneName={formatName(id)}
           mode={mode}
-          onModeChange={(m) => { setMode(m); if (m === "play") { setPlayerGuesses({}); setShowFeedback(false); setPlayKey((k) => k + 1); } }}
+          onModeChange={(m) => {
+            if (isMatchMode) return; // Don't allow mode switching in match mode
+            setMode(m);
+            if (m === "play") { setPlayerGuesses({}); setShowFeedback(false); setPlayKey((k) => k + 1); }
+          }}
           locale={locale}
           onLocaleChange={handleLocaleChange}
-          feedback={showFeedback ? { allCorrect, correctCount, totalCount: dropTargets.length } : undefined}
-          onRetry={() => { setPlayerGuesses({}); setShowFeedback(false); setPlayKey((k) => k + 1); }}
+          feedback={feedbackProp}
+          onRetry={isMatchMode ? undefined : () => { setPlayerGuesses({}); setShowFeedback(false); setPlayKey((k) => k + 1); }}
+          onNewMatch={isMatchMode && matchStatus === "reveal" ? async () => {
+            await fetch(`/api/scenes/${id}/match`, { method: "DELETE" });
+            setPlayerGuesses({});
+            setShowFeedback(false);
+            setRivalGuesses(null);
+            setMatchStatus("playing");
+            hasSubmittedRef.current = false;
+            setPlayKey((k) => k + 1);
+          } : undefined}
           playerName={playerName}
           onLogin={handleLogin}
           onLogout={handleLogout}
           resultSummary={resultSummary}
           resultsByScene={resultsByScene}
+          matchStatus={isMatchMode ? matchStatus : undefined}
+          teamLabel={teamLabel}
         />
         <div className="flex flex-1 overflow-hidden">
           <Canvas
@@ -340,6 +443,9 @@ export default function SceneEditorPage() {
             onCanvasClick={handleCanvasClick}
             locale={locale}
             opaqueTargets={opaqueTargets}
+            rivalGuesses={rivalGuesses ?? undefined}
+            matchStatus={isMatchMode ? matchStatus : undefined}
+            teamLabel={teamLabel}
           />
           <WordList
             terms={availableTerms}
@@ -360,5 +466,13 @@ export default function SceneEditorPage() {
         ) : null}
       </DragOverlay>
     </DndContext>
+  );
+}
+
+export default function SceneEditorPageWrapper() {
+  return (
+    <Suspense>
+      <SceneEditorPage />
+    </Suspense>
   );
 }
