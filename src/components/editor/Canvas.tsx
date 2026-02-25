@@ -16,9 +16,10 @@ interface CanvasProps {
   placingTermId: string | null;
   onCanvasClick: (xPercent: number, yPercent: number) => void;
   locale: string;
+  opaqueTargets?: boolean;
 }
 
-function DropZone({ target, terms, mode, guessTermId, showFeedback, locale }: { target: DropTarget; terms: Term[]; mode: "editor" | "play"; guessTermId?: string; showFeedback: boolean; locale: string }) {
+function DropZone({ target, terms, mode, guessTermId, showFeedback, locale, opaqueTargets }: { target: DropTarget; terms: Term[]; mode: "editor" | "play"; guessTermId?: string; showFeedback: boolean; locale: string; opaqueTargets?: boolean }) {
   const { setNodeRef, isOver } = useDroppable({ id: target.id });
   const assignedTerm = terms.find((t) => t.id === target.assignedTerm);
   const editorLabel = assignedTerm ? getTermLabel(assignedTerm, locale) : null;
@@ -29,11 +30,13 @@ function DropZone({ target, terms, mode, guessTermId, showFeedback, locale }: { 
   const isCorrect = showFeedback && guessTermId === target.assignedTerm;
   const isIncorrect = showFeedback && guessTermId !== target.assignedTerm;
 
+  const emptyBg = opaqueTargets ? "bg-white" : "bg-white/80";
+
   let className: string;
   if (mode === "editor") {
     className = filled
       ? "bg-white border-2 border-blue-400 text-gray-800 shadow-md"
-      : "border-2 border-dashed border-gray-400 bg-white/80 text-gray-500 shadow-sm";
+      : `border-2 border-dashed border-gray-400 ${emptyBg} text-gray-500 shadow-sm`;
   } else if (isCorrect) {
     className = "bg-green-50 border-2 border-green-500 text-green-800 shadow-md";
   } else if (isIncorrect) {
@@ -43,13 +46,13 @@ function DropZone({ target, terms, mode, guessTermId, showFeedback, locale }: { 
   } else if (isOver) {
     className = "border-2 border-dashed border-blue-400 bg-blue-50 text-blue-400";
   } else {
-    className = "border-2 border-dashed border-gray-400 bg-white/80 text-gray-500 shadow-sm";
+    className = `border-2 border-dashed border-gray-400 ${emptyBg} text-gray-500 shadow-sm`;
   }
 
   return (
     <div
       ref={setNodeRef}
-      className={`absolute z-10 flex items-center justify-center -translate-x-1/2 -translate-y-1/2 w-24 h-10 rounded-lg text-sm font-medium transition-colors ${className}`}
+      className={`absolute z-10 flex items-center justify-center -translate-x-1/2 -translate-y-1/2 w-32 h-10 rounded-lg text-sm font-medium transition-colors ${className}`}
       style={{
         left: `${target.x}%`,
         top: `${target.y}%`,
@@ -60,7 +63,7 @@ function DropZone({ target, terms, mode, guessTermId, showFeedback, locale }: { 
   );
 }
 
-export default function Canvas({ sceneId, dropTargets, terms, mode, playerGuesses, showFeedback, placingTermId, onCanvasClick, locale }: CanvasProps) {
+export default function Canvas({ sceneId, dropTargets, terms, mode, playerGuesses, showFeedback, placingTermId, onCanvasClick, locale, opaqueTargets }: CanvasProps) {
   const { setNodeRef, isOver } = useDroppable({ id: "canvas" });
   const isPlacing = !!placingTermId;
   const placingTerm = isPlacing ? terms.find((t) => t.id === placingTermId) : null;
@@ -119,7 +122,7 @@ export default function Canvas({ sceneId, dropTargets, terms, mode, playerGuesse
 
           {/* Drop Targets */}
           {dropTargets.map((target) => (
-            <DropZone key={target.id} target={target} terms={terms} mode={mode} guessTermId={playerGuesses[target.id]} showFeedback={showFeedback} locale={locale} />
+            <DropZone key={target.id} target={target} terms={terms} mode={mode} guessTermId={playerGuesses[target.id]} showFeedback={showFeedback} locale={locale} opaqueTargets={opaqueTargets} />
           ))}
         </div>
       </div>

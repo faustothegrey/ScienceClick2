@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState, useEffect, useCallback } from "react";
+import { useId, useState, useEffect, useCallback, useRef } from "react";
 import confetti from "canvas-confetti";
 import { useParams } from "next/navigation";
 import {
@@ -32,16 +32,50 @@ export default function SceneEditorPage() {
   const [mode, setMode] = useState<"editor" | "play">("play");
   const [availableTerms, setAvailableTerms] = useState<Term[]>([]);
   const [dropTargets, setDropTargets] = useState<DropTarget[]>([]);
+  const [opaqueTargets, setOpaqueTargets] = useState(false);
   const [locale, setLocale] = useState<string>(() => {
     if (typeof window !== "undefined") {
       return localStorage.getItem(`sc2:scene:${id}:locale`) ?? "en";
     }
     return "en";
   });
+  const [playerName, setPlayerName] = useState<string | null>(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("sc2:playerName");
+    }
+    return null;
+  });
+  const [resultSummary, setResultSummary] = useState<string | null>(null);
+  const [resultsByScene, setResultsByScene] = useState<Array<{ sceneId: string; correctCount: number; totalCount: number }>>([]);
+  const lastRecordedPlayKeyRef = useRef<number | null>(null);
 
   function handleLocaleChange(newLocale: string) {
     setLocale(newLocale);
     localStorage.setItem(`sc2:scene:${id}:locale`, newLocale);
+  }
+
+  async function handleLogin() {
+    const name = window.prompt("Enter your name (optional):", playerName ?? "");
+    if (!name) {
+      localStorage.removeItem("sc2:playerName");
+      setPlayerName(null);
+      setResultSummary(null);
+      return;
+    }
+    localStorage.setItem("sc2:playerName", name);
+    setPlayerName(name);
+    setResultSummary(null);
+    await fetch("/api/results", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "login", name }),
+    });
+  }
+
+  function handleLogout() {
+    localStorage.removeItem("sc2:playerName");
+    setPlayerName(null);
+    setResultSummary(null);
   }
 
   useEffect(() => {
@@ -51,6 +85,7 @@ export default function SceneEditorPage() {
         if (data) {
           setAvailableTerms(data.terms.map((t: Record<string, unknown>) => migrateTerm(t)));
           setDropTargets(data.dropTargets);
+          if (data.opaqueTargets) setOpaqueTargets(true);
         }
       });
   }, [id]);
@@ -202,6 +237,42 @@ export default function SceneEditorPage() {
     : 0;
   const allCorrect = allPlaced && correctCount === dropTargets.length;
 
+  useEffect(() => {
+    if (!playerName) return;
+    fetch(`/api/results?name=${encodeURIComponent(playerName)}&sceneId=${encodeURIComponent(id)}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        const result = data?.result;
+        if (result && typeof result.correctCount === "number" && typeof result.totalCount === "number") {
+          setResultSummary(`Last result: ${result.correctCount}/${result.totalCount}`);
+        } else {
+          setResultSummary(null);
+        }
+      });
+  }, [playerName, id]);
+
+  useEffect(() => {
+    if (!playerName) {
+      setResultsByScene([]);
+      return;
+    }
+    fetch(`/api/results?name=${encodeURIComponent(playerName)}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        const scenes = data?.result?.scenes ?? null;
+        if (!scenes || typeof scenes !== "object") {
+          setResultsByScene([]);
+          return;
+        }
+        const list = Object.entries(scenes).map(([sceneId, result]) => ({
+          sceneId,
+          correctCount: (result as { correctCount: number }).correctCount,
+          totalCount: (result as { totalCount: number }).totalCount,
+        }));
+        setResultsByScene(list);
+      });
+  }, [playerName]);
+
   // Auto-check as soon as the last term is placed
   useEffect(() => {
     if (allPlaced && !showFeedback) {
@@ -209,6 +280,31 @@ export default function SceneEditorPage() {
       if (correctCount === dropTargets.length) fireConfetti();
     }
   }, [allPlaced, showFeedback, correctCount, dropTargets.length, fireConfetti]);
+
+  useEffect(() => {
+    if (!playerName || !showFeedback || !allPlaced) return;
+    if (lastRecordedPlayKeyRef.current === playKey) return;
+    lastRecordedPlayKeyRef.current = playKey;
+    fetch("/api/results", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "record",
+        name: playerName,
+        sceneId: id,
+        correctCount,
+        totalCount: dropTargets.length,
+        allCorrect,
+      }),
+    }).then(() => {
+      setResultSummary(`Last result: ${correctCount}/${dropTargets.length}`);
+      setResultsByScene((prev) => {
+        const next = prev.filter((r) => r.sceneId !== id);
+        next.unshift({ sceneId: id, correctCount, totalCount: dropTargets.length });
+        return next;
+      });
+    });
+  }, [playerName, showFeedback, allPlaced, playKey, correctCount, dropTargets.length, allCorrect, id]);
 
   return (
     <DndContext
@@ -226,6 +322,11 @@ export default function SceneEditorPage() {
           onLocaleChange={handleLocaleChange}
           feedback={showFeedback ? { allCorrect, correctCount, totalCount: dropTargets.length } : undefined}
           onRetry={() => { setPlayerGuesses({}); setShowFeedback(false); setPlayKey((k) => k + 1); }}
+          playerName={playerName}
+          onLogin={handleLogin}
+          onLogout={handleLogout}
+          resultSummary={resultSummary}
+          resultsByScene={resultsByScene}
         />
         <div className="flex flex-1 overflow-hidden">
           <Canvas
@@ -238,6 +339,7 @@ export default function SceneEditorPage() {
             placingTermId={placingTermId}
             onCanvasClick={handleCanvasClick}
             locale={locale}
+            opaqueTargets={opaqueTargets}
           />
           <WordList
             terms={availableTerms}
