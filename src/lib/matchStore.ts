@@ -4,6 +4,7 @@ import path from "path";
 export interface TeamState {
   guesses: Record<string, string> | null;
   submittedAt: number | null;
+  liveProgress: string[];
 }
 
 export interface MatchState {
@@ -25,7 +26,7 @@ export async function getOrCreateMatch(sceneId: string): Promise<MatchState> {
     const data = await readFile(filePath, "utf-8");
     return JSON.parse(data);
   } catch {
-    const emptyTeam: TeamState = { guesses: null, submittedAt: null };
+    const emptyTeam: TeamState = { guesses: null, submittedAt: null, liveProgress: [] };
     const state: MatchState = {
       sceneId,
       createdAt: Date.now(),
@@ -48,6 +49,17 @@ export async function submitTeamGuesses(
   const state = await getOrCreateMatch(sceneId);
   state.teams[team].guesses = guesses;
   state.teams[team].submittedAt = Date.now();
+  await writeFile(matchPath(sceneId), JSON.stringify(state, null, 2));
+  return state;
+}
+
+export async function submitTeamProgress(
+  sceneId: string,
+  team: "team-a" | "team-b",
+  liveProgress: string[]
+): Promise<MatchState> {
+  const state = await getOrCreateMatch(sceneId);
+  state.teams[team].liveProgress = liveProgress;
   await writeFile(matchPath(sceneId), JSON.stringify(state, null, 2));
   return state;
 }

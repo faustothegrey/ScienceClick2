@@ -15,6 +15,7 @@ export async function GET() {
         if (!info.isDirectory()) return null;
 
         let termCount = 0;
+        let agent: string | null = null;
         try {
           const configRaw = await readFile(
             path.join(entryPath, "config.json"),
@@ -22,6 +23,7 @@ export async function GET() {
           );
           const config = JSON.parse(configRaw);
           termCount = Array.isArray(config.terms) ? config.terms.length : 0;
+          if (typeof config.agent === "string") agent = config.agent;
         } catch {
           // No config yet — new scene
         }
@@ -37,7 +39,7 @@ export async function GET() {
           }
         }
 
-        return { id: entry, termCount, image };
+        return { id: entry, termCount, image, agent };
       })
     );
 

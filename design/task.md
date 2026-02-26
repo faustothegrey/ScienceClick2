@@ -23,9 +23,10 @@
 ## To Do
 
 - [ ] Edit existing term labels (editor mode)
-- [ ] Completion indicator when all targets are filled correctly (play mode)
+- [x] Completion indicator when all targets are filled correctly (play mode)
 - [ ] Scene catalog (`catalog.json`) and scene selection page
 - [ ] Image upload for new scenes
 - [ ] Unassign/reassign term from drop target (editor mode)
 - [x] Add screenshots to walkthrough
+- [x] Update walkthrough with language support and new components
 

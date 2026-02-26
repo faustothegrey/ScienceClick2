@@ -4,6 +4,7 @@ import path from "path";
 import {
   getOrCreateMatch,
   submitTeamGuesses,
+  submitTeamProgress,
   isMatchComplete,
 } from "@/lib/matchStore";
 
@@ -26,6 +27,10 @@ export async function GET(_request: NextRequest, { params }: Params) {
       "team-a": state.teams["team-a"].guesses !== null,
       "team-b": state.teams["team-b"].guesses !== null,
     },
+    progress: {
+      "team-a": state.teams["team-a"].liveProgress || [],
+      "team-b": state.teams["team-b"].liveProgress || [],
+    },
   });
 }
 
@@ -42,6 +47,22 @@ export async function POST(request: NextRequest, { params }: Params) {
   }
 
   await submitTeamGuesses(id, team, guesses);
+  return NextResponse.json({ ok: true });
+}
+
+export async function PATCH(request: NextRequest, { params }: Params) {
+  const { id } = await params;
+  const body = await request.json();
+  const { team, liveProgress } = body;
+
+  if (team !== "team-a" && team !== "team-b") {
+    return NextResponse.json({ error: "invalid team" }, { status: 400 });
+  }
+  if (!Array.isArray(liveProgress)) {
+    return NextResponse.json({ error: "liveProgress array required" }, { status: 400 });
+  }
+
+  await submitTeamProgress(id, team, liveProgress);
   return NextResponse.json({ ok: true });
 }
 

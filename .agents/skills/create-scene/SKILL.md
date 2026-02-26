@@ -1,11 +1,13 @@
 ---
 name: create-scene
-description: Create a new ScienceClick2 scene with SVG illustration, config, and translations
+description: Create a new ScienceClick2 scene with illustration, config, and translations
 ---
 
 # Create a New Scene
 
 You are building a scene for **ScienceClick2**, an educational drag-and-drop labeling app. The user will describe a topic (e.g., "solar system", "human skeleton", "parts of a flower"). You must generate all assets for a fully playable scene.
+
+**Critical: Language Level.** This app is designed for students at **A2 language level or below**. All terms must be **simple, everyday vocabulary** that a beginner language learner can understand. Avoid technical jargon, specialist terminology, or compound phrases that require domain expertise. If a topic naturally involves complex terms, simplify them or choose a different topic.
 
 ## Arguments
 
@@ -17,68 +19,49 @@ The user provides a short description of the scene topic (e.g., "parts of a flow
 
 Before generating anything:
 
-1. Read `public/scenes/water-cycle/config.json` as a reference for config structure.
+1. Read the example configs in the `examples/` directory next to this file as a reference for config structure.
 2. Propose the **scene ID** (kebab-case, ASCII only, derived from the topic).
-3. Propose **5–8 terms** with their English labels and a brief note on what each represents visually.
+3. Propose **5–8 terms** with their English labels and a brief note on what each represents visually. **Remember: A2 level or below** — use simple, common words (e.g., "Rain", "River", "Sea", not "Continental Shelf", "Abyssal Plain", "Mid-Ocean Ridge").
 4. Ask the user to confirm or adjust the term list before proceeding.
 
 ---
 
-## Step 2 — Generate the SVG Illustration
+## Step 2 — Find and Download the Illustration
 
-Create `public/scenes/<scene-id>/scene.svg`.
+Find a suitable image and save it as `public/scenes/<scene-id>/scene.png`.
 
-### Canvas & Dimensions
-- `viewBox="0 0 1200 800"` with `width="1200" height="800"`
-- The SVG must be self-contained: no external images, fonts, or references
+### Image Requirements
+- **No text, labels, numbers, or annotations** — the app renders labels via drop targets; text in the image gives away answers
+- **No pure white background** — drop-target labels are white boxes and would be invisible
+- **Elements visually distinct and spread out** — each labeled element must be recognizable
+- **Free to use** — prefer Wikimedia Commons (Creative Commons / public domain)
 
-### Visual Style
-- Flat, colorful, educational illustration style (like a textbook diagram or infographic)
-- Use gradients and layered shapes to add depth — avoid flat single-color fills for major elements
-- Pleasant, saturated colors with strong contrast between adjacent elements
-- **No text labels** anywhere in the SVG — all labeling is done by the app's drop targets
+### How to Find the Image
 
-### Layout & Composition
-- **Spread elements across the full canvas** — use the entire 1200×800 area, avoid clustering everything in the center
-- Each labeled element must be **visually distinct and recognizable** at the scale it appears
-- Minimum element size: at least **80×80px** in SVG units so it's clearly visible
-- Leave **breathing room** around each element — drop targets are 96×40px overlays and must not overlap each other
-- For cross-section diagrams (e.g., volcano, earth layers), clearly separate above-ground and underground areas
-- For map/layout diagrams, space elements with clear visual boundaries
+1. **Search Wikimedia** using the Wikipedia API to find relevant images:
+   ```bash
+   curl -s "https://en.wikipedia.org/w/api.php?action=query&titles=<Article_Title>&prop=images&format=json"
+   ```
 
-### Complexity & File Size
-- Target **80–150 lines** of SVG markup
-- Keep the file **under 15 KB** — avoid overly detailed paths or excessive decorative elements
-- Use basic shapes (`rect`, `circle`, `ellipse`, `polygon`, `path`) — avoid complex bezier paths when simpler shapes work
-- Group related elements with `<g>` tags and use comments to label sections (e.g., `<!-- Magma Chamber -->`)
+2. **Get the direct download URL** for a candidate image:
+   ```bash
+   curl -s "https://en.wikipedia.org/w/api.php?action=query&titles=File:<Filename>&prop=imageinfo&iiprop=url|size|mime&format=json"
+   ```
 
-### Color Guidelines
-- **Avoid pure white (#ffffff) backgrounds** — the drop-target labels are white, so they'd be invisible
-- Use a colored sky, gradient, or tinted background as the base
-- Ensure each labeled element has enough color contrast against its neighbors that a student can distinguish them
-- Prefer a consistent color palette of 5–8 main colors
+3. **Download the image**:
+   ```bash
+   mkdir -p public/scenes/<scene-id>
+   curl -sL "<direct-url>" -o public/scenes/<scene-id>/scene.png
+   ```
 
-### SVG Structure Pattern
+4. **Inspect the image** to verify it meets the requirements (no text, no white background, elements are distinct). If the image has text labels baked in, reject it and search for another.
 
-Follow this structure:
-
-```xml
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800">
-  <defs>
-    <!-- Gradients and reusable definitions -->
-  </defs>
-
-  <!-- Background (sky, water, ground, etc.) -->
-
-  <!-- Major structural elements (largest to smallest, back to front) -->
-
-  <!-- Individual labeled elements, each in a comment-delimited section -->
-  <!-- Element Name -->
-  <g>...</g>
-
-  <!-- Decorative details (trees, particles, textures) -->
-</svg>
-```
+### Tips for Finding Good Images
+- Search for diagram/illustration articles on Wikipedia (e.g., "Internal structure of Earth", "Water cycle", "Solar System")
+- Look for filenames containing words like "diagram", "structure", "cutaway", "illustration"
+- Avoid filenames containing "labeled", "annotated", "English", "text"
+- SVG files on Wikimedia can be downloaded as PNG via the thumbnail API: use the `url` field from the imageinfo response
+- If no suitable Wikimedia image exists, ask the user for an alternative source
 
 ---
 
@@ -135,13 +118,13 @@ This is critical — poorly positioned targets ruin the scene:
 - **Minimum spacing**: any two drop targets must be at least **8 percentage points apart** in either x or y (ideally both). This prevents overlapping 96×40px target boxes.
 - **Stay away from edges**: keep all targets within the **5–95% range** for both x and y
 - **Spread targets across the canvas**: if elements are distributed around the image, targets should be too — avoid stacking multiple targets in a vertical or horizontal line at the same coordinate
-- Cross-check each target's (x, y) against the SVG: the percentage should correspond to where the element actually appears in the 1200×800 canvas
+- Cross-check each target's (x, y) against the downloaded image: the percentage should correspond to where the element actually appears
 
 #### How to Calculate Position
 
-For an SVG element centered at pixel coordinates (px, py):
-- `x = (px / 1200) × 100`
-- `y = (py / 800) × 100`
+After inspecting the downloaded image, for an element visually centered at pixel coordinates (px, py) in an image of width W and height H:
+- `x = (px / W) × 100`
+- `y = (py / H) × 100`
 
 Round to the nearest integer.
 
@@ -161,16 +144,16 @@ After generating both files, perform these checks:
 - [ ] No two drop targets are within 8% of each other on both axes simultaneously
 - [ ] All x values are between 5 and 95
 - [ ] All y values are between 5 and 95
-- [ ] Each target's position matches the visual location of its element in the SVG
+- [ ] Each target's position plausibly matches where its element appears in the image
 
-### SVG Quality
-- [ ] File starts with `<svg xmlns=...>` and has the correct viewBox
-- [ ] No `<text>` elements present (labels come from the app, not the SVG)
-- [ ] No external references (xlink:href to URLs, external fonts, etc.)
-- [ ] File is under 15 KB
+### Image Quality
+- [ ] File exists at `public/scenes/<scene-id>/scene.png`
+- [ ] Image contains no text, labels, or annotations
+- [ ] Background is not pure white
+- [ ] Elements are visually distinct and spread across the canvas
 
 ### Final Verification
-Read back both generated files and report a summary:
+Read back the config file and report a summary:
 - Scene ID
 - Number of terms
 - List of term labels (English)
@@ -193,16 +176,14 @@ All targets bunched in the center of the canvas. Students can't tell which zone 
 ```
 
 **Why it's wrong:** Targets are within 4% of each other — the 96×40px boxes overlap completely.
-**Fix:** Space them to match where each element actually appears in the SVG, with at least 8% separation.
+**Fix:** Space them to match where each element actually appears in the image, with at least 8% separation.
 
-### ❌ Text labels baked into the SVG
+### ❌ Text or labels in the image
 
-```xml
-<text x="300" y="150" font-size="18" fill="#333">Magma Chamber</text>
-```
+The downloaded image has labels like "Magma", "Crater", etc. baked into it.
 
-**Why it's wrong:** The app renders labels via drop targets. Text in the SVG means the answer is always visible, defeating the exercise.
-**Fix:** Remove all `<text>` elements. Use only shapes to illustrate the scene.
+**Why it's wrong:** The app renders labels via drop targets. Text in the image means the answer is always visible, defeating the exercise.
+**Fix:** Inspect every candidate image before using it. Reject images with text and search for unlabeled alternatives. Look for filenames without "labeled", "annotated", or "English".
 
 ### ❌ Fake or repeated translations
 
@@ -222,29 +203,29 @@ All targets bunched in the center of the canvas. Students can't tell which zone 
 **Why it's wrong:** Every locale has the English text repeated. Students using Italian or Wolof see nonsense.
 **Fix:** Use real translations: `"it": "Camera magmatica"`, `"es": "Cámara magmática"`, `"fr": "Chambre magmatique"`, `"wo": "Nëgu magma"`.
 
-### ❌ White background
+### ❌ White background in image
 
-```xml
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800">
-  <rect width="1200" height="800" fill="#ffffff"/>
-  <!-- ... elements ... -->
-</svg>
-```
+The image has a pure white background.
 
 **Why it's wrong:** Drop target labels are white boxes — they become invisible against a white background.
-**Fix:** Use a colored or gradient background (sky blue, light tan, etc.).
+**Fix:** Reject images with white backgrounds. Search for illustrations with colored or gradient backgrounds.
 
-### ❌ Tiny, indistinguishable elements
+### ❌ Terms too complex for A2 language level
 
-```xml
-<!-- Mitochondria -->
-<ellipse cx="600" cy="400" rx="8" ry="5" fill="#e57373"/>
-<!-- Nucleus -->
-<circle cx="610" cy="405" r="6" fill="#7986cb"/>
+A scene about ocean floor features with these terms:
+
+```json
+"terms": [
+  { "id": "term-continental-shelf", "translations": { "en": "Continental Shelf", "it": "Piattaforma continentale", ... } },
+  { "id": "term-continental-slope", "translations": { "en": "Continental Slope", "it": "Scarpata continentale", ... } },
+  { "id": "term-abyssal-plain", "translations": { "en": "Abyssal Plain", "it": "Pianura abissale", ... } },
+  { "id": "term-mid-ocean-ridge", "translations": { "en": "Mid-Ocean Ridge", "it": "Dorsale medio-oceanica", ... } },
+  { "id": "term-ocean-trench", "translations": { "en": "Ocean Trench", "it": "Fossa oceanica", ... } }
+]
 ```
 
-**Why it's wrong:** Elements are under 20px and placed right next to each other. Students can't see or distinguish them.
-**Fix:** Make each element at least 80×80px in SVG units and spread them across the canvas.
+**Why it's wrong:** These are specialist geology terms that A2 language learners would never encounter. "Continental Shelf", "Abyssal Plain", and "Mid-Ocean Ridge" are C1/C2 vocabulary. The app is meant for beginner learners — terms should be simple, everyday words like "Mountain", "River", "Rain", "Forest", "Sea".
+**Fix:** Choose topics where the vocabulary is naturally simple (water cycle, farm animals, parts of the body, rooms of a house), or simplify the terms to basic words the student already knows.
 
 ### ❌ Mismatched term and target IDs
 
@@ -266,6 +247,5 @@ All targets bunched in the center of the canvas. Students can't tell which zone 
 
 ## Reference
 
-For a working example of a well-structured scene, read:
-- `public/scenes/water-cycle/config.json` — config with 5 terms, kebab-case IDs, all 5 locale translations, and well-spaced drop targets
-- `public/scenes/water-cycle/scene.svg` — SVG with gradients, layered shapes, and clear structure
+Good examples are bundled in the `examples/` directory next to this file:
+- `examples/water-cycle-config.json` — config with 5 terms, kebab-case IDs, all 5 locale translations, and well-spaced drop targets

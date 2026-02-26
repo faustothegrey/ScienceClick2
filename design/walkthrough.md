@@ -112,14 +112,23 @@ When a team URL is opened, the page loads in match mode:
 ### How It Works
 
 1. Each team drags labels onto drop targets independently on their own device.
-2. When a team places all labels, their guesses are **automatically submitted** to the server.
-3. The canvas shows a **"Waiting for the other team..."** overlay with a spinner. Dragging is disabled.
-4. Both clients poll the server every 2 seconds. When both teams have submitted, the server returns both sets of guesses.
+2. **Live Progress:** As a team places labels, a small colored dot indicator appears on the rival team's screen to show *which* drop targets have been filled. The actual term text is **not** revealed. Team A sees orange dots for Team B's progress, and Team B sees purple dots for Team A's progress.
+3. When a team places all labels, their final guesses are **automatically submitted** to the server.
+4. The canvas shows a **"Waiting for the other team..."** overlay with a spinner. Dragging is disabled.
+5. Both clients poll the server every 2 seconds. When both teams have submitted, the server returns both sets of guesses.
 5. Both screens **simultaneously reveal** results:
    - Each drop target shows the team's own answer colored green/red (correct/incorrect).
    - A small badge below each answer shows the rival team's answer for the same target, also colored green/red.
    - The header shows a score comparison: **"Team A: 4/5 vs Team B: 3/5 — Team A wins!"**
    - Confetti fires if the team won or got all correct.
+
+### Spectator View
+
+A standalone, read-only "Spectator" dashboard is available during Team Match mode. It is accessed by appending `/spectator` to the scene URL:
+
+- **Spectator:** `/scenes/{scene-id}/spectator`
+
+The spectator view renders two side-by-side canvases (one for Team A, one for Team B). As the teams play on their respective devices, the teacher/spectator watches the progress dots appear live across both boards. Once both teams submit, the spectator view reveals all the actual finalized answers and scores comparing both teams.
 
 ### Starting a New Match
 
@@ -310,13 +319,14 @@ Changes are persisted automatically at three points:
 2. After a term (and its drop target) is removed.
 3. After a drop target is repositioned via drag.
 
-Match state is stored at `public/scenes/{id}/match.json` and managed via `/api/scenes/{id}/match` (GET/POST/DELETE).
+Match state is stored at `public/scenes/{id}/match.json` and managed via `/api/scenes/{id}/match` (GET/POST/PATCH/DELETE). Live progress syncing uses `PATCH` to update arrays of placed target IDs while teams are actively playing.
 
 ## File Structure
 
 | File | Purpose |
 |------|---------|
 | `src/app/scenes/[id]/page.tsx` | Main page component. Manages state for terms, drop targets, player guesses, placing mode, and team match mode. Handles drag-and-drop events and persistence. |
+| `src/app/scenes/[id]/spectator/page.tsx`| Spectator page. Polls match data and renders two side-by-side read-only Canvases showing live dots and final answers. |
 | `src/components/editor/HeaderBar.tsx` | Top bar with scene name breadcrumb, Editor/Play mode toggle, match status display, and team score comparison. |
 | `src/components/editor/Canvas.tsx` | Displays the scene image, renders drop targets (DropZone components), handles placing mode click, match waiting overlay, and rival answer badges. |
 | `src/components/editor/WordList.tsx` | Right sidebar listing draggable terms, inline term creation form, remove buttons. |

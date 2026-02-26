@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { readFile, writeFile, mkdir } from "fs/promises";
+import { readFile, writeFile, mkdir, stat } from "fs/promises";
 import path from "path";
 
 function configPath(id: string) {
   return path.join(process.cwd(), "public", "scenes", id, "config.json");
+}
+
+function sceneDir(id: string) {
+  return path.join(process.cwd(), "public", "scenes", id);
 }
 
 export async function GET(
@@ -13,7 +17,21 @@ export async function GET(
   const { id } = await params;
   try {
     const data = await readFile(configPath(id), "utf-8");
-    return NextResponse.json(JSON.parse(data));
+    const config = JSON.parse(data);
+
+    // Discover image format
+    let image: string | null = null;
+    for (const name of ["scene.svg", "scene.png", "scene.jpeg", "scene.jpg"]) {
+      try {
+        await stat(path.join(sceneDir(id), name));
+        image = name;
+        break;
+      } catch {
+        // not found
+      }
+    }
+
+    return NextResponse.json({ ...config, image });
   } catch {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
