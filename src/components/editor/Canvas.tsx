@@ -107,7 +107,7 @@ function DropZone({
       {/* Live progress indicator when the rival has placed a term but hasn't submitted yet */}
       {isRivalLivePlaced && !showRivalFeedback && (
         <div
-          className={`absolute -top-1.5 -right-1.5 w-3 h-3 rounded-full ${rivalThemeColor} shadow-md border border-white animate-pulse`}
+          className={`absolute -bottom-1.5 -right-1.5 w-3 h-3 rounded-full ${rivalThemeColor} shadow-md border border-white animate-pulse`}
           title={`${rivalTeamName} has placed a label here`}
         />
       )}
