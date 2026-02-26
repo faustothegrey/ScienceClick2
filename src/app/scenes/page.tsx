@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Trash2 } from "lucide-react";
 
+export type PlayMode = "single" | "team-a" | "team-b" | "spectator";
+
 interface Scene {
   id: string;
   termCount: number;
@@ -62,6 +64,16 @@ const CATEGORIES: Category[] = [
       "scheletric-apparatus",
       "digestive-system",
       "photosynthesis",
+      "doctor-studio",
+    ],
+  },
+  {
+    label: "Everyday Scenes",
+    icon: "🏘️",
+    sceneIds: [
+      "grocery-store",
+      "park",
+      "rooms-of-a-house",
     ],
   },
 ];
@@ -79,7 +91,20 @@ function formatName(id: string) {
     .replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-function SceneCard({ scene, onDelete }: { scene: Scene; onDelete: (id: string) => void }) {
+function SceneCard({ scene, playMode, onDelete }: { scene: Scene; playMode: PlayMode; onDelete: (id: string) => void }) {
+  const getHref = () => {
+    switch (playMode) {
+      case "team-a":
+        return `/scenes/${scene.id}?team=team-a`;
+      case "team-b":
+        return `/scenes/${scene.id}?team=team-b`;
+      case "spectator":
+        return `/scenes/${scene.id}/spectator`;
+      default:
+        return `/scenes/${scene.id}`;
+    }
+  };
+
   return (
     <div className="group relative rounded-xl border border-gray-800 bg-gray-900 overflow-hidden hover:border-gray-600 transition-colors">
       <button
@@ -93,7 +118,7 @@ function SceneCard({ scene, onDelete }: { scene: Scene; onDelete: (id: string) =
       >
         <Trash2 className="w-4 h-4" />
       </button>
-      <Link href={`/scenes/${scene.id}`} className="block">
+      <Link href={getHref()} className="block">
         <div className="h-40 bg-gray-800 flex items-center justify-center">
           {scene.image ? (
             <img
@@ -113,7 +138,7 @@ function SceneCard({ scene, onDelete }: { scene: Scene; onDelete: (id: string) =
           </h3>
           <p className="text-sm text-gray-400 mt-1">
             {scene.termCount} {scene.termCount === 1 ? "term" : "terms"}
-                    {scene.agent && <span className="ml-2 text-xs text-gray-500">by {scene.agent}</span>}
+            {scene.agent && <span className="ml-2 text-xs text-gray-500">by {scene.agent}</span>}
           </p>
         </div>
       </Link>
@@ -124,6 +149,7 @@ function SceneCard({ scene, onDelete }: { scene: Scene; onDelete: (id: string) =
 export default function ScenesGalleryPage() {
   const [scenes, setScenes] = useState<Scene[]>([]);
   const [loading, setLoading] = useState(true);
+  const [playMode, setPlayMode] = useState<PlayMode>("single");
   const router = useRouter();
 
   useEffect(() => {
@@ -153,12 +179,24 @@ export default function ScenesGalleryPage() {
       <div className="max-w-5xl mx-auto px-6 py-12">
         <header className="flex items-center justify-between mb-10">
           <h1 className="text-3xl font-bold tracking-tight">Scenes</h1>
-          <button
-            onClick={handleCreateScene}
-            className="px-4 py-2 bg-amber-500 text-gray-950 font-semibold rounded-lg hover:bg-amber-400 transition-colors"
-          >
-            Create Scene
-          </button>
+          <div className="flex items-center gap-4">
+            <select
+              value={playMode}
+              onChange={(e) => setPlayMode(e.target.value as PlayMode)}
+              className="px-3 py-2 bg-gray-800 border border-gray-700 text-gray-200 rounded-lg text-sm focus:outline-none focus:border-amber-500 transition-colors"
+            >
+              <option value="single">Single Player</option>
+              <option value="team-a">Team A</option>
+              <option value="team-b">Team B</option>
+              <option value="spectator">Spectator View</option>
+            </select>
+            <button
+              onClick={handleCreateScene}
+              className="px-4 py-2 bg-amber-500 text-gray-950 font-semibold rounded-lg hover:bg-amber-400 transition-colors"
+            >
+              Create Scene
+            </button>
+          </div>
         </header>
 
         {loading ? (
@@ -181,7 +219,7 @@ export default function ScenesGalleryPage() {
                   </h2>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     {catScenes.map((scene) => (
-                      <SceneCard key={scene.id} scene={scene} onDelete={handleDeleteScene} />
+                      <SceneCard key={scene.id} scene={scene} playMode={playMode} onDelete={handleDeleteScene} />
                     ))}
                   </div>
                 </section>
@@ -199,7 +237,7 @@ export default function ScenesGalleryPage() {
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {scenes.filter((s) => !getCategoryForScene(s.id)).map((scene) => (
-                    <SceneCard key={scene.id} scene={scene} onDelete={handleDeleteScene} />
+                    <SceneCard key={scene.id} scene={scene} playMode={playMode} onDelete={handleDeleteScene} />
                   ))}
                 </div>
               </section>
