@@ -91,8 +91,11 @@ function formatName(id: string) {
     .replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-function SceneCard({ scene, playMode, onDelete }: { scene: Scene; playMode: PlayMode; onDelete: (id: string) => void }) {
+function SceneCard({ scene, playMode, isMatchMode, onDelete }: { scene: Scene; playMode: PlayMode; isMatchMode: boolean; onDelete: (id: string) => void }) {
   const getHref = () => {
+    if (!isMatchMode) {
+      return `/scenes/${scene.id}`;
+    }
     switch (playMode) {
       case "team-a":
         return `/scenes/${scene.id}?team=team-a`;
@@ -150,7 +153,7 @@ function SceneCard({ scene, playMode, onDelete }: { scene: Scene; playMode: Play
             href={getHref()}
             className="px-4 py-2 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 hover:bg-emerald-500 hover:text-white text-sm font-semibold rounded-lg transition-colors"
           >
-            Start Match
+            {isMatchMode ? "Start Match" : "Play Scene"}
           </Link>
         </div>
       </div>
@@ -161,7 +164,8 @@ function SceneCard({ scene, playMode, onDelete }: { scene: Scene; playMode: Play
 export default function ScenesGalleryPage() {
   const [scenes, setScenes] = useState<Scene[]>([]);
   const [loading, setLoading] = useState(true);
-  const [playMode, setPlayMode] = useState<PlayMode>("single");
+  const [playMode, setPlayMode] = useState<PlayMode>("team-a");
+  const [isMatchMode, setIsMatchMode] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -192,16 +196,27 @@ export default function ScenesGalleryPage() {
         <header className="flex items-center justify-between mb-10">
           <h1 className="text-3xl font-bold tracking-tight">Scenes</h1>
           <div className="flex items-center gap-4">
-            <select
-              value={playMode}
-              onChange={(e) => setPlayMode(e.target.value as PlayMode)}
-              className="px-3 py-2 bg-gray-800 border border-gray-700 text-gray-200 rounded-lg text-sm focus:outline-none focus:border-amber-500 transition-colors"
+            {isMatchMode && (
+              <select
+                value={playMode}
+                onChange={(e) => setPlayMode(e.target.value as PlayMode)}
+                className="px-3 py-2 bg-gray-800 border border-gray-700 text-gray-200 rounded-lg text-sm focus:outline-none focus:border-purple-500 transition-colors"
+              >
+                <option value="single">Single Player</option>
+                <option value="team-a">Team A</option>
+                <option value="team-b">Team B</option>
+                <option value="spectator">Spectator View</option>
+              </select>
+            )}
+            <button
+              onClick={() => setIsMatchMode(!isMatchMode)}
+              className={`px-4 py-2 font-semibold rounded-lg transition-colors border ${isMatchMode
+                  ? "bg-purple-500/20 text-purple-400 border-purple-500/50 hover:bg-purple-500/30"
+                  : "bg-gray-800 text-gray-300 border-gray-700 hover:bg-gray-700"
+                }`}
             >
-              <option value="single">Single Player</option>
-              <option value="team-a">Team A</option>
-              <option value="team-b">Team B</option>
-              <option value="spectator">Spectator View</option>
-            </select>
+              {isMatchMode ? "Disable Match Mode" : "Enable Match Mode"}
+            </button>
             <button
               onClick={handleCreateScene}
               className="px-4 py-2 bg-amber-500 text-gray-950 font-semibold rounded-lg hover:bg-amber-400 transition-colors"
@@ -231,7 +246,7 @@ export default function ScenesGalleryPage() {
                   </h2>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     {catScenes.map((scene) => (
-                      <SceneCard key={scene.id} scene={scene} playMode={playMode} onDelete={handleDeleteScene} />
+                      <SceneCard key={scene.id} scene={scene} playMode={playMode} isMatchMode={isMatchMode} onDelete={handleDeleteScene} />
                     ))}
                   </div>
                 </section>
@@ -249,7 +264,7 @@ export default function ScenesGalleryPage() {
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {scenes.filter((s) => !getCategoryForScene(s.id)).map((scene) => (
-                    <SceneCard key={scene.id} scene={scene} playMode={playMode} onDelete={handleDeleteScene} />
+                    <SceneCard key={scene.id} scene={scene} playMode={playMode} isMatchMode={isMatchMode} onDelete={handleDeleteScene} />
                   ))}
                 </div>
               </section>
