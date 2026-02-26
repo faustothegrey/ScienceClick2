@@ -28,6 +28,14 @@ interface HeaderBarProps {
   matchStatus?: "playing" | "submitted" | "reveal";
   teamLabel?: string;
   onNewMatch?: () => void;
+  isSpectator?: boolean;
+}
+
+function getTeamColors(teamLabel?: string, isSpectator?: boolean) {
+  if (isSpectator) return "bg-amber-100 text-amber-800 border-amber-200";
+  if (teamLabel === "Team A") return "bg-orange-100 text-orange-800 border-orange-200";
+  if (teamLabel === "Team B") return "bg-purple-100 text-purple-800 border-purple-200";
+  return "bg-green-100 text-green-800 border-green-200"; // Single Player
 }
 
 export default function HeaderBar({
@@ -46,6 +54,7 @@ export default function HeaderBar({
   matchStatus,
   teamLabel,
   onNewMatch,
+  isSpectator,
 }: HeaderBarProps) {
   const [open, setOpen] = useState(false);
   const [resultsOpen, setResultsOpen] = useState(false);
@@ -66,11 +75,10 @@ export default function HeaderBar({
   }, []);
 
   return (
-    <header className={`relative z-30 flex items-center justify-between h-14 px-4 border-b transition-colors ${
-      mode === "editor"
+    <header className={`relative z-30 flex items-center justify-between h-14 px-4 border-b transition-colors ${mode === "editor"
         ? "bg-gradient-to-b from-blue-50/80 to-white border-blue-200"
         : "bg-gradient-to-b from-emerald-50/80 to-white border-emerald-200"
-    }`}>
+      }`}>
       {/* Left: back link */}
       <div className="flex items-center gap-2 text-sm text-gray-400">
         <Link href="/scenes" className="flex items-center gap-2 hover:text-gray-600 transition-colors">
@@ -79,9 +87,19 @@ export default function HeaderBar({
         </Link>
         <span className="text-gray-300">/</span>
         <span className="text-gray-900 font-semibold">{sceneName}</span>
-        {teamLabel && (
-          <span className="ml-2 px-2 py-0.5 text-xs font-bold rounded-full bg-purple-100 text-purple-700">{teamLabel}</span>
-        )}
+        {isSpectator ? (
+          <span className={`ml-2 px-2 py-0.5 text-xs font-bold rounded-full ${getTeamColors(undefined, true)}`}>
+            Spectator
+          </span>
+        ) : teamLabel ? (
+          <span className={`ml-2 px-2 py-0.5 text-xs font-bold rounded-full ${getTeamColors(teamLabel, false)}`}>
+            {teamLabel}
+          </span>
+        ) : mode === "play" ? (
+          <span className={`ml-2 px-2 py-0.5 text-xs font-bold rounded-full ${getTeamColors(undefined, false)}`}>
+            Single Player
+          </span>
+        ) : null}
       </div>
 
       {/* Center: feedback or title + language switcher */}
@@ -129,11 +147,10 @@ export default function HeaderBar({
             </span>
             <button
               onClick={onRetry}
-              className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-                feedback.allCorrect
+              className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${feedback.allCorrect
                   ? "bg-green-600 text-white hover:bg-green-700"
                   : "bg-amber-600 text-white hover:bg-amber-700"
-              }`}
+                }`}
             >
               {feedback.allCorrect ? "Play Again" : "Retry"}
             </button>
@@ -219,8 +236,8 @@ export default function HeaderBar({
         <button
           onClick={() => onModeChange("editor")}
           className={`px-4 py-1.5 text-sm font-medium rounded-full transition-colors ${mode === "editor"
-              ? "bg-blue-600 text-white shadow-sm"
-              : "text-gray-500 hover:text-gray-700"
+            ? "bg-blue-600 text-white shadow-sm"
+            : "text-gray-500 hover:text-gray-700"
             }`}
         >
           Editor
@@ -228,8 +245,8 @@ export default function HeaderBar({
         <button
           onClick={() => onModeChange("play")}
           className={`px-4 py-1.5 text-sm font-medium rounded-full transition-colors ${mode === "play"
-              ? "bg-emerald-600 text-white shadow-sm"
-              : "text-gray-500 hover:text-gray-700"
+            ? "bg-emerald-600 text-white shadow-sm"
+            : "text-gray-500 hover:text-gray-700"
             }`}
         >
           Play

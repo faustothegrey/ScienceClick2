@@ -28,7 +28,7 @@ interface CanvasProps {
 function DropZone({
   target, terms, mode, guessTermId, showFeedback, locale, opaqueTargets,
   rivalGuessTermId, showRivalFeedback, teamLabel, isRivalLivePlaced,
-  indicatorColor, isSpectator, onRemoveGuess
+  indicatorColor, onRemoveGuess
 }: {
   target: DropTarget; terms: Term[]; mode: "editor" | "play";
   guessTermId?: string; showFeedback: boolean; locale: string; opaqueTargets?: boolean;
