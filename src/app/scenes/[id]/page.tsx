@@ -44,6 +44,7 @@ function SceneEditorPage() {
   const [availableTerms, setAvailableTerms] = useState<Term[]>([]);
   const [dropTargets, setDropTargets] = useState<DropTarget[]>([]);
   const [opaqueTargets, setOpaqueTargets] = useState(false);
+  const [sceneImage, setSceneImage] = useState<string | null>(null);
   const [locale, setLocale] = useState<string>(() => {
     if (typeof window !== "undefined") {
       return localStorage.getItem(`sc2:scene:${id}:locale`) ?? "en";
@@ -63,6 +64,7 @@ function SceneEditorPage() {
   // Match mode state
   const [matchStatus, setMatchStatus] = useState<MatchStatus>("playing");
   const [rivalGuesses, setRivalGuesses] = useState<Record<string, string> | null>(null);
+  const [rivalLiveProgress, setRivalLiveProgress] = useState<string[]>([]);
   const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const hasSubmittedRef = useRef(false);
 
@@ -103,6 +105,7 @@ function SceneEditorPage() {
           setAvailableTerms(data.terms.map((t: Record<string, unknown>) => migrateTerm(t)));
           setDropTargets(data.dropTargets);
           if (data.opaqueTargets) setOpaqueTargets(true);
+          if (data.image) setSceneImage(data.image);
         }
       });
   }, [id]);
@@ -320,14 +323,35 @@ function SceneEditorPage() {
     }
   }, [allPlaced, showFeedback, isMatchMode, correctCount, dropTargets.length, fireConfetti, id, teamParam, playerGuesses]);
 
+  // Sync live progress with server in match mode
+  useEffect(() => {
+    if (!isMatchMode || matchStatus !== "playing" || hasSubmittedRef.current) return;
+
+    // Only send the target IDs that have been filled so far
+    const placedTargetIds = Object.keys(playerGuesses);
+
+    fetch(`/api/scenes/${id}/match`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ team: teamParam, liveProgress: placedTargetIds }),
+    }).catch(() => {
+      // ignore errors on progress update
+    });
+  }, [playerGuesses, isMatchMode, matchStatus, teamParam, id]);
+
   // Match mode polling
   useEffect(() => {
-    if (!isMatchMode || matchStatus !== "submitted") return;
+    if (!isMatchMode || matchStatus !== "playing" && matchStatus !== "submitted") return;
 
     pollIntervalRef.current = setInterval(async () => {
       try {
         const res = await fetch(`/api/scenes/${id}/match`);
         const data = await res.json();
+
+        if (data.status === "waiting" && data.progress && data.progress[rivalTeam]) {
+          setRivalLiveProgress(data.progress[rivalTeam]);
+        }
+
         if (data.status === "complete") {
           clearInterval(pollIntervalRef.current!);
           setRivalGuesses(data.teams[rivalTeam].guesses);
@@ -379,19 +403,19 @@ function SceneEditorPage() {
   // Build feedback prop
   const feedbackProp = showFeedback
     ? {
-        allCorrect,
-        correctCount,
-        totalCount: dropTargets.length,
-        ...(isMatchMode && rivalGuesses
-          ? {
-              rivalScore: {
-                correctCount: rivalCorrectCount,
-                totalCount: dropTargets.length,
-                teamLabel: formatTeamLabel(rivalTeam),
-              },
-            }
-          : {}),
-      }
+      allCorrect,
+      correctCount,
+      totalCount: dropTargets.length,
+      ...(isMatchMode && rivalGuesses
+        ? {
+          rivalScore: {
+            correctCount: rivalCorrectCount,
+            totalCount: dropTargets.length,
+            teamLabel: formatTeamLabel(rivalTeam),
+          },
+        }
+        : {}),
+    }
     : undefined;
 
   return (
@@ -419,6 +443,7 @@ function SceneEditorPage() {
             setPlayerGuesses({});
             setShowFeedback(false);
             setRivalGuesses(null);
+            setRivalLiveProgress([]);
             setMatchStatus("playing");
             hasSubmittedRef.current = false;
             setPlayKey((k) => k + 1);
@@ -434,6 +459,7 @@ function SceneEditorPage() {
         <div className="flex flex-1 overflow-hidden">
           <Canvas
             sceneId={id}
+            imageFilename={sceneImage}
             dropTargets={dropTargets}
             terms={availableTerms}
             mode={mode}
@@ -441,9 +467,17 @@ function SceneEditorPage() {
             showFeedback={showFeedback}
             placingTermId={placingTermId}
             onCanvasClick={handleCanvasClick}
+            onRemoveGuess={(targetId) => {
+              setPlayerGuesses((prev) => {
+                const next = { ...prev };
+                delete next[targetId];
+                return next;
+              });
+            }}
             locale={locale}
             opaqueTargets={opaqueTargets}
             rivalGuesses={rivalGuesses ?? undefined}
+            rivalLiveProgress={rivalLiveProgress}
             matchStatus={isMatchMode ? matchStatus : undefined}
             teamLabel={teamLabel}
           />
@@ -460,7 +494,7 @@ function SceneEditorPage() {
       </div>
       <DragOverlay dropAnimation={null}>
         {activeTerm ? (
-          <div className="px-3 py-2.5 bg-white border border-blue-400 rounded-lg shadow-lg font-medium text-sm text-gray-700 cursor-move">
+          <div className="w-32 h-10 flex items-center justify-center bg-white border-2 border-blue-400 rounded-lg shadow-lg font-medium text-sm text-gray-800 cursor-move">
             {getTermLabel(activeTerm, locale)}
           </div>
         ) : null}
