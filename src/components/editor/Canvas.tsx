@@ -65,10 +65,13 @@ function DropZone({
   } else if (filled) {
     className = "bg-white border-2 border-blue-400 text-gray-800 shadow-md";
   } else if (isOver) {
-    className = "border-2 border-dashed border-blue-400 bg-blue-50 text-blue-400";
+    className = "border-2 border-blue-500 bg-blue-100 text-blue-600 scale-110 shadow-lg ring-4 ring-blue-500/20";
   } else {
     className = `border-2 border-dashed border-gray-400 ${emptyBg} text-gray-500 shadow-sm`;
   }
+
+  // Common transitions to smooth the snap when hovering
+  const baseClasses = "transition-all duration-200 ease-out";
 
   const showRival = showRivalFeedback && rivalLabel;
   const rivalTeamName = teamLabel === "Team A" ? "Team B" : "Team A";
@@ -77,7 +80,7 @@ function DropZone({
   return (
     <div
       ref={setNodeRef}
-      className={`absolute z-10 flex flex-col items-center justify-center -translate-x-1/2 -translate-y-1/2 w-32 rounded-lg text-sm font-medium transition-colors ${showRival ? "h-16" : "h-10"} ${className}`}
+      className={`absolute z-10 flex flex-col items-center justify-center -translate-x-1/2 -translate-y-1/2 w-32 rounded-lg text-sm font-medium ${baseClasses} ${showRival ? "h-16" : "h-10"} ${className}`}
       style={{
         left: `${target.x}%`,
         top: `${target.y}%`,
