@@ -205,6 +205,7 @@ Create `public/scenes/my-new-scene/config.json` with terms and drop targets:
 
 ```json
 {
+  "category": "Biology & Human Body",
   "opaqueTargets": false,
   "terms": [
     {
@@ -244,23 +245,7 @@ Create `public/scenes/my-new-scene/config.json` with terms and drop targets:
   - To calculate: for an element at pixel (px, py) in a 1200×800 image: `x = (px / 1200) × 100`, `y = (py / 800) × 100`
 - **`opaqueTargets`:** Set to `true` if the image background is colored (makes drop target backgrounds solid white instead of semi-transparent). Set to `false` or omit for the default semi-transparent look.
 - **`agent`:** Optional field indicating who created the scene (e.g., `"claude"`, `"gemini"`)
-
-### Step 4: Add to Gallery Categories (Optional)
-
-To show the scene in a category on the gallery page, edit `src/app/scenes/page.tsx` and add the scene ID to the appropriate `CATEGORIES` entry:
-
-```typescript
-{
-  label: "Biology & Human Body",
-  icon: "🧬",
-  sceneIds: [
-    "animal-cell",
-    "my-new-scene",  // ← add here
-  ],
-},
-```
-
-Scenes not in any category appear under "Other" automatically.
+- **`category`:** Optional string to group the scene in the gallery. Use one of the known categories: `"Universe & Earth"`, `"The Matter"`, `"Biology & Human Body"`, `"Everyday Scenes"`. Scenes without a category appear under "Other" automatically.
 
 ### Step 5: Verify
 

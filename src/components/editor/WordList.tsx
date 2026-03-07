@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useDraggable } from "@dnd-kit/core";
 import { Plus, Save, Settings, GripVertical, X } from "lucide-react";
 import { Term, getTermLabel, SUPPORTED_LOCALES } from "@/lib/i18n";
@@ -9,6 +9,8 @@ interface WordListProps {
   onAddTerm: (label: string) => void;
   onRemoveTerm: (termId: string) => void;
   locale: string;
+  termLocales: Record<string, string>;
+  onTermLocaleChange: (termId: string, locale: string) => void;
   placedTermIds?: Set<string>;
   playKey?: number;
 }
@@ -41,14 +43,10 @@ function LocaleBadges({ term, activeLocale, onLocaleClick }: { term: Term; activ
   );
 }
 
-function DraggableTerm({ term, mode, onRemove, locale, isPlaced }: { term: Term; mode: "editor" | "play"; onRemove: (termId: string) => void; locale: string; isPlaced: boolean }) {
-  const [termLocale, setTermLocale] = useState(locale);
+function DraggableTerm({ term, mode, onRemove, locale, termLocale, onLocaleChange, isPlaced }: { term: Term; mode: "editor" | "play"; onRemove: (termId: string) => void; locale: string; termLocale: string; onLocaleChange: (locale: string) => void; isPlaced: boolean }) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: term.id,
   });
-
-  // Reset per-term locale when global locale changes
-  useEffect(() => { setTermLocale(locale); }, [locale]);
 
   return (
     <div className={`flex items-center gap-1 ${isDragging ? "opacity-30" : ""} ${isPlaced ? "opacity-40" : ""}`}>
@@ -64,7 +62,7 @@ function DraggableTerm({ term, mode, onRemove, locale, isPlaced }: { term: Term;
       >
         <GripVertical className={`w-3.5 h-3.5 shrink-0 ${isPlaced ? "text-gray-200" : "text-gray-300"}`} />
         <span className={`text-sm font-medium ${isPlaced ? "text-gray-400 line-through" : "text-gray-700"}`}>{getTermLabel(term, termLocale)}</span>
-        {!isPlaced && <LocaleBadges term={term} activeLocale={termLocale} onLocaleClick={setTermLocale} />}
+        {!isPlaced && <LocaleBadges term={term} activeLocale={termLocale} onLocaleClick={onLocaleChange} />}
       </div>
       {mode === "editor" && (
         <button
@@ -78,7 +76,7 @@ function DraggableTerm({ term, mode, onRemove, locale, isPlaced }: { term: Term;
   );
 }
 
-export default function WordList({ terms, mode, onAddTerm, onRemoveTerm, locale, placedTermIds, playKey }: WordListProps) {
+export default function WordList({ terms, mode, onAddTerm, onRemoveTerm, locale, termLocales, onTermLocaleChange, placedTermIds, playKey }: WordListProps) {
   const [isCreating, setIsCreating] = useState(false);
   const [newLabel, setNewLabel] = useState("");
 
@@ -156,7 +154,7 @@ export default function WordList({ terms, mode, onAddTerm, onRemoveTerm, locale,
         <div className="border-t border-gray-100 pt-3">
           <div className="space-y-2">
             {terms.map((term) => (
-              <DraggableTerm key={`${term.id}-${playKey ?? 0}`} term={term} mode={mode} onRemove={onRemoveTerm} locale={locale} isPlaced={placedTermIds?.has(term.id) ?? false} />
+              <DraggableTerm key={`${term.id}-${playKey ?? 0}`} term={term} mode={mode} onRemove={onRemoveTerm} locale={locale} termLocale={termLocales[term.id] || locale} onLocaleChange={(loc) => onTermLocaleChange(term.id, loc)} isPlaced={placedTermIds?.has(term.id) ?? false} />
             ))}
           </div>
         </div>

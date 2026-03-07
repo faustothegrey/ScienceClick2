@@ -51,6 +51,8 @@ function SceneEditorPage() {
     }
     return "en";
   });
+  // Per-term locale overrides (termId → locale code)
+  const [termLocales, setTermLocales] = useState<Record<string, string>>({});
   const [playerName, setPlayerName] = useState<string | null>(() => {
     if (typeof window !== "undefined") {
       return localStorage.getItem("sc2:playerName");
@@ -70,7 +72,12 @@ function SceneEditorPage() {
 
   function handleLocaleChange(newLocale: string) {
     setLocale(newLocale);
+    setTermLocales({});
     localStorage.setItem(`sc2:scene:${id}:locale`, newLocale);
+  }
+
+  function handleTermLocaleChange(termId: string, loc: string) {
+    setTermLocales((prev) => ({ ...prev, [termId]: loc }));
   }
 
   async function handleLogin() {
@@ -475,6 +482,7 @@ function SceneEditorPage() {
               });
             }}
             locale={locale}
+            termLocales={termLocales}
             opaqueTargets={opaqueTargets}
             rivalGuesses={rivalGuesses ?? undefined}
             rivalLiveProgress={rivalLiveProgress}
@@ -487,6 +495,8 @@ function SceneEditorPage() {
             onAddTerm={handleAddTerm}
             onRemoveTerm={handleRemoveTerm}
             locale={locale}
+            termLocales={termLocales}
+            onTermLocaleChange={handleTermLocaleChange}
             placedTermIds={placedTermIds}
             playKey={playKey}
           />
@@ -495,7 +505,7 @@ function SceneEditorPage() {
       <DragOverlay dropAnimation={null}>
         {activeTerm ? (
           <div className="w-32 h-10 flex items-center justify-center bg-white border-2 border-blue-400 rounded-lg shadow-lg font-medium text-sm text-gray-800 cursor-move">
-            {getTermLabel(activeTerm, locale)}
+            {getTermLabel(activeTerm, termLocales[activeTerm.id] || locale)}
           </div>
         ) : null}
       </DragOverlay>

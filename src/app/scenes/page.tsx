@@ -12,78 +12,15 @@ interface Scene {
   termCount: number;
   image: string | null;
   agent: string | null;
+  category: string | null;
 }
 
-interface Category {
-  label: string;
-  icon: string;
-  sceneIds: string[];
-}
-
-const CATEGORIES: Category[] = [
-  {
-    label: "Universe & Earth",
-    icon: "🌍",
-    sceneIds: [
-      "solar-system",
-      "atmosphere",
-      "earth-interior",
-      "earth-motions",
-      "earthquake",
-      "hydrosphere",
-      "mineral-properties",
-      "plate-boundaries",
-      "rock-cycle",
-      "tectonic-plates",
-      "volcano",
-      "struttura-vulcano",
-      "water-distribution",
-      "water-cycle",
-      "tipi-di-rocce",
-      "grotta-carsica",
-    ],
-  },
-  {
-    label: "The Matter",
-    icon: "🔬",
-    sceneIds: [
-      "states-of-matter",
-      "passaggi-di-stato",
-      "proprieta-della-materia",
-      "molecole",
-    ],
-  },
-  {
-    label: "Biology & Human Body",
-    icon: "🧬",
-    sceneIds: [
-      "animal-cell",
-      "dna-structure",
-      "food-chain",
-      "human-body",
-      "scheletric-apparatus",
-      "digestive-system",
-      "photosynthesis",
-      "doctor-studio",
-    ],
-  },
-  {
-    label: "Everyday Scenes",
-    icon: "🏘️",
-    sceneIds: [
-      "grocery-store",
-      "park",
-      "rooms-of-a-house",
-    ],
-  },
-];
-
-function getCategoryForScene(id: string): string | null {
-  for (const cat of CATEGORIES) {
-    if (cat.sceneIds.includes(id)) return cat.label;
-  }
-  return null;
-}
+const CATEGORY_ICONS: Record<string, string> = {
+  "Universe & Earth": "🌍",
+  "The Matter": "🔬",
+  "Biology & Human Body": "🧬",
+  "Everyday Scenes": "🏘️",
+};
 
 function formatName(id: string) {
   return id
@@ -234,41 +171,41 @@ export default function ScenesGalleryPage() {
           </p>
         ) : (
           <div className="space-y-12">
-            {CATEGORIES.map((cat) => {
-              const catScenes = scenes.filter((s) => cat.sceneIds.includes(s.id));
-              if (catScenes.length === 0) return null;
-              return (
-                <section key={cat.label}>
-                  <h2 className="text-xl font-bold text-gray-200 mb-4 flex items-center gap-2">
-                    <span>{cat.icon}</span>
-                    {cat.label}
-                    <span className="text-sm font-normal text-gray-500">({catScenes.length})</span>
-                  </h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {catScenes.map((scene) => (
-                      <SceneCard key={scene.id} scene={scene} playMode={playMode} isMatchMode={isMatchMode} onDelete={handleDeleteScene} />
-                    ))}
-                  </div>
-                </section>
-              );
-            })}
-            {/* Uncategorized scenes */}
-            {scenes.filter((s) => !getCategoryForScene(s.id)).length > 0 && (
-              <section>
-                <h2 className="text-xl font-bold text-gray-200 mb-4 flex items-center gap-2">
-                  <span>📁</span>
-                  Other
-                  <span className="text-sm font-normal text-gray-500">
-                    ({scenes.filter((s) => !getCategoryForScene(s.id)).length})
-                  </span>
-                </h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {scenes.filter((s) => !getCategoryForScene(s.id)).map((scene) => (
-                    <SceneCard key={scene.id} scene={scene} playMode={playMode} isMatchMode={isMatchMode} onDelete={handleDeleteScene} />
-                  ))}
-                </div>
-              </section>
-            )}
+            {(() => {
+              const knownOrder = Object.keys(CATEGORY_ICONS);
+              const grouped = new Map<string, Scene[]>();
+              for (const scene of scenes) {
+                const key = scene.category || "Other";
+                if (!grouped.has(key)) grouped.set(key, []);
+                grouped.get(key)!.push(scene);
+              }
+              const sortedKeys = [...grouped.keys()].sort((a, b) => {
+                const ai = knownOrder.indexOf(a);
+                const bi = knownOrder.indexOf(b);
+                if (ai !== -1 && bi !== -1) return ai - bi;
+                if (ai !== -1) return -1;
+                if (bi !== -1) return 1;
+                return a.localeCompare(b);
+              });
+              return sortedKeys.map((label) => {
+                const catScenes = grouped.get(label)!;
+                const icon = CATEGORY_ICONS[label] || "📁";
+                return (
+                  <section key={label}>
+                    <h2 className="text-xl font-bold text-gray-200 mb-4 flex items-center gap-2">
+                      <span>{icon}</span>
+                      {label}
+                      <span className="text-sm font-normal text-gray-500">({catScenes.length})</span>
+                    </h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {catScenes.map((scene) => (
+                        <SceneCard key={scene.id} scene={scene} playMode={playMode} isMatchMode={isMatchMode} onDelete={handleDeleteScene} />
+                      ))}
+                    </div>
+                  </section>
+                );
+              });
+            })()}
           </div>
         )}
       </div>

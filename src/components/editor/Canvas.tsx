@@ -17,6 +17,7 @@ interface CanvasProps {
   onCanvasClick: (xPercent: number, yPercent: number) => void;
   onRemoveGuess?: (targetId: string) => void;
   locale: string;
+  termLocales?: Record<string, string>;
   opaqueTargets?: boolean;
   rivalGuesses?: Record<string, string>;
   rivalLiveProgress?: string[];
@@ -26,12 +27,12 @@ interface CanvasProps {
 }
 
 function DropZone({
-  target, terms, mode, guessTermId, showFeedback, locale, opaqueTargets,
+  target, terms, mode, guessTermId, showFeedback, locale, termLocales, opaqueTargets,
   rivalGuessTermId, showRivalFeedback, teamLabel, isRivalLivePlaced,
   indicatorColor, onRemoveGuess
 }: {
   target: DropTarget; terms: Term[]; mode: "editor" | "play";
-  guessTermId?: string; showFeedback: boolean; locale: string; opaqueTargets?: boolean;
+  guessTermId?: string; showFeedback: boolean; locale: string; termLocales?: Record<string, string>; opaqueTargets?: boolean;
   rivalGuessTermId?: string; showRivalFeedback?: boolean;
   teamLabel?: string; isRivalLivePlaced?: boolean; indicatorColor?: "purple" | "orange";
   isSpectator?: boolean;
@@ -41,7 +42,8 @@ function DropZone({
   const assignedTerm = terms.find((t) => t.id === target.assignedTerm);
   const editorLabel = assignedTerm ? getTermLabel(assignedTerm, locale) : null;
   const guessTerm = guessTermId ? terms.find((t) => t.id === guessTermId) : null;
-  const guessLabel = guessTerm ? getTermLabel(guessTerm, locale) : null;
+  const guessLocale = guessTermId && termLocales?.[guessTermId] ? termLocales[guessTermId] : locale;
+  const guessLabel = guessTerm ? getTermLabel(guessTerm, guessLocale) : null;
 
   const rivalTerm = rivalGuessTermId ? terms.find((t) => t.id === rivalGuessTermId) : null;
   const rivalLabel = rivalTerm ? getTermLabel(rivalTerm, locale) : null;
@@ -87,6 +89,11 @@ function DropZone({
       }}
     >
       <span>{mode === "editor" ? editorLabel : guessLabel}</span>
+      {mode === "play" && guessTermId && (
+        <span className="absolute -bottom-1.5 -right-1.5 text-[10px] font-semibold uppercase leading-none px-1 py-0.5 rounded text-white bg-blue-600 shadow-sm">
+          {guessLocale}
+        </span>
+      )}
       {mode === "play" && guessTermId && !showFeedback && onRemoveGuess && (
         <button
           className="absolute -top-2 -right-2 bg-white rounded-full p-0.5 border border-gray-300 text-gray-500 hover:text-red-500 hover:border-red-500 transition-colors shadow-sm"
@@ -115,7 +122,7 @@ function DropZone({
   );
 }
 
-export default function Canvas({ sceneId, imageFilename, dropTargets, terms, mode, playerGuesses, showFeedback, placingTermId, onCanvasClick, onRemoveGuess, locale, opaqueTargets, rivalGuesses, rivalLiveProgress, matchStatus, teamLabel, isSpectator }: CanvasProps) {
+export default function Canvas({ sceneId, imageFilename, dropTargets, terms, mode, playerGuesses, showFeedback, placingTermId, onCanvasClick, onRemoveGuess, locale, termLocales, opaqueTargets, rivalGuesses, rivalLiveProgress, matchStatus, teamLabel, isSpectator }: CanvasProps) {
   const { setNodeRef, isOver } = useDroppable({ id: "canvas" });
   const isPlacing = !!placingTermId;
   const placingTerm = isPlacing ? terms.find((t) => t.id === placingTermId) : null;
@@ -175,6 +182,7 @@ export default function Canvas({ sceneId, imageFilename, dropTargets, terms, mod
               guessTermId={playerGuesses[target.id]}
               showFeedback={showFeedback}
               locale={locale}
+              termLocales={termLocales}
               opaqueTargets={opaqueTargets}
               rivalGuessTermId={rivalGuesses?.[target.id]}
               showRivalFeedback={matchStatus === "reveal" && !isSpectator}
