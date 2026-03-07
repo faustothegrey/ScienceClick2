@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useDraggable } from "@dnd-kit/core";
-import { Plus, Save, Settings, GripVertical, X } from "lucide-react";
+import { Plus, Save, GripVertical, X, ChevronDown } from "lucide-react";
 import { Term, getTermLabel, SUPPORTED_LOCALES } from "@/lib/i18n";
 
 interface WordListProps {
@@ -9,6 +9,7 @@ interface WordListProps {
   onAddTerm: (label: string) => void;
   onRemoveTerm: (termId: string) => void;
   locale: string;
+  onLocaleChange: (locale: string) => void;
   termLocales: Record<string, string>;
   onTermLocaleChange: (termId: string, locale: string) => void;
   placedTermIds?: Set<string>;
@@ -76,9 +77,21 @@ function DraggableTerm({ term, mode, onRemove, locale, termLocale, onLocaleChang
   );
 }
 
-export default function WordList({ terms, mode, onAddTerm, onRemoveTerm, locale, termLocales, onTermLocaleChange, placedTermIds, playKey }: WordListProps) {
+export default function WordList({ terms, mode, onAddTerm, onRemoveTerm, locale, onLocaleChange, termLocales, onTermLocaleChange, placedTermIds, playKey }: WordListProps) {
   const [isCreating, setIsCreating] = useState(false);
   const [newLabel, setNewLabel] = useState("");
+  const [localeOpen, setLocaleOpen] = useState(false);
+  const localeRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (localeRef.current && !localeRef.current.contains(e.target as Node)) {
+        setLocaleOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   function handleSaveNew() {
     if (newLabel.trim()) {
@@ -98,9 +111,28 @@ export default function WordList({ terms, mode, onAddTerm, onRemoveTerm, locale,
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-gray-100">
         <h2 className="text-lg font-bold text-gray-900">Word List</h2>
-        <button className="text-gray-400 hover:text-gray-600">
-          <Settings className="w-5 h-5" />
-        </button>
+        <div ref={localeRef} className="relative">
+          <button
+            onClick={() => setLocaleOpen(!localeOpen)}
+            className="flex items-center gap-1 px-2 py-1 text-sm font-medium text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+          >
+            {locale.toUpperCase()}
+            <ChevronDown className="w-3.5 h-3.5" />
+          </button>
+          {localeOpen && (
+            <div className="absolute top-full mt-1 right-0 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-50 min-w-[140px]">
+              {SUPPORTED_LOCALES.map((loc) => (
+                <button
+                  key={loc.code}
+                  onClick={() => { onLocaleChange(loc.code); setLocaleOpen(false); }}
+                  className={`w-full text-left px-3 py-1.5 text-sm hover:bg-gray-50 transition-colors ${locale === loc.code ? "font-semibold text-blue-600" : "text-gray-700"}`}
+                >
+                  {loc.label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* New Term button (editor only) */}

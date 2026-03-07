@@ -80,11 +80,6 @@ export default function SpectatorPage({ params }: { params: Promise<{ id: string
                     sceneName={formatName(id)}
                     mode="play"
                     onModeChange={() => { }}
-                    locale={locale}
-                    onLocaleChange={(l) => {
-                        setLocale(l);
-                        localStorage.setItem(`sc2:scene:${id}:locale`, l);
-                    }}
                     teamLabel="Spectator View"
                     matchStatus={matchStatus}
                     onNewMatch={matchStatus === "reveal" ? async () => {

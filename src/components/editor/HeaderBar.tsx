@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { ArrowLeft, ChevronDown } from "lucide-react";
-import { SUPPORTED_LOCALES } from "@/lib/i18n";
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
 interface FeedbackInfo {
@@ -16,8 +15,6 @@ interface HeaderBarProps {
   sceneName: string;
   mode: "editor" | "play";
   onModeChange: (mode: "editor" | "play") => void;
-  locale: string;
-  onLocaleChange: (locale: string) => void;
   feedback?: FeedbackInfo;
   onRetry?: () => void;
   playerName: string | null;
@@ -42,8 +39,6 @@ export default function HeaderBar({
   sceneName,
   mode,
   onModeChange,
-  locale,
-  onLocaleChange,
   feedback,
   onRetry,
   playerName,
@@ -56,16 +51,11 @@ export default function HeaderBar({
   onNewMatch,
   isSpectator,
 }: HeaderBarProps) {
-  const [open, setOpen] = useState(false);
   const [resultsOpen, setResultsOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
       if (resultsRef.current && !resultsRef.current.contains(e.target as Node)) {
         setResultsOpen(false);
       }
@@ -156,35 +146,7 @@ export default function HeaderBar({
             </button>
           </div>
         ) : (
-          <>
-            <h1 className="text-lg font-bold text-gray-900">{sceneName}</h1>
-
-            {/* Language Switcher */}
-            <div ref={dropdownRef} className="relative">
-              <button
-                onClick={() => setOpen(!open)}
-                className="flex items-center gap-1 px-2 py-1 text-sm font-medium text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
-              >
-                {locale.toUpperCase()}
-                <ChevronDown className="w-3.5 h-3.5" />
-              </button>
-
-              {open && (
-                <div className="absolute top-full mt-1 right-0 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-50 min-w-[140px]">
-                  {SUPPORTED_LOCALES.map((loc) => (
-                    <button
-                      key={loc.code}
-                      onClick={() => { onLocaleChange(loc.code); setOpen(false); }}
-                      className={`w-full text-left px-3 py-1.5 text-sm hover:bg-gray-50 transition-colors ${locale === loc.code ? "font-semibold text-blue-600" : "text-gray-700"
-                        }`}
-                    >
-                      {loc.label}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          </>
+          <h1 className="text-lg font-bold text-gray-900">{sceneName}</h1>
         )}
       </div>
 

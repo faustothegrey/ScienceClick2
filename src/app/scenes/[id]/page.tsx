@@ -441,8 +441,6 @@ function SceneEditorPage() {
             setMode(m);
             if (m === "play") { setPlayerGuesses({}); setShowFeedback(false); setPlayKey((k) => k + 1); }
           }}
-          locale={locale}
-          onLocaleChange={handleLocaleChange}
           feedback={feedbackProp}
           onRetry={isMatchMode ? undefined : () => { setPlayerGuesses({}); setShowFeedback(false); setPlayKey((k) => k + 1); }}
           onNewMatch={isMatchMode && matchStatus === "reveal" ? async () => {
@@ -495,6 +493,7 @@ function SceneEditorPage() {
             onAddTerm={handleAddTerm}
             onRemoveTerm={handleRemoveTerm}
             locale={locale}
+            onLocaleChange={handleLocaleChange}
             termLocales={termLocales}
             onTermLocaleChange={handleTermLocaleChange}
             placedTermIds={placedTermIds}
