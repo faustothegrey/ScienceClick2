@@ -7,6 +7,7 @@ import Canvas from "@/components/editor/Canvas";
 import type { MatchStatus } from "@/components/editor/Canvas";
 import { Term, migrateTerm } from "@/lib/i18n";
 import type { DropTarget } from "@/app/scenes/[id]/page";
+import type { CanvasBg } from "@/components/editor/Toolbar";
 
 function formatName(id: string) {
     return id.replace(/[-_]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
@@ -21,6 +22,7 @@ export default function SpectatorPage({ params }: { params: Promise<{ id: string
     const [sceneImage, setSceneImage] = useState<string | null>(null);
 
     const [locale, setLocale] = useState("en");
+    const [canvasBg, setCanvasBg] = useState<CanvasBg>("default");
 
     // Match state
     const [matchStatus, setMatchStatus] = useState<MatchStatus>("playing");
@@ -123,6 +125,8 @@ export default function SpectatorPage({ params }: { params: Promise<{ id: string
                                 matchStatus={matchStatus}
                                 teamLabel="Team A"
                                 isSpectator={true} /* Passes spectator flag down to apply proper indicator colors */
+                                canvasBg={canvasBg}
+                                onCanvasBgChange={setCanvasBg}
                             />
                         </div>
                     </div>
@@ -149,6 +153,8 @@ export default function SpectatorPage({ params }: { params: Promise<{ id: string
                                 matchStatus={matchStatus}
                                 teamLabel="Team B"
                                 isSpectator={true} /* Passes spectator flag down to apply proper indicator colors */
+                                canvasBg={canvasBg}
+                                onCanvasBgChange={setCanvasBg}
                             />
                         </div>
                     </div>

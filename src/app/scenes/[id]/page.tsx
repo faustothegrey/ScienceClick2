@@ -13,6 +13,7 @@ import {
 import HeaderBar from "@/components/editor/HeaderBar";
 import Canvas from "@/components/editor/Canvas";
 import type { MatchStatus } from "@/components/editor/Canvas";
+import type { CanvasBg } from "@/components/editor/Toolbar";
 import WordList from "@/components/editor/WordList";
 import { Term, migrateTerm, getTermLabel } from "@/lib/i18n";
 
@@ -44,6 +45,7 @@ function SceneEditorPage() {
   const [availableTerms, setAvailableTerms] = useState<Term[]>([]);
   const [dropTargets, setDropTargets] = useState<DropTarget[]>([]);
   const [opaqueTargets, setOpaqueTargets] = useState(false);
+  const [canvasBg, setCanvasBg] = useState<CanvasBg>("default");
   const [sceneImage, setSceneImage] = useState<string | null>(null);
   const [locale, setLocale] = useState<string>(() => {
     if (typeof window !== "undefined") {
@@ -486,6 +488,8 @@ function SceneEditorPage() {
             rivalLiveProgress={rivalLiveProgress}
             matchStatus={isMatchMode ? matchStatus : undefined}
             teamLabel={teamLabel}
+            canvasBg={canvasBg}
+            onCanvasBgChange={setCanvasBg}
           />
           <WordList
             terms={availableTerms}

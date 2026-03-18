@@ -1,5 +1,6 @@
 import { useDroppable } from "@dnd-kit/core";
 import Toolbar from "./Toolbar";
+import type { CanvasBg } from "./Toolbar";
 import type { DropTarget } from "@/app/scenes/[id]/page";
 import { Term, getTermLabel } from "@/lib/i18n"; import { X } from "lucide-react";
 
@@ -24,6 +25,8 @@ interface CanvasProps {
   matchStatus?: MatchStatus;
   teamLabel?: string;
   isSpectator?: boolean;
+  canvasBg: CanvasBg;
+  onCanvasBgChange: (bg: CanvasBg) => void;
 }
 
 function DropZone({
@@ -122,7 +125,7 @@ function DropZone({
   );
 }
 
-export default function Canvas({ sceneId, imageFilename, dropTargets, terms, mode, playerGuesses, showFeedback, placingTermId, onCanvasClick, onRemoveGuess, locale, termLocales, opaqueTargets, rivalGuesses, rivalLiveProgress, matchStatus, teamLabel, isSpectator }: CanvasProps) {
+export default function Canvas({ sceneId, imageFilename, dropTargets, terms, mode, playerGuesses, showFeedback, placingTermId, onCanvasClick, onRemoveGuess, locale, termLocales, opaqueTargets, rivalGuesses, rivalLiveProgress, matchStatus, teamLabel, isSpectator, canvasBg, onCanvasBgChange }: CanvasProps) {
   const { setNodeRef, isOver } = useDroppable({ id: "canvas" });
   const isPlacing = !!placingTermId;
   const placingTerm = isPlacing ? terms.find((t) => t.id === placingTermId) : null;
@@ -138,9 +141,12 @@ export default function Canvas({ sceneId, imageFilename, dropTargets, terms, mod
     onCanvasClick(xPercent, yPercent);
   }
 
+  const areaBg = canvasBg === "dark" ? "bg-gray-800" : canvasBg === "light" ? "bg-gray-100" : "bg-blue-50/50";
+  const canvasBorder = canvasBg === "dark" ? "border-gray-600" : "border-transparent";
+
   return (
-    <div className="flex-1 flex flex-col bg-blue-50/50 relative">
-      <Toolbar />
+    <div className={`flex-1 flex flex-col relative ${areaBg}`}>
+      <Toolbar canvasBg={canvasBg} onCanvasBgChange={onCanvasBgChange} />
 
       {/* Placing indicator */}
       {isPlacing && (
@@ -159,7 +165,7 @@ export default function Canvas({ sceneId, imageFilename, dropTargets, terms, mod
             ? "border-blue-400 cursor-crosshair"
             : isOver
               ? "border-blue-300 bg-blue-50/30"
-              : "border-transparent"
+              : canvasBorder
             } ${!isPlacing ? "cursor-default" : ""}`}
           style={{ aspectRatio: "3 / 2" }}
         >

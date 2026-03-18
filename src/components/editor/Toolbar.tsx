@@ -1,20 +1,31 @@
-import { MousePointer2, Image, Play } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
+import { Sun, Moon, Monitor } from "lucide-react";
 
-const tools: { icon: LucideIcon; label: string }[] = [
-  { icon: MousePointer2, label: "Select" },
-  { icon: Image, label: "Image" },
-  { icon: Play, label: "Play" },
+export type CanvasBg = "default" | "light" | "dark";
+
+const bgOptions: { value: CanvasBg; icon: typeof Sun; label: string }[] = [
+  { value: "default", icon: Monitor, label: "Default" },
+  { value: "light", icon: Sun, label: "Light" },
+  { value: "dark", icon: Moon, label: "Dark" },
 ];
 
-export default function Toolbar() {
+interface ToolbarProps {
+  canvasBg: CanvasBg;
+  onCanvasBgChange: (bg: CanvasBg) => void;
+}
+
+export default function Toolbar({ canvasBg, onCanvasBgChange }: ToolbarProps) {
   return (
     <div className="absolute left-3 top-1/2 -translate-y-1/2 z-10 flex flex-col items-center gap-1 p-1.5 bg-white rounded-xl shadow-md">
-      {tools.map(({ icon: Icon, label }) => (
+      {bgOptions.map(({ value, icon: Icon, label }) => (
         <button
-          key={label}
-          title={label}
-          className="p-2 rounded-lg text-blue-500 hover:bg-blue-50 transition-colors"
+          key={value}
+          title={`${label} background`}
+          onClick={() => onCanvasBgChange(value)}
+          className={`p-2 rounded-lg transition-colors ${
+            canvasBg === value
+              ? "bg-blue-100 text-blue-600"
+              : "text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+          }`}
         >
           <Icon className="w-5 h-5" />
         </button>
