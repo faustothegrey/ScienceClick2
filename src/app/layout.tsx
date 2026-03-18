@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ScienceClick2",
-  description: "Interactive educational scene editor",
+  title: "ScienceClick",
+  description: "Interactive educational tool for visual learning",
 };
 
 export default function RootLayout({
