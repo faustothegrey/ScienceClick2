@@ -5,7 +5,7 @@ import { Term, getTermLabel, SUPPORTED_LOCALES } from "@/lib/i18n";
 
 interface WordListProps {
   terms: Term[];
-  mode: "editor" | "play";
+  mode: "editor" | "play" | "practice";
   onAddTerm: (label: string) => void;
   onRemoveTerm: (termId: string) => void;
   locale: string;
@@ -44,7 +44,7 @@ function LocaleBadges({ term, activeLocale, onLocaleClick }: { term: Term; activ
   );
 }
 
-function DraggableTerm({ term, mode, onRemove, locale, termLocale, onLocaleChange, isPlaced }: { term: Term; mode: "editor" | "play"; onRemove: (termId: string) => void; locale: string; termLocale: string; onLocaleChange: (locale: string) => void; isPlaced: boolean }) {
+function DraggableTerm({ term, mode, onRemove, termLocale, onLocaleChange, isPlaced }: { term: Term; mode: "editor" | "play" | "practice"; onRemove: (termId: string) => void; termLocale: string; onLocaleChange: (locale: string) => void; isPlaced: boolean }) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: term.id,
   });
@@ -186,7 +186,7 @@ export default function WordList({ terms, mode, onAddTerm, onRemoveTerm, locale,
         <div className="border-t border-gray-100 pt-3">
           <div className="space-y-2">
             {terms.map((term) => (
-              <DraggableTerm key={`${term.id}-${playKey ?? 0}`} term={term} mode={mode} onRemove={onRemoveTerm} locale={locale} termLocale={termLocales[term.id] || locale} onLocaleChange={(loc) => onTermLocaleChange(term.id, loc)} isPlaced={placedTermIds?.has(term.id) ?? false} />
+              <DraggableTerm key={`${term.id}-${playKey ?? 0}`} term={term} mode={mode} onRemove={onRemoveTerm} termLocale={termLocales[term.id] || locale} onLocaleChange={(loc) => onTermLocaleChange(term.id, loc)} isPlaced={placedTermIds?.has(term.id) ?? false} />
             ))}
           </div>
         </div>

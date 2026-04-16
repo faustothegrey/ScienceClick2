@@ -1,4 +1,4 @@
-import { useDroppable } from "@dnd-kit/core";
+import { useDroppable, useDraggable } from "@dnd-kit/core";
 import Toolbar from "./Toolbar";
 import type { CanvasBg } from "./Toolbar";
 import type { DropTarget } from "@/app/scenes/[id]/page";
@@ -11,7 +11,7 @@ interface CanvasProps {
   imageFilename: string | null;
   dropTargets: DropTarget[];
   terms: Term[];
-  mode: "editor" | "play";
+  mode: "editor" | "play" | "practice";
   playerGuesses: Record<string, string>;
   showFeedback: boolean;
   placingTermId: string | null;
@@ -27,21 +27,27 @@ interface CanvasProps {
   isSpectator?: boolean;
   canvasBg: CanvasBg;
   onCanvasBgChange: (bg: CanvasBg) => void;
+  practiceHighlightedTargetId?: string | null;
 }
 
 function DropZone({
   target, terms, mode, guessTermId, showFeedback, locale, termLocales, opaqueTargets,
   rivalGuessTermId, showRivalFeedback, teamLabel, isRivalLivePlaced,
-  indicatorColor, onRemoveGuess
+  indicatorColor, onRemoveGuess, practiceHighlighted
 }: {
-  target: DropTarget; terms: Term[]; mode: "editor" | "play";
+  target: DropTarget; terms: Term[]; mode: "editor" | "play" | "practice";
   guessTermId?: string; showFeedback: boolean; locale: string; termLocales?: Record<string, string>; opaqueTargets?: boolean;
   rivalGuessTermId?: string; showRivalFeedback?: boolean;
   teamLabel?: string; isRivalLivePlaced?: boolean; indicatorColor?: "purple" | "orange";
   isSpectator?: boolean;
   onRemoveGuess?: (targetId: string) => void;
+  practiceHighlighted?: boolean;
 }) {
-  const { setNodeRef, isOver } = useDroppable({ id: target.id });
+  const { setNodeRef: setDropRef, isOver } = useDroppable({ id: target.id });
+  const { setNodeRef: setDragRef, listeners, attributes, isDragging } = useDraggable({
+    id: `drag-target-${target.id}`,
+    disabled: mode !== "editor",
+  });
   const assignedTerm = terms.find((t) => t.id === target.assignedTerm);
   const editorLabel = assignedTerm ? getTermLabel(assignedTerm, locale) : null;
   const guessTerm = guessTermId ? terms.find((t) => t.id === guessTermId) : null;
@@ -77,15 +83,24 @@ function DropZone({
 
   // Common transitions to smooth the snap when hovering
   const baseClasses = "transition-all duration-200 ease-out";
+  const practiceRing = practiceHighlighted ? " ring-4 ring-amber-400/60 ring-offset-2 ring-offset-white" : "";
 
   const showRival = showRivalFeedback && rivalLabel;
   const rivalTeamName = teamLabel === "Team A" ? "Team B" : "Team A";
-  const rivalThemeColor = indicatorColor === "purple" ? "bg-purple-500" : indicatorColor === "orange" ? "bg-orange-500" : (teamLabel === "Team A" ? "bg-orange-500" : "bg-purple-500");
+  const rivalThemeColor = indicatorColor === "purple" ? "bg-purple-500" : indicatorColor === "orange" ? "bg-orange-500" : (teamLabel === "Team A" ? "bg-purple-500" : "bg-orange-500");
+
+  const setNodeRef = (el: HTMLElement | null) => {
+    setDropRef(el);
+    setDragRef(el);
+  };
+
+  const editorCursor = mode === "editor" ? "cursor-grab active:cursor-grabbing" : "";
 
   return (
     <div
       ref={setNodeRef}
-      className={`absolute z-10 flex flex-col items-center justify-center -translate-x-1/2 -translate-y-1/2 w-32 rounded-lg text-sm font-medium ${baseClasses} ${showRival ? "h-16" : "h-10"} ${className}`}
+      {...(mode === "editor" ? { ...listeners, ...attributes } : {})}
+      className={`absolute z-10 flex flex-col items-center justify-center -translate-x-1/2 -translate-y-1/2 w-32 rounded-lg text-sm font-medium ${baseClasses} ${showRival ? "h-16" : "h-10"} ${className}${practiceRing} ${editorCursor} ${isDragging ? "opacity-30" : ""}`}
       style={{
         left: `${target.x}%`,
         top: `${target.y}%`,
@@ -110,22 +125,25 @@ function DropZone({
         </button>
       )}
       {showRival && (
-        <span className={`text-xs mt-0.5 px-1.5 py-0.5 rounded ${rivalCorrect ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
-          vs {rivalLabel}
+        <span className={`absolute -top-2.5 -left-2.5 text-[9px] font-bold uppercase px-1.5 py-0.5 rounded shadow-sm ${rivalCorrect ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
+          {rivalTeamName}: {rivalLabel}
         </span>
       )}
       {/* Live progress indicator when the rival has placed a term but hasn't submitted yet */}
       {isRivalLivePlaced && !showRivalFeedback && (
         <div
-          className={`absolute -bottom-1.5 -right-1.5 w-3 h-3 rounded-full ${rivalThemeColor} shadow-md border border-white animate-pulse`}
+          className={`absolute -top-2.5 -left-2.5 flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase text-white ${rivalThemeColor} shadow-md border border-white`}
           title={`${rivalTeamName} has placed a label here`}
-        />
+        >
+          <span className="w-2 h-2 rounded-full bg-white/60" />
+          {rivalTeamName}
+        </div>
       )}
     </div>
   );
 }
 
-export default function Canvas({ sceneId, imageFilename, dropTargets, terms, mode, playerGuesses, showFeedback, placingTermId, onCanvasClick, onRemoveGuess, locale, termLocales, opaqueTargets, rivalGuesses, rivalLiveProgress, matchStatus, teamLabel, isSpectator, canvasBg, onCanvasBgChange }: CanvasProps) {
+export default function Canvas({ sceneId, imageFilename, dropTargets, terms, mode, playerGuesses, showFeedback, placingTermId, onCanvasClick, onRemoveGuess, locale, termLocales, opaqueTargets, rivalGuesses, rivalLiveProgress, matchStatus, teamLabel, isSpectator, canvasBg, onCanvasBgChange, practiceHighlightedTargetId }: CanvasProps) {
   const { setNodeRef, isOver } = useDroppable({ id: "canvas" });
   const isPlacing = !!placingTermId;
   const placingTerm = isPlacing ? terms.find((t) => t.id === placingTermId) : null;
@@ -196,6 +214,7 @@ export default function Canvas({ sceneId, imageFilename, dropTargets, terms, mod
               isRivalLivePlaced={rivalLiveProgress?.includes(target.id)}
               indicatorColor={isSpectator ? (teamLabel === "Team A" ? "purple" : "orange") : undefined}
               onRemoveGuess={onRemoveGuess}
+              practiceHighlighted={practiceHighlightedTargetId === target.id}
             />
           ))}
 

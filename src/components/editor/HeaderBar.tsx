@@ -13,8 +13,8 @@ interface FeedbackInfo {
 
 interface HeaderBarProps {
   sceneName: string;
-  mode: "editor" | "play";
-  onModeChange: (mode: "editor" | "play") => void;
+  mode: "editor" | "play" | "practice";
+  onModeChange: (mode: "editor" | "play" | "practice") => void;
   feedback?: FeedbackInfo;
   onRetry?: () => void;
   playerName: string | null;
@@ -67,7 +67,9 @@ export default function HeaderBar({
   return (
     <header className={`relative z-30 flex items-center justify-between h-14 px-4 border-b transition-colors ${mode === "editor"
         ? "bg-gradient-to-b from-blue-50/80 to-white border-blue-200"
-        : "bg-gradient-to-b from-emerald-50/80 to-white border-emerald-200"
+        : mode === "practice"
+          ? "bg-gradient-to-b from-amber-50/90 to-white border-amber-200"
+          : "bg-gradient-to-b from-emerald-50/80 to-white border-emerald-200"
       }`}>
       {/* Left: back link */}
       <div className="flex items-center gap-2 text-sm text-gray-400">
@@ -88,6 +90,10 @@ export default function HeaderBar({
         ) : mode === "play" ? (
           <span className={`ml-2 px-2 py-0.5 text-xs font-bold rounded-full ${getTeamColors(undefined, false)}`}>
             Single Player
+          </span>
+        ) : mode === "practice" ? (
+          <span className="ml-2 px-2 py-0.5 text-xs font-bold rounded-full bg-amber-100 text-amber-800 border border-amber-200">
+            Practice
           </span>
         ) : null}
       </div>
@@ -195,6 +201,15 @@ export default function HeaderBar({
             Login
           </button>
         )}
+        <button
+          onClick={() => onModeChange("practice")}
+          className={`px-4 py-1.5 text-sm font-medium rounded-full transition-colors ${mode === "practice"
+            ? "bg-amber-500 text-gray-950 shadow-sm"
+            : "text-gray-500 hover:text-gray-700"
+            }`}
+        >
+          Practice
+        </button>
         <button
           onClick={() => onModeChange("editor")}
           className={`px-4 py-1.5 text-sm font-medium rounded-full transition-colors ${mode === "editor"

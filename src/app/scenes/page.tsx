@@ -85,14 +85,6 @@ function SceneCard({ scene, playMode, isMatchMode, onDelete }: { scene: Scene; p
           </p>
         </Link>
 
-        <div className="mt-4 pt-4 border-t border-gray-800/60 mt-auto flex justify-end">
-          <Link
-            href={getHref()}
-            className="px-4 py-2 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 hover:bg-emerald-500 hover:text-white text-sm font-semibold rounded-lg transition-colors"
-          >
-            {isMatchMode ? "Start Match" : "Play Scene"}
-          </Link>
-        </div>
       </div>
     </div>
   );
@@ -128,41 +120,42 @@ export default function ScenesGalleryPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 text-gray-100">
-      <div className="max-w-5xl mx-auto px-6 py-12">
-        <header className="flex items-center justify-between mb-10">
-          <h1 className="text-3xl font-bold tracking-tight">Scenes</h1>
-          <div className="flex items-center gap-4">
-            {isMatchMode && (
-              <select
-                value={playMode}
-                onChange={(e) => setPlayMode(e.target.value as PlayMode)}
-                className="px-3 py-2 bg-gray-800 border border-gray-700 text-gray-200 rounded-lg text-sm focus:outline-none focus:border-purple-500 transition-colors"
-              >
-                <option value="single">Single Player</option>
-                <option value="team-a">Team A</option>
-                <option value="team-b">Team B</option>
-                <option value="spectator">Spectator View</option>
-              </select>
-            )}
-            <button
-              onClick={() => setIsMatchMode(!isMatchMode)}
-              className={`px-4 py-2 font-semibold rounded-lg transition-colors border ${isMatchMode
-                  ? "bg-purple-500/20 text-purple-400 border-purple-500/50 hover:bg-purple-500/30"
-                  : "bg-gray-800 text-gray-300 border-gray-700 hover:bg-gray-700"
-                }`}
-            >
-              {isMatchMode ? "Disable Match Mode" : "Enable Match Mode"}
-            </button>
-            <button
-              onClick={handleCreateScene}
-              className="px-4 py-2 bg-amber-500 text-gray-950 font-semibold rounded-lg hover:bg-amber-400 transition-colors"
-            >
-              Create Scene
-            </button>
-          </div>
-        </header>
+    <div className="min-h-screen bg-gray-950 text-gray-100 flex">
+      {/* Sidebar */}
+      <aside className="w-56 shrink-0 min-h-screen bg-gray-900 border-r border-gray-800 p-5 flex flex-col gap-4">
+        <button
+          onClick={() => setIsMatchMode(!isMatchMode)}
+          className={`w-full px-4 py-2 text-sm font-semibold rounded-lg transition-colors border ${isMatchMode
+              ? "bg-purple-500/20 text-purple-400 border-purple-500/50 hover:bg-purple-500/30"
+              : "bg-gray-800 text-gray-300 border-gray-700 hover:bg-gray-700"
+            }`}
+        >
+          {isMatchMode ? "Disable Match Mode" : "Enable Match Mode"}
+        </button>
 
+        {isMatchMode && (
+          <select
+            value={playMode}
+            onChange={(e) => setPlayMode(e.target.value as PlayMode)}
+            className="w-full px-3 py-2 bg-gray-800 border border-gray-700 text-gray-200 rounded-lg text-sm focus:outline-none focus:border-purple-500 transition-colors"
+          >
+            <option value="single">Single Player</option>
+            <option value="team-a">Team A</option>
+            <option value="team-b">Team B</option>
+            <option value="spectator">Spectator View</option>
+          </select>
+        )}
+
+        <button
+          onClick={handleCreateScene}
+          className="w-full px-4 py-2 bg-amber-500 text-gray-950 text-sm font-semibold rounded-lg hover:bg-amber-400 transition-colors"
+        >
+          Create Scene
+        </button>
+      </aside>
+
+      {/* Main content */}
+      <main className="flex-1 min-w-0 px-8 py-10">
         {loading ? (
           <p className="text-gray-400">Loading scenes...</p>
         ) : scenes.length === 0 ? (
@@ -208,7 +201,7 @@ export default function ScenesGalleryPage() {
             })()}
           </div>
         )}
-      </div>
+      </main>
     </div>
   );
 }
