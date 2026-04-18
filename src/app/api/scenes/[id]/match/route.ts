@@ -7,6 +7,7 @@ import {
   submitTeamProgress,
   isMatchComplete,
 } from "@/lib/matchStore";
+import { findSceneDir } from "@/lib/scenePaths";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -68,9 +69,10 @@ export async function PATCH(request: NextRequest, { params }: Params) {
 
 export async function DELETE(_request: NextRequest, { params }: Params) {
   const { id } = await params;
-  const filePath = path.join(process.cwd(), "public", "scenes", id, "match.json");
+  const sceneDir = await findSceneDir(id);
+  if (!sceneDir) return NextResponse.json({ ok: true });
   try {
-    await unlink(filePath);
+    await unlink(path.join(sceneDir, "match.json"));
   } catch {
     // file may not exist, that's fine
   }

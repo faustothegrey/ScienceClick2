@@ -680,7 +680,7 @@ function SceneEditorPage() {
         <div className="flex flex-1 overflow-hidden">
           <Canvas
             sceneId={id}
-            imageFilename={sceneImage}
+            imageSrc={sceneImage}
             dropTargets={dropTargets}
             terms={availableTerms}
             mode={mode}

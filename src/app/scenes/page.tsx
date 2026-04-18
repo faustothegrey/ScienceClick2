@@ -63,7 +63,7 @@ function SceneCard({ scene, playMode, isMatchMode, onDelete }: { scene: Scene; p
       <Link href={getHref()} className="block relative h-40 bg-gray-800 flex items-center justify-center overflow-hidden">
         {scene.image ? (
           <img
-            src={`/scenes/${scene.id}/${scene.image}`}
+            src={scene.image}
             alt={formatName(scene.id)}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
           />

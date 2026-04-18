@@ -1,5 +1,6 @@
 import { readFile, writeFile, mkdir } from "fs/promises";
 import path from "path";
+import { findSceneDir, SCENES_ROOT_FS, OTHER_SLUG } from "./scenePaths";
 
 export interface TeamState {
   guesses: Record<string, string> | null;
@@ -16,12 +17,16 @@ export interface MatchState {
   };
 }
 
-function matchPath(sceneId: string) {
-  return path.join(process.cwd(), "public", "scenes", sceneId, "match.json");
+async function matchPath(sceneId: string): Promise<string> {
+  const sceneDir = await findSceneDir(sceneId);
+  // Fallback to "other" category if the scene directory doesn't exist yet —
+  // getOrCreateMatch will create it on first use.
+  const base = sceneDir ?? path.join(SCENES_ROOT_FS, OTHER_SLUG, sceneId);
+  return path.join(base, "match.json");
 }
 
 export async function getOrCreateMatch(sceneId: string): Promise<MatchState> {
-  const filePath = matchPath(sceneId);
+  const filePath = await matchPath(sceneId);
   try {
     const data = await readFile(filePath, "utf-8");
     return JSON.parse(data);
@@ -49,7 +54,7 @@ export async function submitTeamGuesses(
   const state = await getOrCreateMatch(sceneId);
   state.teams[team].guesses = guesses;
   state.teams[team].submittedAt = Date.now();
-  await writeFile(matchPath(sceneId), JSON.stringify(state, null, 2));
+  await writeFile(await matchPath(sceneId), JSON.stringify(state, null, 2));
   return state;
 }
 
@@ -60,7 +65,7 @@ export async function submitTeamProgress(
 ): Promise<MatchState> {
   const state = await getOrCreateMatch(sceneId);
   state.teams[team].liveProgress = liveProgress;
-  await writeFile(matchPath(sceneId), JSON.stringify(state, null, 2));
+  await writeFile(await matchPath(sceneId), JSON.stringify(state, null, 2));
   return state;
 }
 

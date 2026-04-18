@@ -110,7 +110,7 @@ export default function SpectatorPage({ params }: { params: Promise<{ id: string
                         <div className="flex-1 relative overflow-hidden pointer-events-none">
                             <Canvas
                                 sceneId={id}
-                                imageFilename={sceneImage}
+                                imageSrc={sceneImage}
                                 dropTargets={dropTargets}
                                 terms={availableTerms}
                                 mode="play"
@@ -139,7 +139,7 @@ export default function SpectatorPage({ params }: { params: Promise<{ id: string
                         <div className="flex-1 relative overflow-hidden pointer-events-none">
                             <Canvas
                                 sceneId={id}
-                                imageFilename={sceneImage}
+                                imageSrc={sceneImage}
                                 dropTargets={dropTargets}
                                 terms={availableTerms}
                                 mode="play"

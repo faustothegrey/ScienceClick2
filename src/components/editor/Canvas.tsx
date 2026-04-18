@@ -8,7 +8,7 @@ export type MatchStatus = "playing" | "submitted" | "reveal";
 
 interface CanvasProps {
   sceneId: string;
-  imageFilename: string | null;
+  imageSrc: string | null;
   dropTargets: DropTarget[];
   terms: Term[];
   mode: "editor" | "play" | "practice";
@@ -143,13 +143,11 @@ function DropZone({
   );
 }
 
-export default function Canvas({ sceneId, imageFilename, dropTargets, terms, mode, playerGuesses, showFeedback, placingTermId, onCanvasClick, onRemoveGuess, locale, termLocales, opaqueTargets, rivalGuesses, rivalLiveProgress, matchStatus, teamLabel, isSpectator, canvasBg, onCanvasBgChange, practiceHighlightedTargetId }: CanvasProps) {
+export default function Canvas({ sceneId, imageSrc, dropTargets, terms, mode, playerGuesses, showFeedback, placingTermId, onCanvasClick, onRemoveGuess, locale, termLocales, opaqueTargets, rivalGuesses, rivalLiveProgress, matchStatus, teamLabel, isSpectator, canvasBg, onCanvasBgChange, practiceHighlightedTargetId }: CanvasProps) {
   const { setNodeRef, isOver } = useDroppable({ id: "canvas" });
   const isPlacing = !!placingTermId;
   const placingTerm = isPlacing ? terms.find((t) => t.id === placingTermId) : null;
   const placingLabel = placingTerm ? getTermLabel(placingTerm, locale) : null;
-
-  const imageSrc = imageFilename ? `/scenes/${sceneId}/${imageFilename}` : null;
 
   function handleClick(e: React.MouseEvent<HTMLDivElement>) {
     if (!isPlacing) return;

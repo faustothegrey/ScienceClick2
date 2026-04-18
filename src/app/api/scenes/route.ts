@@ -1,28 +1,20 @@
 import { NextResponse } from "next/server";
-import { readdir, readFile, stat } from "fs/promises";
+import { readFile, stat } from "fs/promises";
 import path from "path";
-
-const scenesDir = path.join(process.cwd(), "public", "scenes");
+import { listAllScenes, scenePublicUrl } from "@/lib/scenePaths";
 
 export async function GET() {
   try {
-    const entries = await readdir(scenesDir);
+    const scenes = await listAllScenes();
 
-    const scenes = await Promise.all(
-      entries.map(async (entry) => {
-        const entryPath = path.join(scenesDir, entry);
-        const info = await stat(entryPath);
-        if (!info.isDirectory()) return null;
-
+    const result = await Promise.all(
+      scenes.map(async ({ sceneId, categorySlug, absPath }) => {
         let termCount = 0;
         let agent: string | null = null;
         let category: string | null = null;
         let order: number | null = null;
         try {
-          const configRaw = await readFile(
-            path.join(entryPath, "config.json"),
-            "utf-8"
-          );
+          const configRaw = await readFile(path.join(absPath, "config.json"), "utf-8");
           const config = JSON.parse(configRaw);
           termCount = Array.isArray(config.terms) ? config.terms.length : 0;
           if (typeof config.agent === "string") agent = config.agent;
@@ -35,19 +27,19 @@ export async function GET() {
         let image: string | null = null;
         for (const name of ["scene.svg", "scene.png", "scene.jpeg", "scene.jpg"]) {
           try {
-            await stat(path.join(entryPath, name));
-            image = name;
+            await stat(path.join(absPath, name));
+            image = scenePublicUrl(categorySlug, sceneId, name);
             break;
           } catch {
             // not found
           }
         }
 
-        return { id: entry, termCount, image, agent, category, order };
+        return { id: sceneId, termCount, image, agent, category, order };
       })
     );
 
-    return NextResponse.json(scenes.filter(Boolean));
+    return NextResponse.json(result);
   } catch {
     return NextResponse.json([]);
   }
