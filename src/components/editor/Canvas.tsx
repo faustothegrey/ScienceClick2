@@ -172,18 +172,18 @@ export default function Canvas({ sceneId, imageSrc, dropTargets, terms, mode, pl
       )}
 
       {/* Canvas area — fixed 3:2 aspect ratio (1200×800 standard) */}
-      <div className="flex-1 flex items-center justify-center p-6">
+      <div className="flex-1 flex items-center justify-center p-1 desktop:p-6 min-h-0">
         <div
           ref={setNodeRef}
           id="canvas-drop-area"
           onClick={handleClick}
-          className={`bg-white rounded-xl shadow-sm w-full relative border-2 transition-colors ${isPlacing
+          className={`bg-white desktop:rounded-xl desktop:shadow-sm max-w-full max-h-full relative border-2 transition-colors ${isPlacing
             ? "border-blue-400 cursor-crosshair"
             : isOver
               ? "border-blue-300 bg-blue-50/30"
               : canvasBorder
             } ${!isPlacing ? "cursor-default" : ""}`}
-          style={{ aspectRatio: "3 / 2" }}
+          style={{ aspectRatio: "3 / 2", width: "min(100%, calc((100vh - 8rem) * 1.5))" }}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           {imageSrc && (

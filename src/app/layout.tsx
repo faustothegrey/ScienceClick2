@@ -27,6 +27,13 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <div className="rotate-prompt" aria-hidden="true">
+          <div className="rotate-prompt__icon">📱</div>
+          <div className="rotate-prompt__title">Rotate your device</div>
+          <div className="rotate-prompt__body">
+            ScienceClick works best in landscape mode on phones.
+          </div>
+        </div>
         {children}
       </body>
     </html>

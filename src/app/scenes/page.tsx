@@ -121,8 +121,8 @@ export default function ScenesGalleryPage() {
 
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100 flex">
-      {/* Sidebar */}
-      <aside className="w-56 shrink-0 min-h-screen bg-gray-900 border-r border-gray-800 p-5 flex flex-col gap-4">
+      {/* Sidebar — hidden on small screens */}
+      <aside className="hidden md:flex w-56 shrink-0 min-h-screen bg-gray-900 border-r border-gray-800 p-5 flex-col gap-4">
         <button
           onClick={() => setIsMatchMode(!isMatchMode)}
           className={`w-full px-4 py-2 text-sm font-semibold rounded-lg transition-colors border ${isMatchMode

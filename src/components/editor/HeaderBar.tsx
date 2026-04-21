@@ -65,20 +65,20 @@ export default function HeaderBar({
   }, []);
 
   return (
-    <header className={`relative z-30 flex items-center justify-between h-14 px-4 border-b transition-colors ${mode === "editor"
+    <header className={`relative z-30 flex items-center justify-between h-10 desktop:h-14 px-2 desktop:px-4 border-b transition-colors ${mode === "editor"
         ? "bg-gradient-to-b from-blue-50/80 to-white border-blue-200"
         : mode === "practice"
           ? "bg-gradient-to-b from-amber-50/90 to-white border-amber-200"
           : "bg-gradient-to-b from-emerald-50/80 to-white border-emerald-200"
       }`}>
       {/* Left: back link */}
-      <div className="flex items-center gap-2 text-sm text-gray-400">
+      <div className="flex items-center gap-2 text-sm text-gray-400 min-w-0">
         <Link href="/scenes" className="flex items-center gap-2 hover:text-gray-600 transition-colors">
           <ArrowLeft className="w-4 h-4" />
-          <span>Scenes</span>
+          <span className="hidden desktop:inline">Scenes</span>
         </Link>
-        <span className="text-gray-300">/</span>
-        <span className="text-gray-900 font-semibold">{sceneName}</span>
+        <span className="hidden desktop:inline text-gray-300">/</span>
+        <span className="text-gray-900 font-semibold truncate max-w-[40vw] desktop:max-w-none">{sceneName}</span>
         {isSpectator ? (
           <span className={`ml-2 px-2 py-0.5 text-xs font-bold rounded-full ${getTeamColors(undefined, true)}`}>
             Spectator
@@ -152,14 +152,14 @@ export default function HeaderBar({
             </button>
           </div>
         ) : (
-          <h1 className="text-lg font-bold text-gray-900">{sceneName}</h1>
+          <h1 className="hidden desktop:block text-lg font-bold text-gray-900">{sceneName}</h1>
         )}
       </div>
 
       {/* Right: mode toggle */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-1 desktop:gap-3">
         {playerName ? (
-          <div ref={resultsRef} className="relative flex items-center gap-2 text-sm text-gray-600">
+          <div ref={resultsRef} className="hidden desktop:flex relative items-center gap-2 text-sm text-gray-600">
             <button
               onClick={() => setResultsOpen((v) => !v)}
               className="px-2.5 py-1 rounded-full bg-white/70 border border-gray-200 hover:bg-white transition-colors"
@@ -196,14 +196,14 @@ export default function HeaderBar({
         ) : (
           <button
             onClick={onLogin}
-            className="px-3 py-1.5 text-sm font-medium rounded-full bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+            className="hidden desktop:inline-block px-3 py-1.5 text-sm font-medium rounded-full bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
           >
             Login
           </button>
         )}
         <button
           onClick={() => onModeChange("practice")}
-          className={`px-4 py-1.5 text-sm font-medium rounded-full transition-colors ${mode === "practice"
+          className={`px-2 desktop:px-4 py-1 desktop:py-1.5 text-xs desktop:text-sm font-medium rounded-full transition-colors ${mode === "practice"
             ? "bg-amber-500 text-gray-950 shadow-sm"
             : "text-gray-500 hover:text-gray-700"
             }`}
@@ -212,7 +212,7 @@ export default function HeaderBar({
         </button>
         <button
           onClick={() => onModeChange("editor")}
-          className={`px-4 py-1.5 text-sm font-medium rounded-full transition-colors ${mode === "editor"
+          className={`hidden desktop:inline-block px-4 py-1.5 text-sm font-medium rounded-full transition-colors ${mode === "editor"
             ? "bg-blue-600 text-white shadow-sm"
             : "text-gray-500 hover:text-gray-700"
             }`}
@@ -221,7 +221,7 @@ export default function HeaderBar({
         </button>
         <button
           onClick={() => onModeChange("play")}
-          className={`px-4 py-1.5 text-sm font-medium rounded-full transition-colors ${mode === "play"
+          className={`px-2 desktop:px-4 py-1 desktop:py-1.5 text-xs desktop:text-sm font-medium rounded-full transition-colors ${mode === "play"
             ? "bg-emerald-600 text-white shadow-sm"
             : "text-gray-500 hover:text-gray-700"
             }`}

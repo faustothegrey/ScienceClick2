@@ -9,6 +9,10 @@ import {
   DragStartEvent,
   DragOverlay,
   pointerWithin,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
 } from "@dnd-kit/core";
 import HeaderBar from "@/components/editor/HeaderBar";
 import Canvas from "@/components/editor/Canvas";
@@ -119,6 +123,10 @@ function SceneEditorPage() {
   const rivalTeam = teamParam === "team-a" ? "team-b" : "team-a";
 
   const dndId = useId();
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 8 } }),
+  );
   const [mode, setMode] = useState<SceneMode>(isMatchMode ? "play" : "play");
   const [availableTerms, setAvailableTerms] = useState<Term[]>([]);
   const [dropTargets, setDropTargets] = useState<DropTarget[]>([]);
@@ -633,6 +641,7 @@ function SceneEditorPage() {
   return (
     <DndContext
       id={dndId}
+      sensors={sensors}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
       collisionDetection={pointerWithin}
@@ -677,7 +686,7 @@ function SceneEditorPage() {
           matchStatus={isMatchMode ? matchStatus : undefined}
           teamLabel={teamLabel}
         />
-        <div className="flex flex-1 overflow-hidden">
+        <div className="flex flex-col desktop:flex-row flex-1 overflow-hidden">
           <Canvas
             sceneId={id}
             imageSrc={sceneImage}

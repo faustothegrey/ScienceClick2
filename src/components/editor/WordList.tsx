@@ -50,19 +50,19 @@ function DraggableTerm({ term, mode, onRemove, termLocale, onLocaleChange, isPla
   });
 
   return (
-    <div className={`flex items-center gap-1 ${isDragging ? "opacity-30" : ""} ${isPlaced ? "opacity-40" : ""}`}>
+    <div className={`flex items-center gap-1 shrink-0 desktop:shrink ${isDragging ? "opacity-30" : ""} ${isPlaced ? "opacity-40" : ""}`}>
       <div
         ref={setNodeRef}
         {...listeners}
         {...attributes}
-        className={`flex-1 flex items-center gap-2 px-2 py-1.5 rounded-lg transition-colors ${
+        className={`flex-1 flex items-center gap-2 px-2 py-1.5 rounded-lg transition-colors select-none ${
           isPlaced
             ? "bg-gray-100 border border-gray-100 cursor-default"
             : "bg-gray-50 border border-gray-200 cursor-move hover:border-blue-400"
         }`}
       >
         <GripVertical className={`w-3.5 h-3.5 shrink-0 ${isPlaced ? "text-gray-200" : "text-gray-300"}`} />
-        <span className={`text-sm font-medium ${isPlaced ? "text-gray-400 line-through" : "text-gray-700"}`}>{getTermLabel(term, termLocale)}</span>
+        <span className={`text-sm font-medium whitespace-nowrap ${isPlaced ? "text-gray-400 line-through" : "text-gray-700"}`}>{getTermLabel(term, termLocale)}</span>
         {!isPlaced && <LocaleBadges term={term} activeLocale={termLocale} onLocaleClick={onLocaleChange} />}
       </div>
       {mode === "editor" && (
@@ -107,9 +107,9 @@ export default function WordList({ terms, mode, onAddTerm, onRemoveTerm, locale,
   }
 
   return (
-    <aside className="w-72 bg-white border-l border-gray-200 flex flex-col z-20">
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-100">
+    <aside className="order-last shrink-0 w-full desktop:order-none desktop:shrink desktop:w-72 bg-white border-t desktop:border-t-0 desktop:border-l border-gray-200 flex flex-col z-20">
+      {/* Header — hidden on small screens to save space */}
+      <div className="hidden desktop:flex items-center justify-between p-4 border-b border-gray-100">
         <h2 className="text-lg font-bold text-gray-900">Word List</h2>
         <div ref={localeRef} className="relative">
           <button
@@ -135,9 +135,9 @@ export default function WordList({ terms, mode, onAddTerm, onRemoveTerm, locale,
         </div>
       </div>
 
-      {/* New Term button (editor only) */}
+      {/* New Term button (editor only, desktop only) */}
       {mode === "editor" && (
-        <div className="p-3">
+        <div className="hidden desktop:block p-3">
           {!isCreating ? (
             <button
               onClick={() => setIsCreating(true)}
@@ -181,10 +181,10 @@ export default function WordList({ terms, mode, onAddTerm, onRemoveTerm, locale,
         </div>
       )}
 
-      {/* Terms list */}
-      <div className="px-4 pt-2 flex-1 overflow-y-auto">
-        <div className="border-t border-gray-100 pt-3">
-          <div className="space-y-2">
+      {/* Terms list — vertical on desktop, horizontal strip on mobile */}
+      <div className="desktop:px-4 desktop:pt-2 desktop:flex-1 desktop:overflow-y-auto">
+        <div className="desktop:border-t desktop:border-gray-100 desktop:pt-3">
+          <div className="flex flex-row desktop:flex-col gap-2 overflow-x-auto desktop:overflow-x-visible px-2 py-2 desktop:p-0">
             {terms.map((term) => (
               <DraggableTerm key={`${term.id}-${playKey ?? 0}`} term={term} mode={mode} onRemove={onRemoveTerm} termLocale={termLocales[term.id] || locale} onLocaleChange={(loc) => onTermLocaleChange(term.id, loc)} isPlaced={placedTermIds?.has(term.id) ?? false} />
             ))}
