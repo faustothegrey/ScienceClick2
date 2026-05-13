@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { LayoutProvider } from "@/components/LayoutProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,7 +35,7 @@ export default function RootLayout({
             ScienceClick works best in landscape mode on phones.
           </div>
         </div>
-        {children}
+        <LayoutProvider>{children}</LayoutProvider>
       </body>
     </html>
   );
