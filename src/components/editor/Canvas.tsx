@@ -3,6 +3,7 @@ import Toolbar from "./Toolbar";
 import type { CanvasBg } from "./Toolbar";
 import type { DropTarget } from "@/app/scenes/[id]/page";
 import { Term, getTermLabel } from "@/lib/i18n"; import { X } from "lucide-react";
+import { useLayout } from "@/components/LayoutProvider";
 
 export type MatchStatus = "playing" | "submitted" | "reveal";
 
@@ -43,6 +44,7 @@ function DropZone({
   onRemoveGuess?: (targetId: string) => void;
   practiceHighlighted?: boolean;
 }) {
+  const { isLandscape } = useLayout();
   const { setNodeRef: setDropRef, isOver } = useDroppable({ id: target.id });
   const { setNodeRef: setDragRef, listeners, attributes, isDragging } = useDraggable({
     id: `drag-target-${target.id}`,
@@ -95,6 +97,29 @@ function DropZone({
   };
 
   const editorCursor = mode === "editor" ? "cursor-grab active:cursor-grabbing" : "";
+
+  if (isLandscape) {
+    let dotClass: string;
+    if (isCorrect) dotClass = "bg-green-500";
+    else if (isIncorrect) dotClass = "bg-red-500";
+    else if (filled) dotClass = "bg-blue-500";
+    else if (isOver) dotClass = "bg-blue-400 ring-2 ring-blue-300/70";
+    else dotClass = "bg-gray-500/70 ring-1 ring-white/70";
+    const practiceDotRing = practiceHighlighted ? " ring-2 ring-amber-400/80" : "";
+    return (
+      <div
+        ref={setNodeRef}
+        {...(mode === "editor" ? { ...listeners, ...attributes } : {})}
+        className={`absolute z-10 flex items-center justify-center -translate-x-1/2 -translate-y-1/2 w-10 h-10 ${baseClasses} ${editorCursor} ${isDragging ? "opacity-30" : ""}`}
+        style={{
+          left: `${target.x}%`,
+          top: `${target.y}%`,
+        }}
+      >
+        <span className={`block w-2.5 h-2.5 rounded-full ${dotClass}${practiceDotRing}`} />
+      </div>
+    );
+  }
 
   return (
     <div
