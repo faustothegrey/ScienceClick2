@@ -164,10 +164,6 @@ function SceneEditorPage() {
     localStorage.setItem(`sc2:scene:${id}:locale`, newLocale);
   }
 
-  function handleTermLocaleChange(termId: string, loc: string) {
-    setTermLocales((prev) => ({ ...prev, [termId]: loc }));
-  }
-
   async function handleLogin() {
     const name = window.prompt("Enter your name (optional):", playerName ?? "");
     if (!name) {
@@ -685,8 +681,10 @@ function SceneEditorPage() {
           resultsByScene={resultsByScene}
           matchStatus={isMatchMode ? matchStatus : undefined}
           teamLabel={teamLabel}
+          locale={locale}
+          onLocaleChange={handleLocaleChange}
         />
-        <div className="flex flex-col desktop:flex-row flex-1 overflow-hidden">
+        <div className="flex flex-row flex-1 overflow-hidden">
           <Canvas
             sceneId={id}
             imageSrc={sceneImage}
@@ -745,9 +743,7 @@ function SceneEditorPage() {
               onAddTerm={handleAddTerm}
               onRemoveTerm={handleRemoveTerm}
               locale={locale}
-              onLocaleChange={handleLocaleChange}
               termLocales={termLocales}
-              onTermLocaleChange={handleTermLocaleChange}
               placedTermIds={placedTermIds}
               playKey={playKey}
             />

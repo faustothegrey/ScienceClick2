@@ -1,9 +1,7 @@
 import { useDroppable, useDraggable } from "@dnd-kit/core";
-import Toolbar from "./Toolbar";
 import type { CanvasBg } from "./Toolbar";
 import type { DropTarget } from "@/app/scenes/[id]/page";
 import { Term, getTermLabel } from "@/lib/i18n"; import { X } from "lucide-react";
-import { useLayout } from "@/components/LayoutProvider";
 
 export type MatchStatus = "playing" | "submitted" | "reveal";
 
@@ -44,7 +42,6 @@ function DropZone({
   onRemoveGuess?: (targetId: string) => void;
   practiceHighlighted?: boolean;
 }) {
-  const { isLandscape } = useLayout();
   const { setNodeRef: setDropRef, isOver } = useDroppable({ id: target.id });
   const { setNodeRef: setDragRef, listeners, attributes, isDragging } = useDraggable({
     id: `drag-target-${target.id}`,
@@ -98,29 +95,6 @@ function DropZone({
 
   const editorCursor = mode === "editor" ? "cursor-grab active:cursor-grabbing" : "";
 
-  if (isLandscape) {
-    let dotClass: string;
-    if (isCorrect) dotClass = "bg-green-500";
-    else if (isIncorrect) dotClass = "bg-red-500";
-    else if (filled) dotClass = "bg-blue-500";
-    else if (isOver) dotClass = "bg-blue-400 ring-2 ring-blue-300/70";
-    else dotClass = "bg-gray-500/70 ring-1 ring-white/70";
-    const practiceDotRing = practiceHighlighted ? " ring-2 ring-amber-400/80" : "";
-    return (
-      <div
-        ref={setNodeRef}
-        {...(mode === "editor" ? { ...listeners, ...attributes } : {})}
-        className={`absolute z-10 flex items-center justify-center -translate-x-1/2 -translate-y-1/2 w-10 h-10 ${baseClasses} ${editorCursor} ${isDragging ? "opacity-30" : ""}`}
-        style={{
-          left: `${target.x}%`,
-          top: `${target.y}%`,
-        }}
-      >
-        <span className={`block w-2.5 h-2.5 rounded-full ${dotClass}${practiceDotRing}`} />
-      </div>
-    );
-  }
-
   return (
     <div
       ref={setNodeRef}
@@ -168,7 +142,7 @@ function DropZone({
   );
 }
 
-export default function Canvas({ sceneId, imageSrc, dropTargets, terms, mode, playerGuesses, showFeedback, placingTermId, onCanvasClick, onRemoveGuess, locale, termLocales, opaqueTargets, rivalGuesses, rivalLiveProgress, matchStatus, teamLabel, isSpectator, canvasBg, onCanvasBgChange, practiceHighlightedTargetId }: CanvasProps) {
+export default function Canvas({ sceneId, imageSrc, dropTargets, terms, mode, playerGuesses, showFeedback, placingTermId, onCanvasClick, onRemoveGuess, locale, termLocales, opaqueTargets, rivalGuesses, rivalLiveProgress, matchStatus, teamLabel, isSpectator, canvasBg, practiceHighlightedTargetId }: CanvasProps) {
   const { setNodeRef, isOver } = useDroppable({ id: "canvas" });
   const isPlacing = !!placingTermId;
   const placingTerm = isPlacing ? terms.find((t) => t.id === placingTermId) : null;
@@ -187,7 +161,6 @@ export default function Canvas({ sceneId, imageSrc, dropTargets, terms, mode, pl
 
   return (
     <div className={`flex-1 flex flex-col relative ${areaBg}`}>
-      <Toolbar canvasBg={canvasBg} onCanvasBgChange={onCanvasBgChange} />
 
       {/* Placing indicator */}
       {isPlacing && (
@@ -197,18 +170,18 @@ export default function Canvas({ sceneId, imageSrc, dropTargets, terms, mode, pl
       )}
 
       {/* Canvas area — fixed 3:2 aspect ratio (1200×800 standard) */}
-      <div className="flex-1 flex items-center justify-center p-1 desktop:p-6 min-h-0">
+      <div className="flex-1 flex items-center justify-center p-1 min-h-0">
         <div
           ref={setNodeRef}
           id="canvas-drop-area"
           onClick={handleClick}
-          className={`bg-white desktop:rounded-xl desktop:shadow-sm max-w-full max-h-full relative border-2 transition-colors ${isPlacing
+          className={`bg-white max-w-full max-h-full relative border-2 transition-colors ${isPlacing
             ? "border-blue-400 cursor-crosshair"
             : isOver
               ? "border-blue-300 bg-blue-50/30"
               : canvasBorder
             } ${!isPlacing ? "cursor-default" : ""}`}
-          style={{ aspectRatio: "3 / 2", width: "min(100%, calc((100vh - 8rem) * 1.5))" }}
+          style={{ aspectRatio: "3 / 2", width: "min(100%, calc((100vh - 3rem) * 1.5))" }}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           {imageSrc && (

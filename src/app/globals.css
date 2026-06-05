@@ -1,7 +1,5 @@
 @import "tailwindcss";
 
-@custom-variant desktop (@media (min-height: 600px));
-
 @theme inline {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);

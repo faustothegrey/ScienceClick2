@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ChevronDown } from "lucide-react";
 import Link from "next/link";
+import { SUPPORTED_LOCALES } from "@/lib/i18n";
 
 interface FeedbackInfo {
   allCorrect: boolean;
@@ -26,6 +27,8 @@ interface HeaderBarProps {
   teamLabel?: string;
   onNewMatch?: () => void;
   isSpectator?: boolean;
+  locale?: string;
+  onLocaleChange?: (locale: string) => void;
 }
 
 function getTeamColors(teamLabel?: string, isSpectator?: boolean) {
@@ -50,14 +53,21 @@ export default function HeaderBar({
   teamLabel,
   onNewMatch,
   isSpectator,
+  locale,
+  onLocaleChange,
 }: HeaderBarProps) {
   const [resultsOpen, setResultsOpen] = useState(false);
   const resultsRef = useRef<HTMLDivElement>(null);
+  const [localeOpen, setLocaleOpen] = useState(false);
+  const localeRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (resultsRef.current && !resultsRef.current.contains(e.target as Node)) {
         setResultsOpen(false);
+      }
+      if (localeRef.current && !localeRef.current.contains(e.target as Node)) {
+        setLocaleOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -65,7 +75,7 @@ export default function HeaderBar({
   }, []);
 
   return (
-    <header className={`relative z-30 flex items-center justify-between h-10 desktop:h-14 px-2 desktop:px-4 border-b transition-colors ${mode === "editor"
+    <header className={`relative z-30 flex items-center justify-between h-10 px-2 border-b transition-colors ${mode === "editor"
         ? "bg-gradient-to-b from-blue-50/80 to-white border-blue-200"
         : mode === "practice"
           ? "bg-gradient-to-b from-amber-50/90 to-white border-amber-200"
@@ -75,10 +85,10 @@ export default function HeaderBar({
       <div className="flex items-center gap-2 text-sm text-gray-400 min-w-0">
         <Link href="/scenes" className="flex items-center gap-2 hover:text-gray-600 transition-colors">
           <ArrowLeft className="w-4 h-4" />
-          <span className="hidden desktop:inline">Scenes</span>
+          <span className="inline">Scenes</span>
         </Link>
-        <span className="hidden desktop:inline text-gray-300">/</span>
-        <span className="text-gray-900 font-semibold truncate max-w-[40vw] desktop:max-w-none">{sceneName}</span>
+        <span className="inline text-gray-300">/</span>
+        <span className="text-gray-900 font-semibold truncate max-w-[40vw]">{sceneName}</span>
         {isSpectator ? (
           <span className={`ml-2 px-2 py-0.5 text-xs font-bold rounded-full ${getTeamColors(undefined, true)}`}>
             Spectator
@@ -151,15 +161,37 @@ export default function HeaderBar({
               {feedback.allCorrect ? "Play Again" : "Retry"}
             </button>
           </div>
-        ) : (
-          <h1 className="hidden desktop:block text-lg font-bold text-gray-900">{sceneName}</h1>
-        )}
+        ) : null}
       </div>
 
       {/* Right: mode toggle */}
-      <div className="flex items-center gap-1 desktop:gap-3">
+      <div className="flex items-center gap-1">
+        {locale && onLocaleChange ? (
+          <div ref={localeRef} className="relative">
+            <button
+              onClick={() => setLocaleOpen((v) => !v)}
+              className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-gray-600 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
+            >
+              {locale.toUpperCase()}
+              <ChevronDown className="w-3.5 h-3.5" />
+            </button>
+            {localeOpen && (
+              <div className="absolute top-full mt-1 right-0 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-50 min-w-[140px]">
+                {SUPPORTED_LOCALES.map((loc) => (
+                  <button
+                    key={loc.code}
+                    onClick={() => { onLocaleChange(loc.code); setLocaleOpen(false); }}
+                    className={`w-full text-left px-3 py-1.5 text-sm hover:bg-gray-50 transition-colors ${locale === loc.code ? "font-semibold text-blue-600" : "text-gray-700"}`}
+                  >
+                    {loc.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        ) : null}
         {playerName ? (
-          <div ref={resultsRef} className="hidden desktop:flex relative items-center gap-2 text-sm text-gray-600">
+          <div ref={resultsRef} className="flex relative items-center gap-2 text-sm text-gray-600">
             <button
               onClick={() => setResultsOpen((v) => !v)}
               className="px-2.5 py-1 rounded-full bg-white/70 border border-gray-200 hover:bg-white transition-colors"
@@ -196,14 +228,14 @@ export default function HeaderBar({
         ) : (
           <button
             onClick={onLogin}
-            className="hidden desktop:inline-block px-3 py-1.5 text-sm font-medium rounded-full bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+            className="inline-block px-3 py-1.5 text-sm font-medium rounded-full bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
           >
             Login
           </button>
         )}
         <button
           onClick={() => onModeChange("practice")}
-          className={`px-2 desktop:px-4 py-1 desktop:py-1.5 text-xs desktop:text-sm font-medium rounded-full transition-colors ${mode === "practice"
+          className={`px-2 py-1 text-xs font-medium rounded-full transition-colors ${mode === "practice"
             ? "bg-amber-500 text-gray-950 shadow-sm"
             : "text-gray-500 hover:text-gray-700"
             }`}
@@ -212,7 +244,7 @@ export default function HeaderBar({
         </button>
         <button
           onClick={() => onModeChange("editor")}
-          className={`hidden desktop:inline-block px-4 py-1.5 text-sm font-medium rounded-full transition-colors ${mode === "editor"
+          className={`inline-block px-2 py-1 text-xs font-medium rounded-full transition-colors ${mode === "editor"
             ? "bg-blue-600 text-white shadow-sm"
             : "text-gray-500 hover:text-gray-700"
             }`}
@@ -221,7 +253,7 @@ export default function HeaderBar({
         </button>
         <button
           onClick={() => onModeChange("play")}
-          className={`px-2 desktop:px-4 py-1 desktop:py-1.5 text-xs desktop:text-sm font-medium rounded-full transition-colors ${mode === "play"
+          className={`px-2 py-1 text-xs font-medium rounded-full transition-colors ${mode === "play"
             ? "bg-emerald-600 text-white shadow-sm"
             : "text-gray-500 hover:text-gray-700"
             }`}

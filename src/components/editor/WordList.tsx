@@ -1,7 +1,7 @@
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { useDraggable } from "@dnd-kit/core";
-import { Plus, Save, GripVertical, X, ChevronDown } from "lucide-react";
-import { Term, getTermLabel, SUPPORTED_LOCALES } from "@/lib/i18n";
+import { Plus, Save, GripVertical, X } from "lucide-react";
+import { Term, getTermLabel } from "@/lib/i18n";
 
 interface WordListProps {
   terms: Term[];
@@ -9,48 +9,18 @@ interface WordListProps {
   onAddTerm: (label: string) => void;
   onRemoveTerm: (termId: string) => void;
   locale: string;
-  onLocaleChange: (locale: string) => void;
   termLocales: Record<string, string>;
-  onTermLocaleChange: (termId: string, locale: string) => void;
   placedTermIds?: Set<string>;
   playKey?: number;
 }
 
-function LocaleBadges({ term, activeLocale, onLocaleClick }: { term: Term; activeLocale: string; onLocaleClick: (code: string) => void }) {
-  return (
-    <div className="flex gap-0.5 ml-auto">
-      {SUPPORTED_LOCALES.map((loc) => {
-        const hasTranslation = !!term.translations[loc.code];
-        const isActive = loc.code === activeLocale;
-        return (
-          <button
-            key={loc.code}
-            type="button"
-            disabled={!hasTranslation}
-            onPointerDown={(e) => { e.stopPropagation(); onLocaleClick(loc.code); }}
-            className={`text-[10px] font-semibold uppercase leading-none px-1 py-0.5 rounded transition-colors ${
-              isActive && hasTranslation
-                ? "text-white bg-blue-600"
-                : hasTranslation
-                  ? "text-blue-600 bg-blue-50 hover:bg-blue-100 cursor-pointer"
-                  : "text-gray-300 bg-gray-50 cursor-default"
-            }`}
-          >
-            {loc.code}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
-function DraggableTerm({ term, mode, onRemove, termLocale, onLocaleChange, isPlaced }: { term: Term; mode: "editor" | "play" | "practice"; onRemove: (termId: string) => void; termLocale: string; onLocaleChange: (locale: string) => void; isPlaced: boolean }) {
+function DraggableTerm({ term, mode, onRemove, termLocale, isPlaced }: { term: Term; mode: "editor" | "play" | "practice"; onRemove: (termId: string) => void; termLocale: string; isPlaced: boolean }) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: term.id,
   });
 
   return (
-    <div className={`flex items-center gap-1 shrink-0 desktop:shrink ${isDragging ? "opacity-30" : ""} ${isPlaced ? "opacity-40" : ""}`}>
+    <div className={`flex items-center gap-1 shrink-0 ${isDragging ? "opacity-30" : ""} ${isPlaced ? "opacity-40" : ""}`}>
       <div
         ref={setNodeRef}
         {...listeners}
@@ -63,7 +33,6 @@ function DraggableTerm({ term, mode, onRemove, termLocale, onLocaleChange, isPla
       >
         <GripVertical className={`w-3.5 h-3.5 shrink-0 ${isPlaced ? "text-gray-200" : "text-gray-300"}`} />
         <span className={`text-sm font-medium whitespace-nowrap ${isPlaced ? "text-gray-400 line-through" : "text-gray-700"}`}>{getTermLabel(term, termLocale)}</span>
-        {!isPlaced && <LocaleBadges term={term} activeLocale={termLocale} onLocaleClick={onLocaleChange} />}
       </div>
       {mode === "editor" && (
         <button
@@ -77,21 +46,9 @@ function DraggableTerm({ term, mode, onRemove, termLocale, onLocaleChange, isPla
   );
 }
 
-export default function WordList({ terms, mode, onAddTerm, onRemoveTerm, locale, onLocaleChange, termLocales, onTermLocaleChange, placedTermIds, playKey }: WordListProps) {
+export default function WordList({ terms, mode, onAddTerm, onRemoveTerm, locale, termLocales, placedTermIds, playKey }: WordListProps) {
   const [isCreating, setIsCreating] = useState(false);
   const [newLabel, setNewLabel] = useState("");
-  const [localeOpen, setLocaleOpen] = useState(false);
-  const localeRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (localeRef.current && !localeRef.current.contains(e.target as Node)) {
-        setLocaleOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
 
   function handleSaveNew() {
     if (newLabel.trim()) {
@@ -107,37 +64,10 @@ export default function WordList({ terms, mode, onAddTerm, onRemoveTerm, locale,
   }
 
   return (
-    <aside className="order-last shrink-0 w-full desktop:order-none desktop:shrink desktop:w-72 bg-white border-t desktop:border-t-0 desktop:border-l border-gray-200 flex flex-col z-20">
-      {/* Header — hidden on small screens to save space */}
-      <div className="hidden desktop:flex items-center justify-between p-4 border-b border-gray-100">
-        <h2 className="text-lg font-bold text-gray-900">Word List</h2>
-        <div ref={localeRef} className="relative">
-          <button
-            onClick={() => setLocaleOpen(!localeOpen)}
-            className="flex items-center gap-1 px-2 py-1 text-sm font-medium text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
-          >
-            {locale.toUpperCase()}
-            <ChevronDown className="w-3.5 h-3.5" />
-          </button>
-          {localeOpen && (
-            <div className="absolute top-full mt-1 right-0 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-50 min-w-[140px]">
-              {SUPPORTED_LOCALES.map((loc) => (
-                <button
-                  key={loc.code}
-                  onClick={() => { onLocaleChange(loc.code); setLocaleOpen(false); }}
-                  className={`w-full text-left px-3 py-1.5 text-sm hover:bg-gray-50 transition-colors ${locale === loc.code ? "font-semibold text-blue-600" : "text-gray-700"}`}
-                >
-                  {loc.label}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* New Term button (editor only, desktop only) */}
+    <aside className="shrink-0 w-52 bg-white border-l border-gray-200 flex flex-col z-20">
+      {/* New Term button (editor only) */}
       {mode === "editor" && (
-        <div className="hidden desktop:block p-3">
+        <div className="p-3">
           {!isCreating ? (
             <button
               onClick={() => setIsCreating(true)}
@@ -181,12 +111,12 @@ export default function WordList({ terms, mode, onAddTerm, onRemoveTerm, locale,
         </div>
       )}
 
-      {/* Terms list — vertical on desktop, horizontal strip on mobile */}
-      <div className="desktop:px-4 desktop:pt-2 desktop:flex-1 desktop:overflow-y-auto">
-        <div className="desktop:border-t desktop:border-gray-100 desktop:pt-3">
-          <div className="flex flex-row desktop:flex-col gap-2 overflow-x-auto desktop:overflow-x-visible px-2 py-2 desktop:p-0">
+      {/* Terms list — vertical column */}
+      <div className="flex-1 overflow-y-auto px-4 pt-2">
+        <div className="border-t border-gray-100 pt-3">
+          <div className="flex flex-col gap-2">
             {terms.map((term) => (
-              <DraggableTerm key={`${term.id}-${playKey ?? 0}`} term={term} mode={mode} onRemove={onRemoveTerm} termLocale={termLocales[term.id] || locale} onLocaleChange={(loc) => onTermLocaleChange(term.id, loc)} isPlaced={placedTermIds?.has(term.id) ?? false} />
+              <DraggableTerm key={`${term.id}-${playKey ?? 0}`} term={term} mode={mode} onRemove={onRemoveTerm} termLocale={termLocales[term.id] || locale} isPlaced={placedTermIds?.has(term.id) ?? false} />
             ))}
           </div>
         </div>
