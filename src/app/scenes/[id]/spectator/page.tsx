@@ -32,12 +32,19 @@ export default function SpectatorPage({ params }: { params: Promise<{ id: string
     const [guessesB, setGuessesB] = useState<Record<string, string> | null>(null);
     const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+    // Load locale
+    useEffect(() => {
+        if (typeof window === "undefined") return;
+
+        const localeTimeout = window.setTimeout(() => {
+            setLocale(localStorage.getItem(`sc2:scene:${id}:locale`) ?? "en");
+        }, 0);
+
+        return () => window.clearTimeout(localeTimeout);
+    }, [id]);
+
     // Load config
     useEffect(() => {
-        if (typeof window !== "undefined") {
-            setLocale(localStorage.getItem(`sc2:scene:${id}:locale`) ?? "en");
-        }
-
         fetch(`/api/scenes/${id}/config`)
             .then((res) => (res.ok ? res.json() : null))
             .then((data) => {
