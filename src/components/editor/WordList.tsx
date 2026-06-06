@@ -12,21 +12,23 @@ interface WordListProps {
   termLocales: Record<string, string>;
   placedTermIds?: Set<string>;
   playKey?: number;
+  dragDisabled?: boolean;
 }
 
-function DraggableTerm({ term, mode, onRemove, termLocale, isPlaced }: { term: Term; mode: "editor" | "play" | "practice"; onRemove: (termId: string) => void; termLocale: string; isPlaced: boolean }) {
+function DraggableTerm({ term, mode, onRemove, termLocale, isPlaced, dragDisabled }: { term: Term; mode: "editor" | "play" | "practice"; onRemove: (termId: string) => void; termLocale: string; isPlaced: boolean; dragDisabled: boolean }) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: term.id,
+    disabled: dragDisabled,
   });
 
   return (
-    <div className={`flex items-center gap-1 shrink-0 ${isDragging ? "opacity-30" : ""} ${isPlaced ? "opacity-40" : ""}`}>
+    <div className={`flex items-center gap-1 shrink-0 ${isDragging ? "opacity-30" : ""} ${isPlaced || dragDisabled ? "opacity-40" : ""}`}>
       <div
         ref={setNodeRef}
         {...listeners}
         {...attributes}
         className={`relative touch-none flex-1 flex items-center gap-2 px-2 py-1.5 rounded-lg transition-colors select-none ${
-          isPlaced
+          isPlaced || dragDisabled
             ? "bg-white/10 border border-gray-100 cursor-default"
             : "bg-white/10 border border-gray-200 cursor-move hover:border-blue-400"
         }`}
@@ -48,7 +50,7 @@ function DraggableTerm({ term, mode, onRemove, termLocale, isPlaced }: { term: T
   );
 }
 
-export default function WordList({ terms, mode, onAddTerm, onRemoveTerm, locale, termLocales, placedTermIds, playKey }: WordListProps) {
+export default function WordList({ terms, mode, onAddTerm, onRemoveTerm, locale, termLocales, placedTermIds, playKey, dragDisabled = false }: WordListProps) {
   const [isCreating, setIsCreating] = useState(false);
   const [newLabel, setNewLabel] = useState("");
 
@@ -118,7 +120,7 @@ export default function WordList({ terms, mode, onAddTerm, onRemoveTerm, locale,
         <div className="border-t border-gray-100 pt-3">
           <div className="flex flex-col gap-2">
             {terms.map((term) => (
-              <DraggableTerm key={`${term.id}-${playKey ?? 0}`} term={term} mode={mode} onRemove={onRemoveTerm} termLocale={termLocales[term.id] || locale} isPlaced={placedTermIds?.has(term.id) ?? false} />
+              <DraggableTerm key={`${term.id}-${playKey ?? 0}`} term={term} mode={mode} onRemove={onRemoveTerm} termLocale={termLocales[term.id] || locale} isPlaced={placedTermIds?.has(term.id) ?? false} dragDisabled={dragDisabled} />
             ))}
           </div>
         </div>

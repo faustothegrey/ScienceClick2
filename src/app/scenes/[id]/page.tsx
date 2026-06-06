@@ -304,6 +304,7 @@ function SceneEditorPage() {
 
   function handleDragStart(event: DragStartEvent) {
     const id = event.active.id as string;
+    if (mode === "play" && showFeedback) return;
     setActiveId(id);
     // Pop the target pins when a word label is picked up (not when dragging editor targets).
     if (!id.startsWith("drag-target-")) setPulseKey((k) => k + 1);
@@ -372,6 +373,10 @@ function SceneEditorPage() {
         });
       }
     } else if (over.id !== "canvas" && mode === "play") {
+      if (showFeedback) {
+        setActiveId(null);
+        return;
+      }
       if (isMatchMode && matchStatus !== "playing") {
         setActiveId(null);
         return;
@@ -769,6 +774,7 @@ function SceneEditorPage() {
               termLocales={termLocales}
               placedTermIds={placedTermIds}
               playKey={playKey}
+              dragDisabled={mode === "play" && showFeedback}
             />
           )}
         </div>
