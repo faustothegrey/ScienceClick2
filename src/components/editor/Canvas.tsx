@@ -27,12 +27,13 @@ interface CanvasProps {
   canvasBg: CanvasBg;
   onCanvasBgChange: (bg: CanvasBg) => void;
   practiceHighlightedTargetId?: string | null;
+  pulseKey?: number;
 }
 
 function DropZone({
   target, terms, mode, guessTermId, showFeedback, locale, termLocales, opaqueTargets,
   rivalGuessTermId, showRivalFeedback, teamLabel, isRivalLivePlaced,
-  indicatorColor, onRemoveGuess, practiceHighlighted
+  indicatorColor, onRemoveGuess, practiceHighlighted, pulseKey
 }: {
   target: DropTarget; terms: Term[]; mode: "editor" | "play" | "practice";
   guessTermId?: string; showFeedback: boolean; locale: string; termLocales?: Record<string, string>; opaqueTargets?: boolean;
@@ -41,6 +42,7 @@ function DropZone({
   isSpectator?: boolean;
   onRemoveGuess?: (targetId: string) => void;
   practiceHighlighted?: boolean;
+  pulseKey?: number;
 }) {
   const { setNodeRef: setDropRef, isOver } = useDroppable({ id: target.id });
   const { setNodeRef: setDragRef, listeners, attributes, isDragging } = useDraggable({
@@ -102,7 +104,7 @@ function DropZone({
         ref={setNodeRef}
         {...listeners}
         {...attributes}
-        className={`absolute z-10 flex flex-col items-center justify-center -translate-x-1/2 -translate-y-1/2 w-32 h-10 rounded-lg text-sm font-medium ${baseClasses} ${className}${practiceRing} ${editorCursor} ${isDragging ? "opacity-30" : ""}`}
+        className={`absolute z-10 touch-none flex flex-col items-center justify-center -translate-x-1/2 -translate-y-1/2 w-32 h-10 rounded-lg text-sm font-medium ${baseClasses} ${className}${practiceRing} ${editorCursor} ${isDragging ? "opacity-30" : ""}`}
         style={{ left: `${target.x}%`, top: `${target.y}%` }}
       >
         <span>{editorLabel}</span>
@@ -111,16 +113,16 @@ function DropZone({
   }
 
   // PLAY / PRACTICE MODE — a nail on the wall; placed words hang from it like paintings
-  let cardClass = "bg-white border-2 border-gray-300 text-gray-800";
-  if (isCorrect) cardClass = "bg-green-50 border-2 border-green-600 text-green-800";
-  else if (isIncorrect) cardClass = "bg-red-50 border-2 border-red-500 text-red-800";
+  let cardClass = "bg-white/10 border-2 border-gray-300 text-gray-800";
+  if (isCorrect) cardClass = "bg-green-500/10 border-2 border-green-600 text-green-800";
+  else if (isIncorrect) cardClass = "bg-red-500/10 border-2 border-red-500 text-red-800";
 
-  const nailHighlight = isOver || practiceHighlighted;
+  const markerHighlight = isOver || practiceHighlighted;
 
   return (
     <div
       ref={setNodeRef}
-      className={`absolute z-10 -translate-x-1/2 -translate-y-1/2 w-32 h-14 ${baseClasses}`}
+      className={`absolute z-10 -translate-x-1/2 -translate-y-1/2 w-7 h-7 ${baseClasses}`}
       style={{ left: `${target.x}%`, top: `${target.y}%` }}
     >
       {/* Hover affordance — outline of where the painting will hang */}
@@ -132,13 +134,8 @@ function DropZone({
       {filled && (
         <div className={`absolute left-1/2 top-1/2 -translate-x-1/2 w-32 ${showRival ? "min-h-16 py-1" : "h-10"} flex flex-col items-center justify-center rounded-md text-sm font-medium shadow-lg ${cardClass}${practiceRing}`}>
           {/* Hanging hole, centered on the nail point */}
-          <span className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-gray-200 ring-1 ring-white/80 shadow-[inset_0_1px_2px_rgba(0,0,0,0.5)] z-10 pointer-events-none" />
+          <span className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-gray-200 ring-1 ring-white/80 shadow-[inset_0_1px_2px_rgba(0,0,0,0.5)] z-10 pointer-events-none" />
           <span className="px-2 truncate">{guessLabel}</span>
-          {guessTermId && (
-            <span className="absolute -bottom-1.5 -right-1.5 text-[10px] font-semibold uppercase leading-none px-1 py-0.5 rounded text-white bg-blue-600 shadow-sm">
-              {guessLocale}
-            </span>
-          )}
           {guessTermId && !showFeedback && onRemoveGuess && (
             <button
               className="absolute -top-2 -right-2 z-20 bg-white rounded-full p-0.5 border border-gray-300 text-gray-500 hover:text-red-500 hover:border-red-500 transition-colors shadow-sm"
@@ -170,15 +167,15 @@ function DropZone({
         </div>
       )}
 
-      {/* The nail on the wall, at the target point */}
+      {/* Target marker — a bold accent pin head at the target point */}
       <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30 pointer-events-none">
-        <span className={`block w-3 h-3 rounded-full bg-gradient-to-br from-gray-300 to-gray-600 shadow-md ring-1 ring-gray-700/40 transition-transform duration-200 ${nailHighlight ? "scale-125 ring-2 ring-blue-400" : ""}`} />
+        <span key={filled ? "paired" : pulseKey} className={`block w-3 h-3 rounded-full ring-2 ring-white shadow-[0_0_0_1px_rgba(0,0,0,0.45)] transition-all duration-200 ${markerHighlight ? "bg-blue-500 scale-125" : filled ? "bg-slate-500" : "bg-amber-500"} ${isOver ? "hook-ready" : (!filled && pulseKey) ? "pin-pop" : ""}`} />
       </span>
     </div>
   );
 }
 
-export default function Canvas({ sceneId, imageSrc, dropTargets, terms, mode, playerGuesses, showFeedback, placingTermId, onCanvasClick, onRemoveGuess, locale, termLocales, opaqueTargets, rivalGuesses, rivalLiveProgress, matchStatus, teamLabel, isSpectator, canvasBg, practiceHighlightedTargetId }: CanvasProps) {
+export default function Canvas({ sceneId, imageSrc, dropTargets, terms, mode, playerGuesses, showFeedback, placingTermId, onCanvasClick, onRemoveGuess, locale, termLocales, opaqueTargets, rivalGuesses, rivalLiveProgress, matchStatus, teamLabel, isSpectator, canvasBg, practiceHighlightedTargetId, pulseKey }: CanvasProps) {
   const { setNodeRef, isOver } = useDroppable({ id: "canvas" });
   const isPlacing = !!placingTermId;
   const placingTerm = isPlacing ? terms.find((t) => t.id === placingTermId) : null;
@@ -247,6 +244,7 @@ export default function Canvas({ sceneId, imageSrc, dropTargets, terms, mode, pl
               indicatorColor={isSpectator ? (teamLabel === "Team A" ? "purple" : "orange") : undefined}
               onRemoveGuess={onRemoveGuess}
               practiceHighlighted={practiceHighlightedTargetId === target.id}
+              pulseKey={pulseKey}
             />
           ))}
 

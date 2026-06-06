@@ -9,10 +9,12 @@ import {
   DragStartEvent,
   DragOverlay,
   pointerWithin,
+  closestCenter,
   PointerSensor,
   TouchSensor,
   useSensor,
   useSensors,
+  type CollisionDetection,
 } from "@dnd-kit/core";
 import HeaderBar from "@/components/editor/HeaderBar";
 import Canvas from "@/components/editor/Canvas";
@@ -128,6 +130,22 @@ function SceneEditorPage() {
     useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 8 } }),
   );
   const [mode, setMode] = useState<SceneMode>(isMatchMode ? "play" : "play");
+
+  // Editor needs precise pointer placement; play/practice snap the word to the
+  // nearest pin so small drop targets are still easy to hit (esp. on touch).
+  const detectCollisions = useCallback<CollisionDetection>((args) => {
+    if (mode === "editor") return pointerWithin(args);
+    const pins = args.droppableContainers.filter((c) => c.id !== "canvas");
+    const collisions = closestCenter({ ...args, droppableContainers: pins });
+    // Only snap if the nearest pin is reasonably close; otherwise the word
+    // returns to the list instead of jumping across the whole scene.
+    const SNAP_THRESHOLD_PX = 90;
+    const nearest = collisions[0];
+    if (nearest && typeof nearest.data?.value === "number" && nearest.data.value > SNAP_THRESHOLD_PX) {
+      return [];
+    }
+    return collisions;
+  }, [mode]);
   const [availableTerms, setAvailableTerms] = useState<Term[]>([]);
   const [dropTargets, setDropTargets] = useState<DropTarget[]>([]);
   const [opaqueTargets, setOpaqueTargets] = useState(false);
@@ -232,6 +250,7 @@ function SceneEditorPage() {
   const [showFeedback, setShowFeedback] = useState(false);
   const [playKey, setPlayKey] = useState(0);
   const [placingTermId, setPlacingTermId] = useState<string | null>(null);
+  const [pulseKey, setPulseKey] = useState(0);
 
   const activePracticeTargetId = practiceState.queue[0] ?? null;
   const activePracticeTarget = dropTargets.find((target) => target.id === activePracticeTargetId) ?? null;
@@ -284,7 +303,10 @@ function SceneEditorPage() {
   }
 
   function handleDragStart(event: DragStartEvent) {
-    setActiveId(event.active.id as string);
+    const id = event.active.id as string;
+    setActiveId(id);
+    // Pop the target pins when a word label is picked up (not when dragging editor targets).
+    if (!id.startsWith("drag-target-")) setPulseKey((k) => k + 1);
   }
 
   function handleDragEnd(event: DragEndEvent) {
@@ -640,7 +662,7 @@ function SceneEditorPage() {
       sensors={sensors}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
-      collisionDetection={pointerWithin}
+      collisionDetection={detectCollisions}
     >
       <div className="flex flex-col h-screen">
         <HeaderBar
@@ -712,6 +734,7 @@ function SceneEditorPage() {
             canvasBg={canvasBg}
             onCanvasBgChange={setCanvasBg}
             practiceHighlightedTargetId={mode === "practice" && practiceState.hintLevel >= 1 ? activePracticeTargetId : null}
+            pulseKey={pulseKey}
           />
           {mode === "practice" ? (
             <PracticePanel
@@ -752,7 +775,7 @@ function SceneEditorPage() {
       </div>
       <DragOverlay dropAnimation={null}>
         {(activeTerm || dragTargetTerm) ? (
-          <div className={`relative w-32 flex items-center justify-center rounded-lg shadow-lg font-medium text-sm cursor-grabbing ${mode === "practice" ? "h-14 bg-amber-50 border-2 border-amber-400 text-gray-900" : "h-10 bg-white border-2 border-blue-400 text-gray-800"}`}>
+          <div className={`relative w-32 flex items-center justify-center rounded-lg shadow-lg font-medium text-sm cursor-grabbing ${mode === "practice" ? "h-14 bg-amber-50/20 border-2 border-amber-400 text-gray-900" : "h-10 bg-white/10 border-2 border-blue-400 text-gray-800"}`}>
             <span className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-gray-200 ring-1 ring-white shadow-[inset_0_1px_2px_rgba(0,0,0,0.45)] pointer-events-none" />
             {getTermLabel((activeTerm || dragTargetTerm)!, termLocales[(activeTerm || dragTargetTerm)!.id] || locale)}
           </div>

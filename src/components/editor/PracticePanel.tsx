@@ -29,7 +29,7 @@ function DraggablePracticeTerm({ term, locale }: { term: Term; locale: string })
       ref={setNodeRef}
       {...listeners}
       {...attributes}
-      className={`rounded-2xl border border-amber-300 bg-amber-50 px-4 py-5 shadow-sm transition-all ${isDragging ? "opacity-30" : "cursor-move hover:border-amber-400 hover:shadow-md"}`}
+      className={`touch-none rounded-2xl border border-amber-300 bg-amber-50 px-4 py-5 shadow-sm transition-all ${isDragging ? "opacity-30" : "cursor-move hover:border-amber-400 hover:shadow-md"}`}
     >
       <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-amber-700">
         <Target className="h-3.5 w-3.5" />
