@@ -25,12 +25,14 @@ function DraggableTerm({ term, mode, onRemove, termLocale, isPlaced }: { term: T
         ref={setNodeRef}
         {...listeners}
         {...attributes}
-        className={`flex-1 flex items-center gap-2 px-2 py-1.5 rounded-lg transition-colors select-none ${
+        className={`relative flex-1 flex items-center gap-2 px-2 py-1.5 rounded-lg transition-colors select-none ${
           isPlaced
             ? "bg-gray-100 border border-gray-100 cursor-default"
             : "bg-gray-50 border border-gray-200 cursor-move hover:border-blue-400"
         }`}
       >
+        {/* Hanging hole — top center */}
+        <span className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-gray-200 ring-1 ring-white shadow-[inset_0_1px_2px_rgba(0,0,0,0.4)] pointer-events-none" />
         <GripVertical className={`w-3.5 h-3.5 shrink-0 ${isPlaced ? "text-gray-200" : "text-gray-300"}`} />
         <span className={`text-sm font-medium whitespace-nowrap ${isPlaced ? "text-gray-400 line-through" : "text-gray-700"}`}>{getTermLabel(term, termLocale)}</span>
       </div>

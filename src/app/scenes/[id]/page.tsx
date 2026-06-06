@@ -752,7 +752,8 @@ function SceneEditorPage() {
       </div>
       <DragOverlay dropAnimation={null}>
         {(activeTerm || dragTargetTerm) ? (
-          <div className={`w-32 flex items-center justify-center rounded-lg shadow-lg font-medium text-sm cursor-grabbing ${mode === "practice" ? "h-14 bg-amber-50 border-2 border-amber-400 text-gray-900" : "h-10 bg-white border-2 border-blue-400 text-gray-800"}`}>
+          <div className={`relative w-32 flex items-center justify-center rounded-lg shadow-lg font-medium text-sm cursor-grabbing ${mode === "practice" ? "h-14 bg-amber-50 border-2 border-amber-400 text-gray-900" : "h-10 bg-white border-2 border-blue-400 text-gray-800"}`}>
+            <span className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-gray-200 ring-1 ring-white shadow-[inset_0_1px_2px_rgba(0,0,0,0.45)] pointer-events-none" />
             {getTermLabel((activeTerm || dragTargetTerm)!, termLocales[(activeTerm || dragTargetTerm)!.id] || locale)}
           </div>
         ) : null}

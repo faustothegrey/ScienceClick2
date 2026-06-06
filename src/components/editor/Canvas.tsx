@@ -95,49 +95,85 @@ function DropZone({
 
   const editorCursor = mode === "editor" ? "cursor-grab active:cursor-grabbing" : "";
 
+  // EDITOR MODE — authoring boxes (unchanged look)
+  if (mode === "editor") {
+    return (
+      <div
+        ref={setNodeRef}
+        {...listeners}
+        {...attributes}
+        className={`absolute z-10 flex flex-col items-center justify-center -translate-x-1/2 -translate-y-1/2 w-32 h-10 rounded-lg text-sm font-medium ${baseClasses} ${className}${practiceRing} ${editorCursor} ${isDragging ? "opacity-30" : ""}`}
+        style={{ left: `${target.x}%`, top: `${target.y}%` }}
+      >
+        <span>{editorLabel}</span>
+      </div>
+    );
+  }
+
+  // PLAY / PRACTICE MODE — a nail on the wall; placed words hang from it like paintings
+  let cardClass = "bg-white border-2 border-gray-300 text-gray-800";
+  if (isCorrect) cardClass = "bg-green-50 border-2 border-green-600 text-green-800";
+  else if (isIncorrect) cardClass = "bg-red-50 border-2 border-red-500 text-red-800";
+
+  const nailHighlight = isOver || practiceHighlighted;
+
   return (
     <div
       ref={setNodeRef}
-      {...(mode === "editor" ? { ...listeners, ...attributes } : {})}
-      className={`absolute z-10 flex flex-col items-center justify-center -translate-x-1/2 -translate-y-1/2 w-32 rounded-lg text-sm font-medium ${baseClasses} ${showRival ? "h-16" : "h-10"} ${className}${practiceRing} ${editorCursor} ${isDragging ? "opacity-30" : ""}`}
-      style={{
-        left: `${target.x}%`,
-        top: `${target.y}%`,
-      }}
+      className={`absolute z-10 -translate-x-1/2 -translate-y-1/2 w-32 h-14 ${baseClasses}`}
+      style={{ left: `${target.x}%`, top: `${target.y}%` }}
     >
-      <span>{mode === "editor" ? editorLabel : guessLabel}</span>
-      {mode === "play" && guessTermId && (
-        <span className="absolute -bottom-1.5 -right-1.5 text-[10px] font-semibold uppercase leading-none px-1 py-0.5 rounded text-white bg-blue-600 shadow-sm">
-          {guessLocale}
-        </span>
+      {/* Hover affordance — outline of where the painting will hang */}
+      {!filled && isOver && (
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 w-32 h-10 rounded-md border-2 border-dashed border-blue-400 bg-blue-100/40" />
       )}
-      {mode === "play" && guessTermId && !showFeedback && onRemoveGuess && (
-        <button
-          className="absolute -top-2 -right-2 bg-white rounded-full p-0.5 border border-gray-300 text-gray-500 hover:text-red-500 hover:border-red-500 transition-colors shadow-sm"
-          onPointerDown={(e) => {
-            e.stopPropagation();
-            onRemoveGuess(target.id);
-          }}
-          title="Remove Label"
-        >
-          <X className="w-3 h-3" />
-        </button>
+
+      {/* The hanging painting (placed word) */}
+      {filled && (
+        <div className={`absolute left-1/2 top-1/2 -translate-x-1/2 w-32 ${showRival ? "min-h-16 py-1" : "h-10"} flex flex-col items-center justify-center rounded-md text-sm font-medium shadow-lg ${cardClass}${practiceRing}`}>
+          {/* Hanging hole, centered on the nail point */}
+          <span className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-gray-200 ring-1 ring-white/80 shadow-[inset_0_1px_2px_rgba(0,0,0,0.5)] z-10 pointer-events-none" />
+          <span className="px-2 truncate">{guessLabel}</span>
+          {guessTermId && (
+            <span className="absolute -bottom-1.5 -right-1.5 text-[10px] font-semibold uppercase leading-none px-1 py-0.5 rounded text-white bg-blue-600 shadow-sm">
+              {guessLocale}
+            </span>
+          )}
+          {guessTermId && !showFeedback && onRemoveGuess && (
+            <button
+              className="absolute -top-2 -right-2 z-20 bg-white rounded-full p-0.5 border border-gray-300 text-gray-500 hover:text-red-500 hover:border-red-500 transition-colors shadow-sm"
+              onPointerDown={(e) => {
+                e.stopPropagation();
+                onRemoveGuess(target.id);
+              }}
+              title="Remove Label"
+            >
+              <X className="w-3 h-3" />
+            </button>
+          )}
+          {showRival && (
+            <span className={`absolute -bottom-2.5 left-1/2 -translate-x-1/2 whitespace-nowrap text-[9px] font-bold uppercase px-1.5 py-0.5 rounded shadow-sm ${rivalCorrect ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
+              {rivalTeamName}: {rivalLabel}
+            </span>
+          )}
+        </div>
       )}
-      {showRival && (
-        <span className={`absolute -top-2.5 -left-2.5 text-[9px] font-bold uppercase px-1.5 py-0.5 rounded shadow-sm ${rivalCorrect ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
-          {rivalTeamName}: {rivalLabel}
-        </span>
-      )}
-      {/* Live progress indicator when the rival has placed a term but hasn't submitted yet */}
-      {isRivalLivePlaced && !showRivalFeedback && (
+
+      {/* Rival live-progress indicator (match mode) on an empty target */}
+      {!filled && isRivalLivePlaced && !showRivalFeedback && (
         <div
-          className={`absolute -top-2.5 -left-2.5 flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase text-white ${rivalThemeColor} shadow-md border border-white`}
+          className={`absolute left-1/2 top-1/2 translate-x-2 -translate-y-1/2 flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase text-white ${rivalThemeColor} shadow-md border border-white`}
           title={`${rivalTeamName} has placed a label here`}
         >
           <span className="w-2 h-2 rounded-full bg-white/60" />
           {rivalTeamName}
         </div>
       )}
+
+      {/* The nail on the wall, at the target point */}
+      <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30 pointer-events-none">
+        <span className={`block w-3 h-3 rounded-full bg-gradient-to-br from-gray-300 to-gray-600 shadow-md ring-1 ring-gray-700/40 transition-transform duration-200 ${nailHighlight ? "scale-125 ring-2 ring-blue-400" : ""}`} />
+      </span>
     </div>
   );
 }
