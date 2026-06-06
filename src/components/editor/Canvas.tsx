@@ -1,5 +1,4 @@
 import { useDroppable, useDraggable } from "@dnd-kit/core";
-import type { CanvasBg } from "./Toolbar";
 import type { DropTarget } from "@/app/scenes/[id]/page";
 import { Term, getTermLabel } from "@/lib/i18n"; import { X } from "lucide-react";
 
@@ -17,26 +16,23 @@ interface CanvasProps {
   onCanvasClick: (xPercent: number, yPercent: number) => void;
   onRemoveGuess?: (targetId: string) => void;
   locale: string;
-  termLocales?: Record<string, string>;
   opaqueTargets?: boolean;
   rivalGuesses?: Record<string, string>;
   rivalLiveProgress?: string[];
   matchStatus?: MatchStatus;
   teamLabel?: string;
   isSpectator?: boolean;
-  canvasBg: CanvasBg;
-  onCanvasBgChange: (bg: CanvasBg) => void;
   practiceHighlightedTargetId?: string | null;
   pulseKey?: number;
 }
 
 function DropZone({
-  target, terms, mode, guessTermId, showFeedback, locale, termLocales, opaqueTargets,
+  target, terms, mode, guessTermId, showFeedback, locale, opaqueTargets,
   rivalGuessTermId, showRivalFeedback, teamLabel, isRivalLivePlaced,
   indicatorColor, onRemoveGuess, practiceHighlighted, pulseKey
 }: {
   target: DropTarget; terms: Term[]; mode: "editor" | "play" | "practice";
-  guessTermId?: string; showFeedback: boolean; locale: string; termLocales?: Record<string, string>; opaqueTargets?: boolean;
+  guessTermId?: string; showFeedback: boolean; locale: string; opaqueTargets?: boolean;
   rivalGuessTermId?: string; showRivalFeedback?: boolean;
   teamLabel?: string; isRivalLivePlaced?: boolean; indicatorColor?: "purple" | "orange";
   isSpectator?: boolean;
@@ -52,8 +48,7 @@ function DropZone({
   const assignedTerm = terms.find((t) => t.id === target.assignedTerm);
   const editorLabel = assignedTerm ? getTermLabel(assignedTerm, locale) : null;
   const guessTerm = guessTermId ? terms.find((t) => t.id === guessTermId) : null;
-  const guessLocale = guessTermId && termLocales?.[guessTermId] ? termLocales[guessTermId] : locale;
-  const guessLabel = guessTerm ? getTermLabel(guessTerm, guessLocale) : null;
+  const guessLabel = guessTerm ? getTermLabel(guessTerm, locale) : null;
 
   const rivalTerm = rivalGuessTermId ? terms.find((t) => t.id === rivalGuessTermId) : null;
   const rivalLabel = rivalTerm ? getTermLabel(rivalTerm, locale) : null;
@@ -175,7 +170,7 @@ function DropZone({
   );
 }
 
-export default function Canvas({ sceneId, imageSrc, dropTargets, terms, mode, playerGuesses, showFeedback, placingTermId, onCanvasClick, onRemoveGuess, locale, termLocales, opaqueTargets, rivalGuesses, rivalLiveProgress, matchStatus, teamLabel, isSpectator, canvasBg, practiceHighlightedTargetId, pulseKey }: CanvasProps) {
+export default function Canvas({ sceneId, imageSrc, dropTargets, terms, mode, playerGuesses, showFeedback, placingTermId, onCanvasClick, onRemoveGuess, locale, opaqueTargets, rivalGuesses, rivalLiveProgress, matchStatus, teamLabel, isSpectator, practiceHighlightedTargetId, pulseKey }: CanvasProps) {
   const { setNodeRef, isOver } = useDroppable({ id: "canvas" });
   const isPlacing = !!placingTermId;
   const placingTerm = isPlacing ? terms.find((t) => t.id === placingTermId) : null;
@@ -189,11 +184,8 @@ export default function Canvas({ sceneId, imageSrc, dropTargets, terms, mode, pl
     onCanvasClick(xPercent, yPercent);
   }
 
-  const areaBg = canvasBg === "dark" ? "bg-gray-800" : canvasBg === "light" ? "bg-gray-100" : "bg-blue-50/50";
-  const canvasBorder = canvasBg === "dark" ? "border-gray-600" : "border-transparent";
-
   return (
-    <div className={`flex-1 flex flex-col relative ${areaBg}`}>
+    <div className="flex-1 flex flex-col relative bg-blue-50/50">
 
       {/* Placing indicator */}
       {isPlacing && (
@@ -212,12 +204,12 @@ export default function Canvas({ sceneId, imageSrc, dropTargets, terms, mode, pl
             ? "border-blue-400 cursor-crosshair"
             : isOver
               ? "border-blue-300 bg-blue-50/30"
-              : canvasBorder
+              : "border-transparent"
             } ${!isPlacing ? "cursor-default" : ""}`}
           style={{ aspectRatio: "3 / 2", width: "min(100%, calc((100vh - 3rem) * 1.5))" }}
         >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
           {imageSrc && (
+            // eslint-disable-next-line @next/next/no-img-element
             <img
               src={imageSrc}
               alt={`${sceneId} scene`}
@@ -235,7 +227,6 @@ export default function Canvas({ sceneId, imageSrc, dropTargets, terms, mode, pl
               guessTermId={playerGuesses[target.id]}
               showFeedback={showFeedback}
               locale={locale}
-              termLocales={termLocales}
               opaqueTargets={opaqueTargets}
               rivalGuessTermId={rivalGuesses?.[target.id]}
               showRivalFeedback={matchStatus === "reveal" && !isSpectator}

@@ -62,6 +62,7 @@ function SceneCard({ scene, playMode, isMatchMode, onDelete }: { scene: Scene; p
 
       <Link href={getHref()} className="block relative h-40 bg-gray-800 flex items-center justify-center overflow-hidden">
         {scene.image ? (
+          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={scene.image}
             alt={formatName(scene.id)}

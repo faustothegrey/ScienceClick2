@@ -19,7 +19,6 @@ import {
 import HeaderBar from "@/components/editor/HeaderBar";
 import Canvas from "@/components/editor/Canvas";
 import type { MatchStatus } from "@/components/editor/Canvas";
-import type { CanvasBg } from "@/components/editor/Toolbar";
 import WordList from "@/components/editor/WordList";
 import PracticePanel from "@/components/editor/PracticePanel";
 import { Term, migrateTerm, getTermLabel } from "@/lib/i18n";
@@ -149,7 +148,6 @@ function SceneEditorPage() {
   const [availableTerms, setAvailableTerms] = useState<Term[]>([]);
   const [dropTargets, setDropTargets] = useState<DropTarget[]>([]);
   const [opaqueTargets, setOpaqueTargets] = useState(false);
-  const [canvasBg, setCanvasBg] = useState<CanvasBg>("default");
   const [sceneImage, setSceneImage] = useState<string | null>(null);
   const [locale, setLocale] = useState<string>(() => {
     if (typeof window !== "undefined") {
@@ -157,7 +155,6 @@ function SceneEditorPage() {
     }
     return "en";
   });
-  const [termLocales, setTermLocales] = useState<Record<string, string>>({});
   const [playerName, setPlayerName] = useState<string | null>(() => {
     if (typeof window !== "undefined") {
       return localStorage.getItem("sc2:playerName");
@@ -178,7 +175,6 @@ function SceneEditorPage() {
 
   function handleLocaleChange(newLocale: string) {
     setLocale(newLocale);
-    setTermLocales({});
     localStorage.setItem(`sc2:scene:${id}:locale`, newLocale);
   }
 
@@ -730,14 +726,11 @@ function SceneEditorPage() {
               });
             } : undefined}
             locale={locale}
-            termLocales={termLocales}
             opaqueTargets={opaqueTargets}
             rivalGuesses={rivalGuesses ?? undefined}
             rivalLiveProgress={rivalLiveProgress}
             matchStatus={isMatchMode ? matchStatus : undefined}
             teamLabel={teamLabel}
-            canvasBg={canvasBg}
-            onCanvasBgChange={setCanvasBg}
             practiceHighlightedTargetId={mode === "practice" && practiceState.hintLevel >= 1 ? activePracticeTargetId : null}
             pulseKey={pulseKey}
           />
@@ -771,7 +764,6 @@ function SceneEditorPage() {
               onAddTerm={handleAddTerm}
               onRemoveTerm={handleRemoveTerm}
               locale={locale}
-              termLocales={termLocales}
               placedTermIds={placedTermIds}
               playKey={playKey}
               dragDisabled={mode === "play" && showFeedback}
@@ -783,7 +775,7 @@ function SceneEditorPage() {
         {(activeTerm || dragTargetTerm) ? (
           <div className={`relative w-32 flex items-center justify-center rounded-lg shadow-lg font-medium text-sm cursor-grabbing ${mode === "practice" ? "h-14 bg-amber-50/20 border-2 border-amber-400 text-gray-900" : "h-10 bg-white/10 border-2 border-blue-400 text-gray-800"}`}>
             <span className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-gray-200 ring-1 ring-white shadow-[inset_0_1px_2px_rgba(0,0,0,0.45)] pointer-events-none" />
-            {getTermLabel((activeTerm || dragTargetTerm)!, termLocales[(activeTerm || dragTargetTerm)!.id] || locale)}
+            {getTermLabel((activeTerm || dragTargetTerm)!, locale)}
           </div>
         ) : null}
       </DragOverlay>

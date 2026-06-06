@@ -9,7 +9,6 @@ interface WordListProps {
   onAddTerm: (label: string) => void;
   onRemoveTerm: (termId: string) => void;
   locale: string;
-  termLocales: Record<string, string>;
   placedTermIds?: Set<string>;
   playKey?: number;
   dragDisabled?: boolean;
@@ -50,7 +49,7 @@ function DraggableTerm({ term, mode, onRemove, termLocale, isPlaced, dragDisable
   );
 }
 
-export default function WordList({ terms, mode, onAddTerm, onRemoveTerm, locale, termLocales, placedTermIds, playKey, dragDisabled = false }: WordListProps) {
+export default function WordList({ terms, mode, onAddTerm, onRemoveTerm, locale, placedTermIds, playKey, dragDisabled = false }: WordListProps) {
   const [isCreating, setIsCreating] = useState(false);
   const [newLabel, setNewLabel] = useState("");
 
@@ -120,7 +119,7 @@ export default function WordList({ terms, mode, onAddTerm, onRemoveTerm, locale,
         <div className="border-t border-gray-100 pt-3">
           <div className="flex flex-col gap-2">
             {terms.map((term) => (
-              <DraggableTerm key={`${term.id}-${playKey ?? 0}`} term={term} mode={mode} onRemove={onRemoveTerm} termLocale={termLocales[term.id] || locale} isPlaced={placedTermIds?.has(term.id) ?? false} dragDisabled={dragDisabled} />
+              <DraggableTerm key={`${term.id}-${playKey ?? 0}`} term={term} mode={mode} onRemove={onRemoveTerm} termLocale={locale} isPlaced={placedTermIds?.has(term.id) ?? false} dragDisabled={dragDisabled} />
             ))}
           </div>
         </div>
