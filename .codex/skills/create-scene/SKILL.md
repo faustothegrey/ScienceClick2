@@ -250,6 +250,7 @@ Good examples are bundled in the `examples/` directory next to this file:
 - `examples/water-cycle-config.json` — config with 5 terms, kebab-case IDs, all 5 locale translations, and well-spaced drop targets
 
 
-## Antigravity-Specific Notes
 
-- Set `"agent": "gemini"` in the generated config.json.
+## Codex-Specific Notes
+
+- Set `"agent": "codex"` in the generated config.json.

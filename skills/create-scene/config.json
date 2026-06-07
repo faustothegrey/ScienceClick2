@@ -1,0 +1,29 @@
+{
+  "name": "create-scene",
+  "description": "Create a new ScienceClick2 scene with illustration, config, and translations",
+  "targets": {
+    "claude": {
+      "dest": ".claude/skills/create-scene/SKILL.md",
+      "frontmatter": {
+        "name": "create-scene",
+        "description": "Create a new ScienceClick scene with SVG illustration, config, and translations",
+        "allowed-tools": "Read, Write, Bash, Glob, Grep",
+        "user-invocable": true
+      }
+    },
+    "antigravity": {
+      "dest": ".agents/skills/create-scene/SKILL.md",
+      "frontmatter": {
+        "name": "create-scene",
+        "description": "Create a new ScienceClick2 scene with illustration, config, and translations"
+      }
+    },
+    "codex": {
+      "dest": ".codex/skills/create-scene/SKILL.md",
+      "frontmatter": {
+        "name": "create-scene",
+        "description": "Create a new ScienceClick2 scene with illustration, config, and translations"
+      }
+    }
+  }
+}

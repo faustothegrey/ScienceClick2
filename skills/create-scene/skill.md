@@ -1,7 +1,3 @@
----
-name: create-scene
-description: Create a new ScienceClick2 scene with illustration, config, and translations
----
 # Create a New Scene
 
 You are building a scene for **ScienceClick2**, an educational drag-and-drop labeling app. The user will describe a topic (e.g., "solar system", "human skeleton", "parts of a flower"). You must generate all assets for a fully playable scene.
@@ -249,7 +245,21 @@ A scene about ocean floor features with these terms:
 Good examples are bundled in the `examples/` directory next to this file:
 - `examples/water-cycle-config.json` — config with 5 terms, kebab-case IDs, all 5 locale translations, and well-spaced drop targets
 
+<!-- if model="claude" -->
+## Claude-Specific Notes
 
+- `$ARGUMENTS` contains the scene topic provided by the user.
+- Set `"agent": "claude"` in the generated config.json.
+<!-- endif -->
+
+<!-- if model="antigravity" -->
 ## Antigravity-Specific Notes
 
 - Set `"agent": "gemini"` in the generated config.json.
+<!-- endif -->
+
+<!-- if model="codex" -->
+## Codex-Specific Notes
+
+- Set `"agent": "codex"` in the generated config.json.
+<!-- endif -->

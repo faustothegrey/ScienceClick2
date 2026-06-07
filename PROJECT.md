@@ -25,6 +25,7 @@ completion indicator.
 
 Use these defaults for future AI agent sessions working in this repository:
 
+- When creating or modifying agent skills, make the changes inside the `skills/` directory (e.g., [skills/create-scene/skill.md](file:///Users/fausto/Software/ScienceClick2/skills/create-scene/skill.md)) and always run `./scripts/sync-skills.py` to compile the model-specific versions (do not edit files in `.agents/skills/`, `.claude/skills/`, or `.codex/skills/` directly).
 - For substantial implementation work, create a dedicated git worktree and branch instead of editing directly in the main working tree.
 - Name the temporary worktree after the task, for example `../ScienceClick2-<task>` with a matching branch name.
 - Use the main working tree only for final merged results, verification, and the user-visible final state.

@@ -1,0 +1,92 @@
+{
+  "terms": [
+    {
+      "id": "term-rain",
+      "translations": {
+        "en": "Rain",
+        "it": "Pioggia",
+        "es": "Lluvia",
+        "fr": "Pluie",
+        "wo": "Taw"
+      },
+      "defaultLocale": "en"
+    },
+    {
+      "id": "term-evaporation",
+      "translations": {
+        "en": "Evaporation",
+        "it": "Evaporazione",
+        "es": "Evaporación",
+        "fr": "Évaporation",
+        "wo": "Naaj"
+      },
+      "defaultLocale": "en"
+    },
+    {
+      "id": "term-river",
+      "translations": {
+        "en": "River",
+        "it": "Fiume",
+        "es": "Río",
+        "fr": "Rivière",
+        "wo": "Dex"
+      },
+      "defaultLocale": "en"
+    },
+    {
+      "id": "term-forest",
+      "translations": {
+        "en": "Forest",
+        "it": "Foresta",
+        "es": "Bosque",
+        "fr": "Forêt",
+        "wo": "Àll"
+      },
+      "defaultLocale": "en"
+    },
+    {
+      "id": "term-sea",
+      "translations": {
+        "en": "Sea",
+        "it": "Mare",
+        "es": "Mar",
+        "fr": "Mer",
+        "wo": "Géej"
+      },
+      "defaultLocale": "en"
+    }
+  ],
+  "dropTargets": [
+    {
+      "id": "target-rain",
+      "x": 38.5,
+      "y": 31.87,
+      "assignedTerm": "term-rain"
+    },
+    {
+      "id": "target-evaporation",
+      "x": 65.67,
+      "y": 46.52,
+      "assignedTerm": "term-evaporation"
+    },
+    {
+      "id": "target-river",
+      "x": 27.53,
+      "y": 57.66,
+      "assignedTerm": "term-river"
+    },
+    {
+      "id": "target-forest",
+      "x": 11.87,
+      "y": 48.69,
+      "assignedTerm": "term-forest"
+    },
+    {
+      "id": "target-sea",
+      "x": 56.88,
+      "y": 71.75,
+      "assignedTerm": "term-sea"
+    }
+  ],
+  "agent": "claude"
+}
