@@ -1,0 +1,162 @@
+{
+  "category": "Biology & Human Body",
+  "opaqueTargets": true,
+  "terms": [
+    {
+      "id": "term-mouth",
+      "translations": {
+        "en": "Mouth",
+        "it": "Bocca",
+        "es": "Boca",
+        "fr": "Bouche",
+        "wo": "Baat"
+      },
+      "defaultLocale": "en"
+    },
+    {
+      "id": "term-esophagus",
+      "translations": {
+        "en": "Esophagus",
+        "it": "Esofago",
+        "es": "Esófago",
+        "fr": "Œsophage",
+        "wo": "Esofas"
+      },
+      "defaultLocale": "en"
+    },
+    {
+      "id": "term-liver",
+      "translations": {
+        "en": "Liver",
+        "it": "Fegato",
+        "es": "Hígado",
+        "fr": "Foie",
+        "wo": "Res"
+      },
+      "defaultLocale": "en"
+    },
+    {
+      "id": "term-stomach",
+      "translations": {
+        "en": "Stomach",
+        "it": "Stomaco",
+        "es": "Estómago",
+        "fr": "Estomac",
+        "wo": "Biir"
+      },
+      "defaultLocale": "en"
+    },
+    {
+      "id": "term-pancreas",
+      "translations": {
+        "en": "Pancreas",
+        "it": "Pancreas",
+        "es": "Páncreas",
+        "fr": "Pancréas",
+        "wo": "Pankreas"
+      },
+      "defaultLocale": "en"
+    },
+    {
+      "id": "term-small-intestine",
+      "translations": {
+        "en": "Small Intestine",
+        "it": "Intestino tenue",
+        "es": "Intestino delgado",
+        "fr": "Intestin grêle",
+        "wo": "Biir bu ndaw"
+      },
+      "defaultLocale": "en"
+    },
+    {
+      "id": "term-large-intestine",
+      "translations": {
+        "en": "Large Intestine",
+        "it": "Intestino crasso",
+        "es": "Intestino grueso",
+        "fr": "Gros intestin",
+        "wo": "Biir bu mag"
+      },
+      "defaultLocale": "en"
+    },
+    {
+      "id": "term-appendix",
+      "translations": {
+        "en": "Appendix",
+        "it": "Appendice",
+        "es": "Apéndice",
+        "fr": "Appendice",
+        "wo": "Apendis"
+      },
+      "defaultLocale": "en"
+    },
+    {
+      "id": "term-anus",
+      "translations": {
+        "en": "Anus",
+        "it": "Ano",
+        "es": "Ano",
+        "fr": "Anus",
+        "wo": "Anus"
+      },
+      "defaultLocale": "en"
+    }
+  ],
+  "dropTargets": [
+    {
+      "id": "target-mouth",
+      "x": 64.05976336935292,
+      "y": 18.890418177065644,
+      "assignedTerm": "term-mouth"
+    },
+    {
+      "id": "target-esophagus",
+      "x": 57.720858808876805,
+      "y": 24.786302317743715,
+      "assignedTerm": "term-esophagus"
+    },
+    {
+      "id": "target-liver",
+      "x": 34.65468918067822,
+      "y": 55.717775096064024,
+      "assignedTerm": "term-liver"
+    },
+    {
+      "id": "target-stomach",
+      "x": 62.78550521187161,
+      "y": 52.61990920357083,
+      "assignedTerm": "term-stomach"
+    },
+    {
+      "id": "target-pancreas",
+      "x": 62.64858522276947,
+      "y": 58.29928854237431,
+      "assignedTerm": "term-pancreas"
+    },
+    {
+      "id": "target-small-intestine",
+      "x": 62.994965263034985,
+      "y": 67.13368789009427,
+      "assignedTerm": "term-small-intestine"
+    },
+    {
+      "id": "target-large-intestine",
+      "x": 64.59596053413723,
+      "y": 73.47242935844089,
+      "assignedTerm": "term-large-intestine"
+    },
+    {
+      "id": "target-appendix",
+      "x": 36.00218676138615,
+      "y": 72.36664813497792,
+      "assignedTerm": "term-appendix"
+    },
+    {
+      "id": "target-anus",
+      "x": 37.10299229276353,
+      "y": 79.0455610855766,
+      "assignedTerm": "term-anus"
+    }
+  ],
+  "order": 2
+}

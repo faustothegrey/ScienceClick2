@@ -1,0 +1,95 @@
+{
+  "category": "Everyday Scenes",
+  "opaqueTargets": false,
+  "terms": [
+    {
+      "id": "term-cart",
+      "translations": {
+        "en": "Shopping Cart",
+        "it": "Carrello della spesa",
+        "es": "Carrito de compras",
+        "fr": "Chariot de courses",
+        "wo": "Puse-puse bi"
+      },
+      "defaultLocale": "en"
+    },
+    {
+      "id": "term-fruit",
+      "translations": {
+        "en": "Fruit",
+        "it": "Frutta",
+        "es": "Fruta",
+        "fr": "Fruits",
+        "wo": "Meññeef yi"
+      },
+      "defaultLocale": "en"
+    },
+    {
+      "id": "term-shelf",
+      "translations": {
+        "en": "Shelf",
+        "it": "Scaffale",
+        "es": "Estante",
+        "fr": "Étagère",
+        "wo": "Armoaru"
+      },
+      "defaultLocale": "en"
+    },
+    {
+      "id": "term-cash-register",
+      "translations": {
+        "en": "Cash Register",
+        "it": "Cassa",
+        "es": "Caja",
+        "fr": "Caisse",
+        "wo": "Keas bi"
+      },
+      "defaultLocale": "en"
+    },
+    {
+      "id": "term-customer",
+      "translations": {
+        "en": "Customer",
+        "it": "Cliente",
+        "es": "Cliente",
+        "fr": "Client",
+        "wo": "Jëndkat bi"
+      },
+      "defaultLocale": "en"
+    }
+  ],
+  "dropTargets": [
+    {
+      "id": "target-cart",
+      "x": 55,
+      "y": 70,
+      "assignedTerm": "term-cart"
+    },
+    {
+      "id": "target-fruit",
+      "x": 18,
+      "y": 45,
+      "assignedTerm": "term-fruit"
+    },
+    {
+      "id": "target-shelf",
+      "x": 52,
+      "y": 40,
+      "assignedTerm": "term-shelf"
+    },
+    {
+      "id": "target-cash-register",
+      "x": 85,
+      "y": 65,
+      "assignedTerm": "term-cash-register"
+    },
+    {
+      "id": "target-customer",
+      "x": 72,
+      "y": 45,
+      "assignedTerm": "term-customer"
+    }
+  ],
+  "agent": "gemini",
+  "order": 2
+}

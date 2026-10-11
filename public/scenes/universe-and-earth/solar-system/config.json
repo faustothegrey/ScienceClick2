@@ -1,0 +1,163 @@
+{
+  "category": "Universe & Earth",
+  "opaqueTargets": true,
+  "agent": "claude",
+  "terms": [
+    {
+      "id": "term-sun",
+      "translations": {
+        "en": "Sun",
+        "it": "Sole",
+        "es": "Sol",
+        "fr": "Soleil",
+        "wo": "Jant"
+      },
+      "defaultLocale": "en"
+    },
+    {
+      "id": "term-mercury",
+      "translations": {
+        "en": "Mercury",
+        "it": "Mercurio",
+        "es": "Mercurio",
+        "fr": "Mercure",
+        "wo": "Mersür"
+      },
+      "defaultLocale": "en"
+    },
+    {
+      "id": "term-venus",
+      "translations": {
+        "en": "Venus",
+        "it": "Venere",
+        "es": "Venus",
+        "fr": "Vénus",
+        "wo": "Wenus"
+      },
+      "defaultLocale": "en"
+    },
+    {
+      "id": "term-earth",
+      "translations": {
+        "en": "Earth",
+        "it": "Terra",
+        "es": "Tierra",
+        "fr": "Terre",
+        "wo": "Suuf"
+      },
+      "defaultLocale": "en"
+    },
+    {
+      "id": "term-mars",
+      "translations": {
+        "en": "Mars",
+        "it": "Marte",
+        "es": "Marte",
+        "fr": "Mars",
+        "wo": "Mars"
+      },
+      "defaultLocale": "en"
+    },
+    {
+      "id": "term-jupiter",
+      "translations": {
+        "en": "Jupiter",
+        "it": "Giove",
+        "es": "Júpiter",
+        "fr": "Jupiter",
+        "wo": "Jupiteer"
+      },
+      "defaultLocale": "en"
+    },
+    {
+      "id": "term-saturn",
+      "translations": {
+        "en": "Saturn",
+        "it": "Saturno",
+        "es": "Saturno",
+        "fr": "Saturne",
+        "wo": "Satirn"
+      },
+      "defaultLocale": "en"
+    },
+    {
+      "id": "term-uranus",
+      "translations": {
+        "en": "Uranus",
+        "it": "Urano",
+        "es": "Urano",
+        "fr": "Uranus",
+        "wo": "Iranis"
+      },
+      "defaultLocale": "en"
+    },
+    {
+      "id": "term-neptune",
+      "translations": {
+        "en": "Neptune",
+        "it": "Nettuno",
+        "es": "Neptuno",
+        "fr": "Neptune",
+        "wo": "Neptin"
+      },
+      "defaultLocale": "en"
+    }
+  ],
+  "dropTargets": [
+    {
+      "id": "target-sun",
+      "x": 5,
+      "y": 57.42378234863281,
+      "assignedTerm": "term-sun"
+    },
+    {
+      "id": "target-mercury",
+      "x": 11.453647690589982,
+      "y": 44.86318299264619,
+      "assignedTerm": "term-mercury"
+    },
+    {
+      "id": "target-venus",
+      "x": 16.996364709102746,
+      "y": 56.435008193507336,
+      "assignedTerm": "term-venus"
+    },
+    {
+      "id": "target-earth",
+      "x": 21.883045543323863,
+      "y": 44.56390843246922,
+      "assignedTerm": "term-earth"
+    },
+    {
+      "id": "target-mars",
+      "x": 31.737053456932607,
+      "y": 55.99977435487689,
+      "assignedTerm": "term-mars"
+    },
+    {
+      "id": "target-jupiter",
+      "x": 43,
+      "y": 45,
+      "assignedTerm": "term-jupiter"
+    },
+    {
+      "id": "target-saturn",
+      "x": 58,
+      "y": 50,
+      "assignedTerm": "term-saturn"
+    },
+    {
+      "id": "target-uranus",
+      "x": 72,
+      "y": 45,
+      "assignedTerm": "term-uranus"
+    },
+    {
+      "id": "target-neptune",
+      "x": 87.95667459507182,
+      "y": 57.25901054613518,
+      "assignedTerm": "term-neptune"
+    }
+  ],
+  "order": 2
+}

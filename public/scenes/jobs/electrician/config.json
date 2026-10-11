@@ -1,0 +1,108 @@
+{
+  "terms": [
+    {
+      "id": "term-electrician",
+      "translations": {
+        "en": "Electrician",
+        "it": "Elettricista",
+        "es": "Electricista",
+        "fr": "Électricien",
+        "wo": "Elektirisiyaŋ"
+      },
+      "defaultLocale": "en"
+    },
+    {
+      "id": "term-helmet",
+      "translations": {
+        "en": "Helmet",
+        "it": "Casco",
+        "es": "Casco",
+        "fr": "Casque",
+        "wo": "Kaska"
+      },
+      "defaultLocale": "en"
+    },
+    {
+      "id": "term-wires",
+      "translations": {
+        "en": "Wires",
+        "it": "Fili",
+        "es": "Cables",
+        "fr": "Fils",
+        "wo": "Buum yi"
+      },
+      "defaultLocale": "en"
+    },
+    {
+      "id": "term-toolbox",
+      "translations": {
+        "en": "Toolbox",
+        "it": "Cassetta degli attrezzi",
+        "es": "Caja de herramientas",
+        "fr": "Boîte à outils",
+        "wo": "Bóoxu jumtukaay"
+      },
+      "defaultLocale": "en"
+    },
+    {
+      "id": "term-cable",
+      "translations": {
+        "en": "Cable",
+        "it": "Cavo",
+        "es": "Cable",
+        "fr": "Câble",
+        "wo": "Kaabal"
+      },
+      "defaultLocale": "en"
+    },
+    {
+      "id": "term-tape",
+      "translations": {
+        "en": "Tape",
+        "it": "Nastro",
+        "es": "Cinta",
+        "fr": "Ruban adhésif",
+        "wo": "Sparadara"
+      },
+      "defaultLocale": "en"
+    }
+  ],
+  "dropTargets": [
+    {
+      "id": "target-helmet",
+      "x": 32,
+      "y": 18,
+      "assignedTerm": "term-helmet"
+    },
+    {
+      "id": "target-electrician",
+      "x": 35,
+      "y": 55,
+      "assignedTerm": "term-electrician"
+    },
+    {
+      "id": "target-wires",
+      "x": 58.27887427288553,
+      "y": 49.87647512684698,
+      "assignedTerm": "term-wires"
+    },
+    {
+      "id": "target-toolbox",
+      "x": 80,
+      "y": 70,
+      "assignedTerm": "term-toolbox"
+    },
+    {
+      "id": "target-cable",
+      "x": 45,
+      "y": 88,
+      "assignedTerm": "term-cable"
+    },
+    {
+      "id": "target-tape",
+      "x": 72,
+      "y": 90,
+      "assignedTerm": "term-tape"
+    }
+  ]
+}

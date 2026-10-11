@@ -1,0 +1,112 @@
+{
+  "category": "Everyday Scenes",
+  "opaqueTargets": false,
+  "terms": [
+    {
+      "id": "term-doctor",
+      "translations": {
+        "en": "Doctor",
+        "it": "Dottore",
+        "es": "Doctor",
+        "fr": "Docteur",
+        "wo": "Doktoor bi"
+      },
+      "defaultLocale": "en"
+    },
+    {
+      "id": "term-patient",
+      "translations": {
+        "en": "Patient",
+        "it": "Paziente",
+        "es": "Paciente",
+        "fr": "Patient",
+        "wo": "Tawat bi"
+      },
+      "defaultLocale": "en"
+    },
+    {
+      "id": "term-eye-chart",
+      "translations": {
+        "en": "Eye Chart",
+        "it": "Tabella ottotipica",
+        "es": "Tabla optométrica",
+        "fr": "Tableau optométrique",
+        "wo": "Misaalu bët"
+      },
+      "defaultLocale": "en"
+    },
+    {
+      "id": "term-poster",
+      "translations": {
+        "en": "Anatomical Poster",
+        "it": "Poster anatomico",
+        "es": "Póster anatómico",
+        "fr": "Affiche anatomique",
+        "wo": "Nataal"
+      },
+      "defaultLocale": "en"
+    },
+    {
+      "id": "term-couch",
+      "translations": {
+        "en": "Medical Couch",
+        "it": "Lettino medico",
+        "es": "Camilla médica",
+        "fr": "Table d'examen",
+        "wo": "Lalu opitaal"
+      },
+      "defaultLocale": "en"
+    },
+    {
+      "id": "term-cabinet",
+      "translations": {
+        "en": "Medicine Cabinet",
+        "it": "Armadietto dei medicinali",
+        "es": "Botiquín",
+        "fr": "Pharmacie",
+        "wo": "Armoaru"
+      },
+      "defaultLocale": "en"
+    }
+  ],
+  "dropTargets": [
+    {
+      "id": "target-doctor",
+      "x": 34,
+      "y": 55,
+      "assignedTerm": "term-doctor"
+    },
+    {
+      "id": "target-patient",
+      "x": 62,
+      "y": 55,
+      "assignedTerm": "term-patient"
+    },
+    {
+      "id": "target-eye-chart",
+      "x": 43,
+      "y": 22,
+      "assignedTerm": "term-eye-chart"
+    },
+    {
+      "id": "target-poster",
+      "x": 60,
+      "y": 22,
+      "assignedTerm": "term-poster"
+    },
+    {
+      "id": "target-couch",
+      "x": 18,
+      "y": 50,
+      "assignedTerm": "term-couch"
+    },
+    {
+      "id": "target-cabinet",
+      "x": 75,
+      "y": 40,
+      "assignedTerm": "term-cabinet"
+    }
+  ],
+  "agent": "gemini",
+  "order": 3
+}

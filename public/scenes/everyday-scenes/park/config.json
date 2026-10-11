@@ -1,0 +1,95 @@
+{
+  "category": "Everyday Scenes",
+  "opaqueTargets": false,
+  "terms": [
+    {
+      "id": "term-slide",
+      "translations": {
+        "en": "Slide",
+        "it": "Scivolo",
+        "es": "Tobogán",
+        "fr": "Toboggan",
+        "wo": "Glise-glise"
+      },
+      "defaultLocale": "en"
+    },
+    {
+      "id": "term-swing",
+      "translations": {
+        "en": "Swing",
+        "it": "Altalena",
+        "es": "Columpio",
+        "fr": "Balançoire",
+        "wo": "Njoowaan gi"
+      },
+      "defaultLocale": "en"
+    },
+    {
+      "id": "term-sandbox",
+      "translations": {
+        "en": "Sandbox",
+        "it": "Sabbiera",
+        "es": "Arenero",
+        "fr": "Bac à sable",
+        "wo": "Sabbiyer bi"
+      },
+      "defaultLocale": "en"
+    },
+    {
+      "id": "term-seesaw",
+      "translations": {
+        "en": "Seesaw",
+        "it": "Altalena a bilico",
+        "es": "Balancín",
+        "fr": "Bascule",
+        "wo": "Bascul bi"
+      },
+      "defaultLocale": "en"
+    },
+    {
+      "id": "term-tree",
+      "translations": {
+        "en": "Tree",
+        "it": "Albero",
+        "es": "Árbol",
+        "fr": "Arbre",
+        "wo": "Garab gi"
+      },
+      "defaultLocale": "en"
+    }
+  ],
+  "dropTargets": [
+    {
+      "id": "target-slide",
+      "x": 18,
+      "y": 35,
+      "assignedTerm": "term-slide"
+    },
+    {
+      "id": "target-swing",
+      "x": 60,
+      "y": 40,
+      "assignedTerm": "term-swing"
+    },
+    {
+      "id": "target-sandbox",
+      "x": 55,
+      "y": 68,
+      "assignedTerm": "term-sandbox"
+    },
+    {
+      "id": "target-seesaw",
+      "x": 88,
+      "y": 55,
+      "assignedTerm": "term-seesaw"
+    },
+    {
+      "id": "target-tree",
+      "x": 42,
+      "y": 32,
+      "assignedTerm": "term-tree"
+    }
+  ],
+  "agent": "gemini",
+  "order": 1
+}

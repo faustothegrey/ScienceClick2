@@ -43,8 +43,8 @@ next-env.d.ts
 # claude
 .claude/
 
-# scene data (images + config)
-public/scenes/
+# scene runtime state (match results are written at runtime)
+public/scenes/**/match.json
 
 # source materials
 sources/

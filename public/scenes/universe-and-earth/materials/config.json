@@ -1,0 +1,111 @@
+{
+  "category": "Universe & Earth",
+  "agent": "claude",
+  "terms": [
+    {
+      "id": "term-sugar",
+      "translations": {
+        "en": "Sugar",
+        "it": "Zucchero",
+        "es": "Azúcar",
+        "fr": "Sucre",
+        "wo": "Sukër"
+      },
+      "defaultLocale": "en"
+    },
+    {
+      "id": "term-plastic",
+      "translations": {
+        "en": "Plastic",
+        "it": "Plastica",
+        "es": "Plástico",
+        "fr": "Plastique",
+        "wo": "Plastik"
+      },
+      "defaultLocale": "en"
+    },
+    {
+      "id": "term-wood",
+      "translations": {
+        "en": "Wood",
+        "it": "Legno",
+        "es": "Madera",
+        "fr": "Bois",
+        "wo": "Garab"
+      },
+      "defaultLocale": "en"
+    },
+    {
+      "id": "term-glass",
+      "translations": {
+        "en": "Glass",
+        "it": "Vetro",
+        "es": "Vidrio",
+        "fr": "Verre",
+        "wo": "Weer"
+      },
+      "defaultLocale": "en"
+    },
+    {
+      "id": "term-iron",
+      "translations": {
+        "en": "Iron",
+        "it": "Ferro",
+        "es": "Hierro",
+        "fr": "Fer",
+        "wo": "Wurus"
+      },
+      "defaultLocale": "en"
+    },
+    {
+      "id": "term-water",
+      "translations": {
+        "en": "Water",
+        "it": "Acqua",
+        "es": "Agua",
+        "fr": "Eau",
+        "wo": "Ndox"
+      },
+      "defaultLocale": "en"
+    }
+  ],
+  "dropTargets": [
+    {
+      "id": "target-sugar",
+      "x": 17,
+      "y": 36,
+      "assignedTerm": "term-sugar"
+    },
+    {
+      "id": "target-plastic",
+      "x": 50,
+      "y": 36,
+      "assignedTerm": "term-plastic"
+    },
+    {
+      "id": "target-wood",
+      "x": 83,
+      "y": 36,
+      "assignedTerm": "term-wood"
+    },
+    {
+      "id": "target-glass",
+      "x": 17,
+      "y": 64,
+      "assignedTerm": "term-glass"
+    },
+    {
+      "id": "target-iron",
+      "x": 50,
+      "y": 64,
+      "assignedTerm": "term-iron"
+    },
+    {
+      "id": "target-water",
+      "x": 83,
+      "y": 64,
+      "assignedTerm": "term-water"
+    }
+  ],
+  "order": 3
+}

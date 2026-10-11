@@ -1,0 +1,93 @@
+{
+  "category": "Biology & Human Body",
+  "terms": [
+    {
+      "id": "term-cell-membrane",
+      "translations": {
+        "en": "Cell Membrane",
+        "it": "Membrana cellulare",
+        "es": "Membrana celular",
+        "fr": "Membrane cellulaire",
+        "wo": "Tëraliinu selil"
+      },
+      "defaultLocale": "en"
+    },
+    {
+      "id": "term-cytoplasm",
+      "translations": {
+        "en": "Cytoplasm",
+        "it": "Citoplasma",
+        "es": "Citoplasma",
+        "fr": "Cytoplasme",
+        "wo": "Sitoplasm"
+      },
+      "defaultLocale": "en"
+    },
+    {
+      "id": "term-nucleus",
+      "translations": {
+        "en": "Nucleus",
+        "it": "Nucleo",
+        "es": "Núcleo",
+        "fr": "Noyau",
+        "wo": "Noyo"
+      },
+      "defaultLocale": "en"
+    },
+    {
+      "id": "term-mitochondrion",
+      "translations": {
+        "en": "Mitochondrion",
+        "it": "Mitocondrio",
+        "es": "Mitocondria",
+        "fr": "Mitochondrie",
+        "wo": "Mitokondiri"
+      },
+      "defaultLocale": "en"
+    },
+    {
+      "id": "term-ribosome",
+      "translations": {
+        "en": "Ribosome",
+        "it": "Ribosoma",
+        "es": "Ribosoma",
+        "fr": "Ribosome",
+        "wo": "Ribosom"
+      },
+      "defaultLocale": "en"
+    }
+  ],
+  "dropTargets": [
+    {
+      "id": "target-cell-membrane",
+      "x": 18.825237992881,
+      "y": 82.4473588362984,
+      "assignedTerm": "term-cell-membrane"
+    },
+    {
+      "id": "target-cytoplasm",
+      "x": 66.35456361632417,
+      "y": 39.675658682118296,
+      "assignedTerm": "term-cytoplasm"
+    },
+    {
+      "id": "target-nucleus",
+      "x": 35.33042133718297,
+      "y": 40.506877069887906,
+      "assignedTerm": "term-nucleus"
+    },
+    {
+      "id": "target-mitochondrion",
+      "x": 34.46162127066349,
+      "y": 17.45998133783755,
+      "assignedTerm": "term-mitochondrion"
+    },
+    {
+      "id": "target-ribosome",
+      "x": 90.52158853282099,
+      "y": 52.9591353043266,
+      "assignedTerm": "term-ribosome"
+    }
+  ],
+  "order": 1
+}

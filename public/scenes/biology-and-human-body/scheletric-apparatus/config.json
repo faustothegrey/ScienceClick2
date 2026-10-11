@@ -1,0 +1,129 @@
+{
+  "category": "Biology & Human Body",
+  "opaqueTargets": true,
+  "terms": [
+    {
+      "id": "term-skull",
+      "translations": {
+        "en": "Skull",
+        "it": "Cranio",
+        "es": "Cráneo",
+        "fr": "Crâne",
+        "wo": "Góor"
+      },
+      "defaultLocale": "en"
+    },
+    {
+      "id": "term-ribs",
+      "translations": {
+        "en": "Ribs",
+        "it": "Costole",
+        "es": "Costillas",
+        "fr": "Côtes",
+        "wo": "Yépp"
+      },
+      "defaultLocale": "en"
+    },
+    {
+      "id": "term-spine",
+      "translations": {
+        "en": "Spine",
+        "it": "Colonna vertebrale",
+        "es": "Columna vertebral",
+        "fr": "Colonne vertébrale",
+        "wo": "Caru garab"
+      },
+      "defaultLocale": "en"
+    },
+    {
+      "id": "term-shoulder",
+      "translations": {
+        "en": "Shoulder",
+        "it": "Spalla",
+        "es": "Hombro",
+        "fr": "Épaule",
+        "wo": "Bàpp"
+      },
+      "defaultLocale": "en"
+    },
+    {
+      "id": "term-pelvis",
+      "translations": {
+        "en": "Pelvis",
+        "it": "Bacino",
+        "es": "Pelvis",
+        "fr": "Bassin",
+        "wo": "Pelwis"
+      },
+      "defaultLocale": "en"
+    },
+    {
+      "id": "term-knee",
+      "translations": {
+        "en": "Knee",
+        "it": "Ginocchio",
+        "es": "Rodilla",
+        "fr": "Genou",
+        "wo": "Óom"
+      },
+      "defaultLocale": "en"
+    },
+    {
+      "id": "term-foot",
+      "translations": {
+        "en": "Foot",
+        "it": "Piede",
+        "es": "Pie",
+        "fr": "Pied",
+        "wo": "Tànk"
+      },
+      "defaultLocale": "en"
+    }
+  ],
+  "dropTargets": [
+    {
+      "id": "target-skull",
+      "x": 50,
+      "y": 8,
+      "assignedTerm": "term-skull"
+    },
+    {
+      "id": "target-shoulder",
+      "x": 35,
+      "y": 20,
+      "assignedTerm": "term-shoulder"
+    },
+    {
+      "id": "target-ribs",
+      "x": 55,
+      "y": 28,
+      "assignedTerm": "term-ribs"
+    },
+    {
+      "id": "target-spine",
+      "x": 50,
+      "y": 40,
+      "assignedTerm": "term-spine"
+    },
+    {
+      "id": "target-pelvis",
+      "x": 50,
+      "y": 50,
+      "assignedTerm": "term-pelvis"
+    },
+    {
+      "id": "target-knee",
+      "x": 44,
+      "y": 73,
+      "assignedTerm": "term-knee"
+    },
+    {
+      "id": "target-foot",
+      "x": 44,
+      "y": 93,
+      "assignedTerm": "term-foot"
+    }
+  ],
+  "agent": "claude",
+  "order": 3
+}

@@ -1,0 +1,108 @@
+{
+  "terms": [
+    {
+      "id": "term-plumber",
+      "translations": {
+        "en": "Plumber",
+        "it": "Idraulico",
+        "es": "Fontanero",
+        "fr": "Plombier",
+        "wo": "Plombiye"
+      },
+      "defaultLocale": "en"
+    },
+    {
+      "id": "term-cap",
+      "translations": {
+        "en": "Cap",
+        "it": "Berretto",
+        "es": "Gorra",
+        "fr": "Casquette",
+        "wo": "Kaaskéet"
+      },
+      "defaultLocale": "en"
+    },
+    {
+      "id": "term-sink",
+      "translations": {
+        "en": "Sink",
+        "it": "Lavandino",
+        "es": "Lavabo",
+        "fr": "Lavabo",
+        "wo": "Labóo"
+      },
+      "defaultLocale": "en"
+    },
+    {
+      "id": "term-tap",
+      "translations": {
+        "en": "Tap",
+        "it": "Rubinetto",
+        "es": "Grifo",
+        "fr": "Robinet",
+        "wo": "Robine"
+      },
+      "defaultLocale": "en"
+    },
+    {
+      "id": "term-pipe",
+      "translations": {
+        "en": "Pipe",
+        "it": "Tubo",
+        "es": "Tubería",
+        "fr": "Tuyau",
+        "wo": "Tiyo"
+      },
+      "defaultLocale": "en"
+    },
+    {
+      "id": "term-wrench",
+      "translations": {
+        "en": "Wrench",
+        "it": "Chiave inglese",
+        "es": "Llave inglesa",
+        "fr": "Clé à molette",
+        "wo": "Kile"
+      },
+      "defaultLocale": "en"
+    }
+  ],
+  "dropTargets": [
+    {
+      "id": "target-cap",
+      "x": 33,
+      "y": 22,
+      "assignedTerm": "term-cap"
+    },
+    {
+      "id": "target-plumber",
+      "x": 36,
+      "y": 55,
+      "assignedTerm": "term-plumber"
+    },
+    {
+      "id": "target-tap",
+      "x": 68,
+      "y": 10,
+      "assignedTerm": "term-tap"
+    },
+    {
+      "id": "target-sink",
+      "x": 75,
+      "y": 28,
+      "assignedTerm": "term-sink"
+    },
+    {
+      "id": "target-pipe",
+      "x": 67.44868513466655,
+      "y": 54.43544304889181,
+      "assignedTerm": "term-pipe"
+    },
+    {
+      "id": "target-wrench",
+      "x": 52,
+      "y": 52,
+      "assignedTerm": "term-wrench"
+    }
+  ]
+}
