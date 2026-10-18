@@ -14,6 +14,9 @@ interface Scene {
   category: string | null;
 }
 
+// Match-mode UI (sidebar toggle + team select) is hidden for now; flip to re-enable.
+const SHOW_MATCH_MODE_TOGGLE = false;
+
 const CATEGORY_ICONS: Record<string, string> = {
   "Universe & Earth": "🌍",
   "The Matter": "🔬",
@@ -113,30 +116,32 @@ export default function ScenesGalleryPage() {
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100 flex">
       {/* Sidebar — hidden on small screens */}
-      <aside className="hidden md:flex w-56 shrink-0 min-h-screen bg-gray-900 border-r border-gray-800 p-5 flex-col gap-4">
-        <button
-          onClick={() => setIsMatchMode(!isMatchMode)}
-          className={`w-full px-4 py-2 text-sm font-semibold rounded-lg transition-colors border ${isMatchMode
-              ? "bg-purple-500/20 text-purple-400 border-purple-500/50 hover:bg-purple-500/30"
-              : "bg-gray-800 text-gray-300 border-gray-700 hover:bg-gray-700"
-            }`}
-        >
-          {isMatchMode ? "Disable Match Mode" : "Enable Match Mode"}
-        </button>
-
-        {isMatchMode && (
-          <select
-            value={playMode}
-            onChange={(e) => setPlayMode(e.target.value as PlayMode)}
-            className="w-full px-3 py-2 bg-gray-800 border border-gray-700 text-gray-200 rounded-lg text-sm focus:outline-none focus:border-purple-500 transition-colors"
+      {SHOW_MATCH_MODE_TOGGLE && (
+        <aside className="hidden md:flex w-56 shrink-0 min-h-screen bg-gray-900 border-r border-gray-800 p-5 flex-col gap-4">
+          <button
+            onClick={() => setIsMatchMode(!isMatchMode)}
+            className={`w-full px-4 py-2 text-sm font-semibold rounded-lg transition-colors border ${isMatchMode
+                ? "bg-purple-500/20 text-purple-400 border-purple-500/50 hover:bg-purple-500/30"
+                : "bg-gray-800 text-gray-300 border-gray-700 hover:bg-gray-700"
+              }`}
           >
-            <option value="single">Single Player</option>
-            <option value="team-a">Team A</option>
-            <option value="team-b">Team B</option>
-            <option value="spectator">Spectator View</option>
-          </select>
-        )}
-      </aside>
+            {isMatchMode ? "Disable Match Mode" : "Enable Match Mode"}
+          </button>
+
+          {isMatchMode && (
+            <select
+              value={playMode}
+              onChange={(e) => setPlayMode(e.target.value as PlayMode)}
+              className="w-full px-3 py-2 bg-gray-800 border border-gray-700 text-gray-200 rounded-lg text-sm focus:outline-none focus:border-purple-500 transition-colors"
+            >
+              <option value="single">Single Player</option>
+              <option value="team-a">Team A</option>
+              <option value="team-b">Team B</option>
+              <option value="spectator">Spectator View</option>
+            </select>
+          )}
+        </aside>
+      )}
 
       {/* Main content */}
       <main className="flex-1 min-w-0 px-8 py-10">
