@@ -7,7 +7,7 @@ State of the ObserveIt work for whoever picks it up next (a new Claude Code sess
 - ObserveIt is merged on `master` (commit `0a9d056`) and deployed to Vercel production. Pushing to `master` deploys automatically through the Vercel Git integration.
 - `DEFAULT_APP` in `next.config.ts` is `/observeit`, so `/` opens it. SnapIt still lives at `/snapit`.
 - Live: https://science-click2.vercel.app (debug view, with every target outlined: `/observeit?debug`).
-- Checks passing at handoff: `npm test` (16 tests: geometry, vocabulary, scene rules), `npx tsc --noEmit`, `npm run lint`, `npm run build`.
+- Checks passing at handoff: `npm test` (16 tests: geometry, vocabulary, scene rules), `npm run test:e2e` (13 browser tests of the interaction flow), `npx tsc --noEmit`, `npm run lint`, `npm run build`.
 - Tested only with a mouse in desktop Chrome. **Not yet tested on the real interactive whiteboard (LIM).** The teacher is about to try it in class.
 
 ## Context that is not in the code
@@ -34,7 +34,7 @@ State of the ObserveIt work for whoever picks it up next (a new Claude Code sess
    The thresholds are in `src/lib/observeit/geometry.ts`.
 2. **Teacher "Accetta" button: undecided.** It would let the teacher count a valid shape that isn't among the prepared targets (arches, building fronts, inner glass panes), with the word but without stars. The realistic scene makes this more likely to come up. It was raised as point 3 of Codex's review (`design/observeit-review-2026-10-18.md`). Ask the teacher before building it.
 3. **Square vs rectangle:** a square accepts only `quadrato`. Revisit if students find this frustrating.
-4. **Interaction tests:** the draw → adjust → name → feedback flow has no automated tests yet (Codex's suggestion).
+4. **Interaction tests: done.** `npm run test:e2e` runs Playwright against `next dev` (port 3100, override with `E2E_PORT`) and drives the whole flow with a real mouse: drawing, corner and move adjustment, confirm, on-screen and physical keyboard, wrong/misspelled words, loose-box hints, repeat finds, restart, and Enter with a focused button (review point 1). Touch and multi-pointer input are still untested; they need the board.
 
 Codex review points 1 (Enter also pressing the focused button) and 2 (one-star hint pointing the wrong way) are fixed.
 
