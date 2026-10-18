@@ -55,26 +55,22 @@ export async function PUT(
   }
 
   const body = await request.json();
+  // Scenes are created on disk by the create-scene skill; this only edits existing ones.
   const existingDir = await findSceneDir(id);
-  const existingSlug = existingDir ? path.basename(path.dirname(existingDir)) : null;
-
-  // Target slug: use body.category if provided, else preserve current, else "other".
-  let targetSlug: string;
-  if (typeof body?.category === "string") {
-    targetSlug = categoryToSlug(body.category);
-  } else if (existingSlug) {
-    targetSlug = existingSlug;
-  } else {
-    targetSlug = categoryToSlug(null);
+  if (!existingDir) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
+  const existingSlug = path.basename(path.dirname(existingDir));
+
+  // Target slug: use body.category if provided, else preserve current.
+  const targetSlug =
+    typeof body?.category === "string" ? categoryToSlug(body.category) : existingSlug;
 
   const targetDir = path.join(SCENES_ROOT_FS, targetSlug, id);
 
-  if (existingDir && existingSlug !== targetSlug) {
+  if (existingSlug !== targetSlug) {
     await mkdir(path.dirname(targetDir), { recursive: true });
     await rename(existingDir, targetDir);
-  } else {
-    await mkdir(targetDir, { recursive: true });
   }
 
   await writeFile(path.join(targetDir, "config.json"), JSON.stringify(body, null, 2));

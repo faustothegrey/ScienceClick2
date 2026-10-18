@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Trash2 } from "lucide-react";
 
@@ -96,7 +95,6 @@ export default function ScenesGalleryPage() {
   const [loading, setLoading] = useState(true);
   const [playMode, setPlayMode] = useState<PlayMode>("team-a");
   const [isMatchMode, setIsMatchMode] = useState(false);
-  const router = useRouter();
 
   useEffect(() => {
     fetch("/api/scenes")
@@ -110,14 +108,6 @@ export default function ScenesGalleryPage() {
       .then((res) => {
         if (res.ok) setScenes((prev) => prev.filter((s) => s.id !== sceneId));
       });
-  }
-
-  function handleCreateScene() {
-    const name = prompt("Enter a name for the new scene:")?.trim();
-    if (!name) return;
-    const id = name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
-    if (!id) return;
-    router.push(`/scenes/${id}`);
   }
 
   return (
@@ -146,13 +136,6 @@ export default function ScenesGalleryPage() {
             <option value="spectator">Spectator View</option>
           </select>
         )}
-
-        <button
-          onClick={handleCreateScene}
-          className="w-full px-4 py-2 bg-amber-500 text-gray-950 text-sm font-semibold rounded-lg hover:bg-amber-400 transition-colors"
-        >
-          Create Scene
-        </button>
       </aside>
 
       {/* Main content */}
@@ -161,7 +144,7 @@ export default function ScenesGalleryPage() {
           <p className="text-gray-400">Loading scenes...</p>
         ) : scenes.length === 0 ? (
           <p className="text-gray-400">
-            No scenes yet. Click &quot;Create Scene&quot; to get started.
+            No scenes yet. Use the create-scene skill to add one.
           </p>
         ) : (
           <div className="space-y-12">
