@@ -21,6 +21,10 @@ completion indicator.
 - Backend: Next.js API routes handle CRUD operations for scenes.
 - Storage: File-system based. Scenes are stored as JSON files and images under public/snapit/scenes/<category-slug>/<scene-id>/. No external database.
 
+## Current Work
+
+- The site has two sub-apps: SnapIt (`/snapit`) and ObserveIt (`/observeit`, the default for `/`). Before working on ObserveIt, read [design/observeit-handoff.md](./design/observeit-handoff.md).
+
 ## Agent Workflow Defaults
 
 Use these defaults for future AI agent sessions working in this repository:
