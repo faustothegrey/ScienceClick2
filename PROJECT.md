@@ -19,7 +19,7 @@ completion indicator.
 
 - Frontend: Next.js 16 (React 19) with TypeScript, styled with Tailwind CSS. Drag-and-drop is powered by @dnd-kit/core.
 - Backend: Next.js API routes handle CRUD operations for scenes.
-- Storage: File-system based. Scenes are stored as JSON files and images under public/scenes/, with a catalog.json index. No external database.
+- Storage: File-system based. Scenes are stored as JSON files and images under public/snapit/scenes/<category-slug>/<scene-id>/. No external database.
 
 ## Agent Workflow Defaults
 

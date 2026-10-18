@@ -1,14 +1,14 @@
 import { NextResponse } from "next/server";
-import { readFile, stat } from "fs/promises";
+import { readFile } from "fs/promises";
 import path from "path";
-import { listAllScenes, scenePublicUrl } from "@/lib/scenePaths";
+import { listAllScenes, sceneImageUrl } from "@/lib/scenePaths";
 
 export async function GET() {
   try {
     const scenes = await listAllScenes();
 
     const result = await Promise.all(
-      scenes.map(async ({ sceneId, categorySlug, absPath }) => {
+      scenes.map(async ({ sceneId, absPath }) => {
         let termCount = 0;
         let agent: string | null = null;
         let category: string | null = null;
@@ -24,16 +24,7 @@ export async function GET() {
           // No config yet — new scene
         }
 
-        let image: string | null = null;
-        for (const name of ["scene.svg", "scene.png", "scene.jpeg", "scene.jpg"]) {
-          try {
-            await stat(path.join(absPath, name));
-            image = scenePublicUrl(categorySlug, sceneId, name);
-            break;
-          } catch {
-            // not found
-          }
-        }
+        const image = await sceneImageUrl(sceneId);
 
         return { id: sceneId, termCount, image, agent, category, order };
       })

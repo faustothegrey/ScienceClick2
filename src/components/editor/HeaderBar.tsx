@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { ArrowLeft, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { SUPPORTED_LOCALES } from "@/lib/i18n";
+import { SNAPIT_BASE } from "@/lib/snapitRoutes";
 
 interface FeedbackInfo {
   allCorrect: boolean;
@@ -83,7 +84,7 @@ export default function HeaderBar({
       }`}>
       {/* Left: back link */}
       <div className="flex items-center gap-2 text-sm text-gray-400 min-w-0">
-        <Link href="/scenes" className="flex items-center gap-2 hover:text-gray-600 transition-colors">
+        <Link href={`${SNAPIT_BASE}/scenes`} className="flex items-center gap-2 hover:text-gray-600 transition-colors">
           <ArrowLeft className="w-4 h-4" />
           <span className="inline">Scenes</span>
         </Link>

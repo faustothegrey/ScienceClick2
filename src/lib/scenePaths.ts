@@ -1,8 +1,34 @@
-import { readdir, stat } from "fs/promises";
+import { cp, readdir, stat } from "fs/promises";
 import path from "path";
+import { SNAPIT_BASE } from "./snapitRoutes";
 
-export const SCENES_ROOT_FS = path.join(process.cwd(), "public", "scenes");
-export const SCENES_ROOT_URL = "/scenes";
+// Scenes shipped with the app (served as static files).
+const SCENES_SEED_FS = path.join(process.cwd(), "public", "snapit", "scenes");
+// Where scene data is read and written. On Vercel the app directory is read-only,
+// so we work on a copy in /tmp: edits last only as long as the server instance does.
+export const SCENES_ROOT_FS = process.env.VERCEL
+  ? path.join("/tmp", "snapit", "scenes")
+  : SCENES_SEED_FS;
+export const SCENES_ROOT_URL = `${SNAPIT_BASE}/scenes`;
+
+const IMAGE_NAMES = ["scene.svg", "scene.png", "scene.jpeg", "scene.jpg"];
+
+let dataReady: Promise<void> | null = null;
+
+// Seed the writable copy on first use. Images are skipped: they are always served
+// from the static seed (see sceneImageUrl).
+function ensureDataDir(): Promise<void> {
+  if (SCENES_ROOT_FS === SCENES_SEED_FS) return Promise.resolve();
+  dataReady ??= cp(SCENES_SEED_FS, SCENES_ROOT_FS, {
+    recursive: true,
+    force: false,
+    errorOnExist: false,
+    filter: (src) => !IMAGE_NAMES.includes(path.basename(src)),
+  }).catch(() => {
+    dataReady = null;
+  });
+  return dataReady;
+}
 
 const CATEGORY_SLUGS: Record<string, string> = {
   "Universe & Earth": "universe-and-earth",
@@ -32,6 +58,7 @@ async function isDir(p: string): Promise<boolean> {
 }
 
 export async function listCategorySlugs(): Promise<string[]> {
+  await ensureDataDir();
   try {
     const entries = await readdir(SCENES_ROOT_FS);
     const result: string[] = [];
@@ -66,6 +93,29 @@ export function sceneDirForCategory(sceneId: string, category: string | null | u
 export function scenePublicUrl(categorySlug: string, sceneId: string, file?: string): string {
   const base = `${SCENES_ROOT_URL}/${categorySlug}/${sceneId}`;
   return file ? `${base}/${file}` : base;
+}
+
+// Public URL of a scene's image, looked up in the static seed (the files actually
+// served), so it stays valid even if the scene's category changed at runtime.
+export async function sceneImageUrl(sceneId: string): Promise<string | null> {
+  if (!isValidSceneId(sceneId)) return null;
+  let slugs: string[];
+  try {
+    slugs = await readdir(SCENES_SEED_FS);
+  } catch {
+    return null;
+  }
+  for (const slug of slugs) {
+    for (const name of IMAGE_NAMES) {
+      try {
+        await stat(path.join(SCENES_SEED_FS, slug, sceneId, name));
+        return scenePublicUrl(slug, sceneId, name);
+      } catch {
+        // not found
+      }
+    }
+  }
+  return null;
 }
 
 export async function listAllScenes(): Promise<Array<{ sceneId: string; categorySlug: string; absPath: string }>> {

@@ -6,7 +6,8 @@ import HeaderBar from "@/components/editor/HeaderBar";
 import Canvas from "@/components/editor/Canvas";
 import type { MatchStatus } from "@/components/editor/Canvas";
 import { Term, migrateTerm } from "@/lib/i18n";
-import type { DropTarget } from "@/app/scenes/[id]/page";
+import type { DropTarget } from "@/app/snapit/scenes/[id]/page";
+import { SNAPIT_API } from "@/lib/snapitRoutes";
 
 function formatName(id: string) {
     return id.replace(/[-_]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
@@ -43,7 +44,7 @@ export default function SpectatorPage({ params }: { params: Promise<{ id: string
 
     // Load config
     useEffect(() => {
-        fetch(`/api/scenes/${id}/config`)
+        fetch(`${SNAPIT_API}/scenes/${id}/config`)
             .then((res) => (res.ok ? res.json() : null))
             .then((data) => {
                 if (data) {
@@ -59,7 +60,7 @@ export default function SpectatorPage({ params }: { params: Promise<{ id: string
     useEffect(() => {
         pollIntervalRef.current = setInterval(async () => {
             try {
-                const res = await fetch(`/api/scenes/${id}/match`);
+                const res = await fetch(`${SNAPIT_API}/scenes/${id}/match`);
                 const data = await res.json();
 
                 if (data.status === "waiting" && data.progress) {
@@ -90,7 +91,7 @@ export default function SpectatorPage({ params }: { params: Promise<{ id: string
                     teamLabel="Spectator View"
                     matchStatus={matchStatus}
                     onNewMatch={matchStatus === "reveal" ? async () => {
-                        await fetch(`/api/scenes/${id}/match`, { method: "DELETE" });
+                        await fetch(`${SNAPIT_API}/scenes/${id}/match`, { method: "DELETE" });
                         setMatchStatus("playing");
                         setProgressA([]);
                         setProgressB([]);

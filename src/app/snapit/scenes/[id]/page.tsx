@@ -22,6 +22,7 @@ import type { MatchStatus } from "@/components/editor/Canvas";
 import WordList from "@/components/editor/WordList";
 import PracticePanel from "@/components/editor/PracticePanel";
 import { Term, migrateTerm, getTermLabel } from "@/lib/i18n";
+import { SNAPIT_API } from "@/lib/snapitRoutes";
 
 export interface DropTarget {
   id: string;
@@ -189,7 +190,7 @@ function SceneEditorPage() {
     localStorage.setItem("sc2:playerName", name);
     setPlayerName(name);
     setResultSummary(null);
-    await fetch("/api/results", {
+    await fetch(`${SNAPIT_API}/results`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "login", name }),
@@ -203,7 +204,7 @@ function SceneEditorPage() {
   }
 
   useEffect(() => {
-    fetch(`/api/scenes/${id}/config`)
+    fetch(`${SNAPIT_API}/scenes/${id}/config`)
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data) {
@@ -324,7 +325,7 @@ function SceneEditorPage() {
           t.id === targetId ? { ...t, x: newX, y: newY } : t
         );
         setDropTargets(nextTargets);
-        fetch(`/api/scenes/${id}/config`, {
+        fetch(`${SNAPIT_API}/scenes/${id}/config`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ terms: availableTerms, dropTargets: nextTargets }),
@@ -362,7 +363,7 @@ function SceneEditorPage() {
           : [...dropTargets, { id: `target-${Date.now()}`, x: xPercent, y: yPercent, assignedTerm: term.id }];
 
         setDropTargets(nextTargets);
-        fetch(`/api/scenes/${id}/config`, {
+        fetch(`${SNAPIT_API}/scenes/${id}/config`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ terms: availableTerms, dropTargets: nextTargets }),
@@ -428,7 +429,7 @@ function SceneEditorPage() {
     setDropTargets(nextTargets);
     setPlacingTermId(null);
 
-    fetch(`/api/scenes/${id}/config`, {
+    fetch(`${SNAPIT_API}/scenes/${id}/config`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ terms: availableTerms, dropTargets: nextTargets }),
@@ -441,7 +442,7 @@ function SceneEditorPage() {
     setAvailableTerms(nextTerms);
     setDropTargets(nextTargets);
 
-    fetch(`/api/scenes/${id}/config`, {
+    fetch(`${SNAPIT_API}/scenes/${id}/config`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ terms: nextTerms, dropTargets: nextTargets }),
@@ -516,7 +517,7 @@ function SceneEditorPage() {
 
   useEffect(() => {
     if (!playerName) return;
-    fetch(`/api/results?name=${encodeURIComponent(playerName)}&sceneId=${encodeURIComponent(id)}`)
+    fetch(`${SNAPIT_API}/results?name=${encodeURIComponent(playerName)}&sceneId=${encodeURIComponent(id)}`)
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         const result = data?.result;
@@ -533,7 +534,7 @@ function SceneEditorPage() {
       setResultsByScene([]);
       return;
     }
-    fetch(`/api/results?name=${encodeURIComponent(playerName)}`)
+    fetch(`${SNAPIT_API}/results?name=${encodeURIComponent(playerName)}`)
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         const scenes = data?.result?.scenes ?? null;
@@ -558,7 +559,7 @@ function SceneEditorPage() {
       hasSubmittedRef.current = true;
       setMatchStatus("submitted");
 
-      fetch(`/api/scenes/${id}/match`, {
+      fetch(`${SNAPIT_API}/scenes/${id}/match`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ team: teamParam, guesses: playerGuesses }),
@@ -572,7 +573,7 @@ function SceneEditorPage() {
   useEffect(() => {
     if (!isMatchMode || matchStatus !== "playing" || hasSubmittedRef.current) return;
 
-    fetch(`/api/scenes/${id}/match`, {
+    fetch(`${SNAPIT_API}/scenes/${id}/match`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ team: teamParam, liveProgress: Object.keys(playerGuesses) }),
@@ -586,7 +587,7 @@ function SceneEditorPage() {
 
     pollIntervalRef.current = setInterval(async () => {
       try {
-        const res = await fetch(`/api/scenes/${id}/match`);
+        const res = await fetch(`${SNAPIT_API}/scenes/${id}/match`);
         const data = await res.json();
 
         if (data.status === "waiting" && data.progress && data.progress[rivalTeam]) {
@@ -619,7 +620,7 @@ function SceneEditorPage() {
     if (!playerName || !showFeedback || !allPlaced) return;
     if (lastRecordedPlayKeyRef.current === playKey) return;
     lastRecordedPlayKeyRef.current = playKey;
-    fetch("/api/results", {
+    fetch(`${SNAPIT_API}/results`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -688,7 +689,7 @@ function SceneEditorPage() {
             setPlayKey((k) => k + 1);
           }}
           onNewMatch={isMatchMode && matchStatus === "reveal" ? async () => {
-            await fetch(`/api/scenes/${id}/match`, { method: "DELETE" });
+            await fetch(`${SNAPIT_API}/scenes/${id}/match`, { method: "DELETE" });
             setPlayerGuesses({});
             setShowFeedback(false);
             setRivalGuesses(null);

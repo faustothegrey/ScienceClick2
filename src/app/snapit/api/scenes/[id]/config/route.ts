@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { readFile, writeFile, mkdir, stat, rename } from "fs/promises";
+import { readFile, writeFile, mkdir, rename } from "fs/promises";
 import path from "path";
 import {
   findSceneDir,
   categoryToSlug,
-  scenePublicUrl,
+  sceneImageUrl,
   isValidSceneId,
   SCENES_ROOT_FS,
 } from "@/lib/scenePaths";
@@ -26,18 +26,7 @@ export async function GET(
   try {
     const data = await readFile(path.join(sceneDir, "config.json"), "utf-8");
     const config = JSON.parse(data);
-    const categorySlug = path.basename(path.dirname(sceneDir));
-
-    let image: string | null = null;
-    for (const name of ["scene.svg", "scene.png", "scene.jpeg", "scene.jpg"]) {
-      try {
-        await stat(path.join(sceneDir, name));
-        image = scenePublicUrl(categorySlug, id, name);
-        break;
-      } catch {
-        // not found
-      }
-    }
+    const image = await sceneImageUrl(id);
 
     return NextResponse.json({ ...config, image });
   } catch {

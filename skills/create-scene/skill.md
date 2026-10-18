@@ -23,7 +23,8 @@ Before generating anything:
 
 ## Step 2 — Find and Download the Illustration
 
-Find a suitable image and save it as `public/scenes/<scene-id>/scene.png`.
+Find a suitable image and save it as `public/snapit/scenes/<category-slug>/<scene-id>/scene.png`.
+`<category-slug>` is the folder for the scene's `category` (see `CATEGORY_SLUGS` in `src/lib/scenePaths.ts`, e.g. `universe-and-earth`, or `other`).
 
 ### Image Requirements
 - **No text, labels, numbers, or annotations** — the app renders labels via drop targets; text in the image gives away answers
@@ -45,8 +46,8 @@ Find a suitable image and save it as `public/scenes/<scene-id>/scene.png`.
 
 3. **Download the image**:
    ```bash
-   mkdir -p public/scenes/<scene-id>
-   curl -sL "<direct-url>" -o public/scenes/<scene-id>/scene.png
+   mkdir -p public/snapit/scenes/<category-slug>/<scene-id>
+   curl -sL "<direct-url>" -o public/snapit/scenes/<category-slug>/<scene-id>/scene.png
    ```
 
 4. **Inspect the image** to verify it meets the requirements (no text, no white background, elements are distinct). If the image has text labels baked in, reject it and search for another.
@@ -62,7 +63,7 @@ Find a suitable image and save it as `public/scenes/<scene-id>/scene.png`.
 
 ## Step 3 — Generate the Config
 
-Create `public/scenes/<scene-id>/config.json`.
+Create `public/snapit/scenes/<category-slug>/<scene-id>/config.json`.
 
 ### Structure
 
@@ -142,7 +143,7 @@ After generating both files, perform these checks:
 - [ ] Each target's position plausibly matches where its element appears in the image
 
 ### Image Quality
-- [ ] File exists at `public/scenes/<scene-id>/scene.png`
+- [ ] File exists at `public/snapit/scenes/<category-slug>/<scene-id>/scene.png`
 - [ ] Image contains no text, labels, or annotations
 - [ ] Background is not pure white
 - [ ] Elements are visually distinct and spread across the canvas

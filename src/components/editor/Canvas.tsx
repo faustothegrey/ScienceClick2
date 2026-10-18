@@ -1,5 +1,5 @@
 import { useDroppable, useDraggable } from "@dnd-kit/core";
-import type { DropTarget } from "@/app/scenes/[id]/page";
+import type { DropTarget } from "@/app/snapit/scenes/[id]/page";
 import { Term, getTermLabel } from "@/lib/i18n"; import { X } from "lucide-react";
 
 export type MatchStatus = "playing" | "submitted" | "reveal";

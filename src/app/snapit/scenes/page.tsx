@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Trash2 } from "lucide-react";
+import { SNAPIT_BASE, SNAPIT_API } from "@/lib/snapitRoutes";
 
 export type PlayMode = "single" | "team-a" | "team-b" | "spectator";
 
@@ -33,17 +34,17 @@ function formatName(id: string) {
 function SceneCard({ scene, playMode, isMatchMode, onDelete }: { scene: Scene; playMode: PlayMode; isMatchMode: boolean; onDelete: (id: string) => void }) {
   const getHref = () => {
     if (!isMatchMode) {
-      return `/scenes/${scene.id}`;
+      return `${SNAPIT_BASE}/scenes/${scene.id}`;
     }
     switch (playMode) {
       case "team-a":
-        return `/scenes/${scene.id}?team=team-a`;
+        return `${SNAPIT_BASE}/scenes/${scene.id}?team=team-a`;
       case "team-b":
-        return `/scenes/${scene.id}?team=team-b`;
+        return `${SNAPIT_BASE}/scenes/${scene.id}?team=team-b`;
       case "spectator":
-        return `/scenes/${scene.id}/spectator`;
+        return `${SNAPIT_BASE}/scenes/${scene.id}/spectator`;
       default:
-        return `/scenes/${scene.id}`;
+        return `${SNAPIT_BASE}/scenes/${scene.id}`;
     }
   };
 
@@ -100,14 +101,14 @@ export default function ScenesGalleryPage() {
   const [isMatchMode, setIsMatchMode] = useState(false);
 
   useEffect(() => {
-    fetch("/api/scenes")
+    fetch(`${SNAPIT_API}/scenes`)
       .then((res) => res.json())
       .then((data) => setScenes(data))
       .finally(() => setLoading(false));
   }, []);
 
   function handleDeleteScene(sceneId: string) {
-    fetch(`/api/scenes/${sceneId}`, { method: "DELETE" })
+    fetch(`${SNAPIT_API}/scenes/${sceneId}`, { method: "DELETE" })
       .then((res) => {
         if (res.ok) setScenes((prev) => prev.filter((s) => s.id !== sceneId));
       });

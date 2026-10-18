@@ -44,7 +44,7 @@ next-env.d.ts
 .claude/
 
 # scene runtime state (match results are written at runtime)
-public/scenes/**/match.json
+public/**/match.json
 
 # source materials
 sources/
