@@ -15,7 +15,7 @@ const SUB_APPS: SubApp[] = [
   {
     name: "ObserveIt",
     href: "/observeit",
-    description: "Osserva una scena, trova le forme e scrivi il loro nome. Pensato per la LIM.",
+    description: "Osserva una scena, trova gli oggetti della forma richiesta e scrivi il loro nome. Pensato per la LIM.",
     icon: Shapes,
     accent: "bg-emerald-100 text-emerald-700",
   },

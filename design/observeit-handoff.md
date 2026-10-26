@@ -4,10 +4,10 @@ State of the ObserveIt work for whoever picks it up next (a new Claude Code sess
 
 ## Where things stand
 
-- ObserveIt is merged on `master` (commit `0a9d056`) and deployed to Vercel production. Pushing to `master` deploys automatically through the Vercel Git integration.
+- ObserveIt v5 and the home page are on `master` (commit `f7da9b5`, 2026-10-26) and deployed to Vercel production. Pushing to `master` deploys automatically through the Vercel Git integration.
 - `/` is a home page (`src/app/page.tsx`) linking to each sub-app; ObserveIt is at `/observeit`, SnapIt at `/snapit`.
 - Live: https://science-click2.vercel.app/observeit (debug view, with every target outlined: `/observeit?debug`).
-- Checks passing at handoff: `npm test` (16 tests: geometry, vocabulary, scene rules), `npx tsc --noEmit`, `npm run lint`, `npm run build`.
+- Checks passing at handoff: `npm test` (17 tests: geometry, vocabulary, game rules, scene rules), `npx tsc --noEmit`, `npm run lint`, `npm run build`.
 - 2026-10-22: the teacher confirmed that drawing the box works with touch on the **Helgi** LIM. The game was then reworked (v5): the app asks for a shape, the student finds an object with it and writes the object's name.
 
 ## Context that is not in the code
