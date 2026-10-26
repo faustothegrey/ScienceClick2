@@ -23,7 +23,7 @@ completion indicator.
 
 ## Current Work
 
-- The site has two sub-apps: SnapIt (`/snapit`) and ObserveIt (`/observeit`, the default for `/`). Before working on ObserveIt, read [design/observeit-handoff.md](./design/observeit-handoff.md).
+- The site has two sub-apps, SnapIt (`/snapit`) and ObserveIt (`/observeit`), linked from the home page at `/` (`src/app/page.tsx`; add new sub-apps to its `SUB_APPS` list). Before working on ObserveIt, read [design/observeit-handoff.md](./design/observeit-handoff.md).
 
 ## Agent Workflow Defaults
 
