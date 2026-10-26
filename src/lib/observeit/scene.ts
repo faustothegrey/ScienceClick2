@@ -12,6 +12,8 @@ export type Geometry =
 export interface SceneTarget extends BoxTarget {
   shape: ShapeName;
   geometry: Geometry;
+  // Accepted object names, lowercase; the first is the one shown to students.
+  names: string[];
 }
 
 export interface Scene {
@@ -38,8 +40,8 @@ export function boundsOf(g: Geometry): Box {
   }
 }
 
-export function target(id: string, shape: ShapeName, geometry: Geometry): SceneTarget {
-  return { id, shape, geometry, box: boundsOf(geometry) };
+export function target(id: string, shape: ShapeName, geometry: Geometry, names: string[]): SceneTarget {
+  return { id, shape, geometry, names, box: boundsOf(geometry) };
 }
 
 export const circle = (cx: number, cy: number, r: number): Geometry => ({ kind: "circle", cx, cy, r });

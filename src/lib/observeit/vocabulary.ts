@@ -1,16 +1,17 @@
-// Italian shape vocabulary: normalizing what the student writes and judging it
-// against the shape their box found. No fuzzy matching ever turns a wrong word
-// into a right one; near-misses only produce a "check the spelling" message.
+// Italian vocabulary: the shapes the app asks for, and judging the object name
+// the student writes. No fuzzy matching ever turns a wrong name into a right
+// one; near-misses only produce a "check the spelling" message.
 
 export type ShapeName = "cerchio" | "quadrato" | "triangolo" | "rettangolo";
 
 export const SHAPE_NAMES: readonly ShapeName[] = ["cerchio", "quadrato", "triangolo", "rettangolo"];
 
-// Articles a student may naturally write before the noun ("un cerchio", "il quadrato").
-const ARTICLES = ["il", "lo", "la", "l'", "un", "uno", "una", "un'"];
+// Articles a student may naturally write before the noun ("un orologio", "la porta").
+const ARTICLES = ["il", "lo", "la", "i", "gli", "le", "l'", "un", "uno", "una", "un'"];
 
 export function normalizeWord(input: string): string {
-  let s = input.toLowerCase().replace(/[’`]/g, "'").replace(/\s+/g, " ").trim();
+  // Also joins "dell' auto" into "dell'auto".
+  let s = input.toLowerCase().replace(/[’`]/g, "'").replace(/'\s+/g, "'").replace(/\s+/g, " ").trim();
   for (const article of ARTICLES) {
     const prefix = article.endsWith("'") ? article : `${article} `;
     if (s.startsWith(prefix)) {
@@ -35,22 +36,19 @@ export function editDistance(a: string, b: string): number {
   return row[b.length];
 }
 
-export type WordVerdict =
+export type NameVerdict =
   | { kind: "correct" }
-  // Close to the right word: show the correct spelling and let them write it again.
-  | { kind: "spelling" }
-  // Another shape's name (e.g. "triangolo" for a circle).
-  | { kind: "other-shape"; written: ShapeName }
-  // Not a shape name we know.
-  | { kind: "unknown" };
+  // Close to an accepted name: show its spelling and let them write it again.
+  | { kind: "spelling"; closest: string }
+  | { kind: "wrong" };
 
 const SPELLING_DISTANCE = 2;
 
-export function judgeWord(input: string, expected: ShapeName): WordVerdict {
+// `accepted` lists the object's accepted names; the first is the main one.
+export function judgeName(input: string, accepted: readonly string[]): NameVerdict {
   const word = normalizeWord(input);
-  if (word === expected) return { kind: "correct" };
-  const other = SHAPE_NAMES.find((name) => name === word);
-  if (other) return { kind: "other-shape", written: other };
-  if (editDistance(word, expected) <= SPELLING_DISTANCE) return { kind: "spelling" };
-  return { kind: "unknown" };
+  if (!word) return { kind: "wrong" };
+  if (accepted.includes(word)) return { kind: "correct" };
+  const closest = accepted.find((name) => editDistance(word, name) <= SPELLING_DISTANCE);
+  return closest ? { kind: "spelling", closest } : { kind: "wrong" };
 }

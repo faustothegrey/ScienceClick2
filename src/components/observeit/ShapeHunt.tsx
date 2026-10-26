@@ -2,9 +2,10 @@
 
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import confetti from "canvas-confetti";
-import { RotateCcw, Star } from "lucide-react";
-import { boxFromPoints, fitHint, matchBox, starsFor, type Box, type FitHint, type Point, type Stars } from "@/lib/observeit/geometry";
-import { judgeWord, type WordVerdict } from "@/lib/observeit/vocabulary";
+import { RotateCcw, UserCheck } from "lucide-react";
+import { boxFromPoints, matchBox, type Box, type Point } from "@/lib/observeit/geometry";
+import { MAX_ATTEMPTS, remaining, shapesIn, shuffled, type Discovery } from "@/lib/observeit/game";
+import { judgeName, normalizeWord, type ShapeName } from "@/lib/observeit/vocabulary";
 import type { Scene, SceneTarget } from "@/lib/observeit/scene";
 import LetterKeyboard from "./LetterKeyboard";
 
@@ -13,32 +14,44 @@ const CORNERS: Corner[] = ["nw", "ne", "sw", "se"];
 
 // Boxes smaller than this (scene units) are treated as an accidental tap.
 const MIN_BOX = 16;
-const MAX_WORD = 20;
+const MAX_WORD = 30;
 
 type Drag =
   | { pointerId: number; mode: "draw"; origin: Point }
   | { pointerId: number; mode: "move"; origin: Point; start: Box }
   | { pointerId: number; mode: Corner; start: Box };
 
-type Result =
-  | { kind: "no-shape" }
-  | { kind: "ambiguous" }
-  | { kind: "correct"; target: SceneTarget; stars: Stars; hint: FitHint; previous?: Stars }
-  | { kind: "word"; target: SceneTarget; score: number; written: string; verdict: Exclude<WordVerdict, { kind: "correct" }> };
-
+// Shapes are never pictured: linking the word to the shape is the student's job.
+// The game never stops to ask "continue?": each outcome becomes a notice and play
+// moves on by itself.
 type Phase =
   | { name: "draw" }
-  | { name: "adjust" }
-  | { name: "name"; target: SceneTarget; score: number }
-  | { name: "result"; result: Result };
+  // Box drawn (still adjustable): write the object's name.
+  | { name: "name" }
+  | { name: "finished" };
+
+interface Notice {
+  tone: "good" | "bad" | "reveal";
+  title: string;
+  text?: string;
+  // Shown large: the object's name.
+  word?: string;
+  attempt?: number;
+  // Lets the teacher accept the student's word for this object.
+  accept?: { target: SceneTarget; written: string };
+}
 
 interface ShapeHuntProps {
   scene: Scene;
   // SVG content drawn in the scene's viewBox.
   illustration: ReactNode;
+  // Shapes in the order they are asked; chosen by the server so it matches on hydration.
+  initialOrder: ShapeName[];
   // Authoring aid: outline every target.
   showTargets?: boolean;
 }
+
+const shaped = (shape: ShapeName) => `a forma di ${shape}`;
 
 function cornerPoint(box: Box, corner: Corner): Point {
   return {
@@ -55,18 +68,39 @@ function inside(p: Point, box: Box): boolean {
   return p.x >= box.x && p.x <= box.x + box.width && p.y >= box.y && p.y <= box.y + box.height;
 }
 
-export default function ShapeHunt({ scene, illustration, showTargets = false }: ShapeHuntProps) {
+// Two-tap guard for actions students shouldn't trigger by accident.
+function useArmed(): [boolean, () => boolean] {
+  const [armed, setArmed] = useState(false);
+  useEffect(() => {
+    if (!armed) return;
+    const t = setTimeout(() => setArmed(false), 3000);
+    return () => clearTimeout(t);
+  }, [armed]);
+  // Returns true on the second tap.
+  const tap = () => {
+    setArmed(!armed);
+    return armed;
+  };
+  return [armed, tap];
+}
+
+export default function ShapeHunt({ scene, illustration, initialOrder, showTargets = false }: ShapeHuntProps) {
   const svgRef = useRef<SVGSVGElement>(null);
   const drag = useRef<Drag | null>(null);
+  const [order, setOrder] = useState(initialOrder);
+  const [round, setRound] = useState(0);
   const [box, setBox] = useState<Box | null>(null);
   const [phase, setPhase] = useState<Phase>({ name: "draw" });
   const [word, setWord] = useState("");
-  const [found, setFound] = useState<Map<string, Stars>>(new Map());
-  const [restartArmed, setRestartArmed] = useState(false);
+  const [notice, setNotice] = useState<Notice | null>(null);
+  const [found, setFound] = useState<Map<string, Discovery>>(new Map());
+  // Wrong names so far, per object.
+  const [attempts, setAttempts] = useState<Map<string, number>>(new Map());
+  const [restartArmed, tapRestart] = useArmed();
 
-  const total = scene.targets.length;
-  const allFound = found.size === total;
-  const canEditBox = phase.name === "draw" || phase.name === "adjust";
+  const shape = order[round] as ShapeName | undefined;
+  const foundOfShape = shape ? scene.targets.filter((t) => t.shape === shape && found.has(t.id)).length : 0;
+  const canEditBox = phase.name === "draw" || phase.name === "name";
 
   function toScene(e: ReactPointerEvent): Point | null {
     const ctm = svgRef.current?.getScreenCTM();
@@ -93,12 +127,13 @@ export default function ShapeHunt({ scene, illustration, showTargets = false }: 
     const handle = (e.target as Element).closest("[data-handle]")?.getAttribute("data-handle") as Corner | null;
     if (box && handle) {
       drag.current = { pointerId: e.pointerId, mode: handle, start: box };
-    } else if (box && phase.name === "adjust" && inside(p, box)) {
+    } else if (box && inside(p, box)) {
       drag.current = { pointerId: e.pointerId, mode: "move", origin: p, start: box };
     } else {
+      // Dragging elsewhere redraws the box, keeping whatever was already written.
       drag.current = { pointerId: e.pointerId, mode: "draw", origin: p };
       setBox({ x: p.x, y: p.y, width: 0, height: 0 });
-      setPhase({ name: "draw" });
+      setNotice(null);
     }
     try {
       e.currentTarget.setPointerCapture(e.pointerId);
@@ -136,8 +171,10 @@ export default function ShapeHunt({ scene, illustration, showTargets = false }: 
       if (cancelled || tooSmall) {
         setBox(null);
         setPhase({ name: "draw" });
-      } else {
-        setPhase({ name: "adjust" });
+      } else if (phase.name === "draw") {
+        // No confirmation step: go straight to writing the name.
+        setWord("");
+        setPhase({ name: "name" });
       }
     } else if (cancelled || tooSmall) {
       setBox(d.start);
@@ -146,82 +183,95 @@ export default function ShapeHunt({ scene, illustration, showTargets = false }: 
 
   // --- Flow
 
-  function confirmBox() {
-    if (!box) return;
-    const m = matchBox(box, scene.targets);
-    if (m.kind === "none") setPhase({ name: "result", result: { kind: "no-shape" } });
-    else if (m.kind === "ambiguous") setPhase({ name: "result", result: { kind: "ambiguous" } });
-    else {
-      setWord("");
-      setPhase({ name: "name", target: m.target, score: m.score });
-    }
-  }
-
-  function submitWord() {
-    if (phase.name !== "name" || !word.trim()) return;
-    const { target, score } = phase;
-    const verdict = judgeWord(word, target.shape);
-    if (verdict.kind !== "correct") {
-      setPhase({ name: "result", result: { kind: "word", target, score, written: word, verdict } });
-      return;
-    }
-    const stars = starsFor(score);
-    const previous = found.get(target.id);
-    const next = new Map(found);
-    next.set(target.id, Math.max(stars, previous ?? 0) as Stars);
-    setFound(next);
-    setPhase({ name: "result", result: { kind: "correct", target, stars, hint: box ? fitHint(box, target.box) : "shift", previous } });
-    if (!previous && next.size === total) {
-      confetti({ particleCount: 160, spread: 90, origin: { y: 0.6 } });
-    }
-  }
-
-  function newBox() {
+  // Ends the current object: clear the box and look for the next one.
+  function lookAgain(next: Notice | null) {
     setBox(null);
-    setPhase({ name: "draw" });
-  }
-
-  function retryWord(target: SceneTarget, score: number) {
     setWord("");
-    setPhase({ name: "name", target, score });
+    setPhase({ name: "draw" });
+    setNotice(next);
   }
 
-  function restart() {
-    if (!restartArmed) {
-      setRestartArmed(true);
-      return;
+  function discover(target: SceneTarget, discovery: Discovery) {
+    setFound(new Map(found).set(target.id, discovery));
+  }
+
+  function submit() {
+    if (phase.name !== "name" || !box || !shape || !word.trim()) return;
+    const m = matchBox(box, scene.targets);
+    if (m.kind === "none") return lookAgain({ tone: "bad", title: "Non trovo un oggetto qui." });
+    if (m.kind === "ambiguous") {
+      // Keep box and word: tightening the box is enough.
+      return setNotice({ tone: "bad", title: "Il riquadro prende più oggetti.", text: "Stringi il riquadro intorno a un oggetto." });
     }
-    setRestartArmed(false);
-    setFound(new Map());
-    newBox();
+    const target = m.target;
+    if (target.shape !== shape) return lookAgain({ tone: "bad", title: `Questo oggetto non è ${shaped(shape)}.` });
+    if (found.has(target.id)) return lookAgain({ tone: "bad", title: "Hai già trovato questo oggetto." });
+
+    const verdict = judgeName(word, target.names);
+    if (verdict.kind === "correct") {
+      const label = normalizeWord(word);
+      discover(target, { label, how: "named" });
+      return lookAgain({ tone: "good", title: "Esatto!", word: label });
+    }
+    const attempt = (attempts.get(target.id) ?? 0) + 1;
+    setAttempts(new Map(attempts).set(target.id, attempt));
+    const accept = { target, written: word };
+    if (attempt >= MAX_ATTEMPTS) {
+      discover(target, { label: target.names[0], how: "revealed" });
+      return lookAgain({ tone: "reveal", title: "Questo oggetto si chiama:", word: target.names[0], attempt, accept });
+    }
+    // Straight back to writing; the word stays so it can be corrected.
+    setNotice(
+      verdict.kind === "spelling"
+        ? { tone: "bad", title: "Quasi!", text: "Controlla come si scrive.", attempt, accept }
+        : { tone: "bad", title: "No.", text: "Prova un'altra parola.", attempt, accept },
+    );
   }
 
-  useEffect(() => {
-    if (!restartArmed) return;
-    const t = setTimeout(() => setRestartArmed(false), 3000);
-    return () => clearTimeout(t);
-  }, [restartArmed]);
+  // The teacher overrules the app: the student's word counts for this object.
+  function teacherAccept({ target, written }: { target: SceneTarget; written: string }) {
+    const label = normalizeWord(written);
+    discover(target, { label, how: "accepted" });
+    lookAgain({ tone: "good", title: "Accettato dall'insegnante", word: label });
+  }
+
+  function claimNoneLeft() {
+    if (!shape) return;
+    if (remaining(scene, shape, found).length > 0) {
+      return lookAgain({ tone: "bad", title: "Guarda bene!", text: `C'è ancora almeno un oggetto ${shaped(shape)}.` });
+    }
+    if (round + 1 >= order.length) {
+      setRound(order.length);
+      lookAgain(null);
+      setPhase({ name: "finished" });
+      confetti({ particleCount: 180, spread: 100, origin: { y: 0.6 } });
+    } else {
+      setRound(round + 1);
+      lookAgain({ tone: "good", title: "Giusto!", text: `Hai trovato tutti gli oggetti ${shaped(shape)}.` });
+    }
+  }
+
+  function newGame() {
+    setOrder(shuffled(shapesIn(scene)));
+    setRound(0);
+    setFound(new Map());
+    setAttempts(new Map());
+    lookAgain(null);
+  }
 
   const typeLetter = (letter: string) => setWord((w) => (w.length < MAX_WORD ? w + letter : w));
   const backspace = () => setWord((w) => w.slice(0, -1));
 
   // Physical keyboard, for testing on the laptop.
   function onKey(e: KeyboardEvent) {
-    if (e.ctrlKey || e.metaKey || e.altKey) return;
-    if (phase.name === "name") {
-      if (/^[a-zà-ú' ]$/i.test(e.key)) typeLetter(e.key.toLowerCase());
-      else if (e.key === "Backspace") backspace();
-      else if (e.key === "Enter") submitWord();
-      else if (e.key === "Escape") setPhase({ name: "adjust" });
-      else return;
-      e.preventDefault();
-    } else if (phase.name === "adjust") {
-      if (e.key === "Enter") confirmBox();
-      else if (e.key === "Escape") newBox();
-      else return;
-      // Otherwise Enter would also activate whichever button still has focus.
-      e.preventDefault();
-    }
+    if (e.ctrlKey || e.metaKey || e.altKey || phase.name !== "name") return;
+    if (/^[a-zà-ú' ]$/i.test(e.key)) typeLetter(e.key.toLowerCase());
+    else if (e.key === "Backspace") backspace();
+    // preventDefault below also stops Enter from pressing a focused button.
+    else if (e.key === "Enter") submit();
+    else if (e.key === "Escape") lookAgain(null);
+    else return;
+    e.preventDefault();
   }
   // Re-subscribed every render so the listener always sees the current phase.
   useEffect(() => {
@@ -229,9 +279,6 @@ export default function ShapeHunt({ scene, illustration, showTargets = false }: 
     window.addEventListener("keydown", listener);
     return () => window.removeEventListener("keydown", listener);
   });
-
-  const resultKind = phase.name === "result" ? phase.result.kind : null;
-  const boxColor = resultKind === "correct" ? "#16a34a" : resultKind === "no-shape" || resultKind === "ambiguous" ? "#ea580c" : "#2563eb";
 
   return (
     <div className="h-dvh w-full flex bg-slate-800 overflow-hidden overscroll-none select-none">
@@ -256,47 +303,26 @@ export default function ShapeHunt({ scene, illustration, showTargets = false }: 
               <g key={t.id} pointerEvents="none">
                 <rect x={t.box.x} y={t.box.y} width={t.box.width} height={t.box.height} fill="none" stroke="#e11d48" strokeWidth={2} />
                 <text x={t.box.x + 2} y={t.box.y - 3} fontSize={11} fill="#e11d48">
-                  {t.shape}
+                  {t.shape} · {t.names[0]}
                 </text>
               </g>
             ))}
 
-          {scene.targets.filter((t) => found.has(t.id)).map((t) => (
-            <rect
-              key={t.id}
-              x={t.box.x - 6}
-              y={t.box.y - 6}
-              width={t.box.width + 12}
-              height={t.box.height + 12}
-              rx={8}
-              fill="none"
-              stroke="#16a34a"
-              strokeWidth={5}
-              strokeDasharray="14 8"
-              pointerEvents="none"
-            />
-          ))}
+          {scene.targets.map((t) => {
+            const discovery = found.get(t.id);
+            return discovery && <FoundMarker key={t.id} target={t} discovery={discovery} sceneWidth={scene.width} />;
+          })}
 
           {box && (
             <g>
-              <rect
-                x={box.x}
-                y={box.y}
-                width={box.width}
-                height={box.height}
-                fill={boxColor}
-                fillOpacity={0.12}
-                stroke={boxColor}
-                strokeWidth={5}
-                style={{ cursor: phase.name === "adjust" ? "move" : undefined }}
-              />
-              {phase.name === "adjust" &&
+              <rect x={box.x} y={box.y} width={box.width} height={box.height} fill="#2563eb" fillOpacity={0.12} stroke="#2563eb" strokeWidth={5} style={{ cursor: "move" }} />
+              {phase.name === "name" &&
                 CORNERS.map((corner) => {
                   const p = cornerPoint(box, corner);
                   return (
                     <g key={corner} data-handle={corner} style={{ cursor: corner === "nw" || corner === "se" ? "nwse-resize" : "nesw-resize" }}>
                       <circle cx={p.x} cy={p.y} r={40} fill="transparent" />
-                      <circle cx={p.x} cy={p.y} r={14} fill="#ffffff" stroke={boxColor} strokeWidth={5} />
+                      <circle cx={p.x} cy={p.y} r={14} fill="#ffffff" stroke="#2563eb" strokeWidth={5} />
                     </g>
                   );
                 })}
@@ -305,17 +331,18 @@ export default function ShapeHunt({ scene, illustration, showTargets = false }: 
         </svg>
       </main>
 
-      <aside className="w-[clamp(340px,30vw,520px)] shrink-0 bg-slate-50 text-slate-800 flex flex-col p-5 gap-4">
+      <aside className="w-[clamp(340px,30vw,520px)] shrink-0 bg-slate-50 text-slate-800 flex flex-col p-5 gap-3 overflow-y-auto">
         <header className="flex items-start justify-between gap-3">
           <div>
             <h1 className="text-2xl font-bold">{scene.title}</h1>
             <p className="text-lg text-slate-600 mt-1">
-              Forme trovate: <span className="font-bold text-slate-900">{found.size} / {total}</span>
+              Oggetti trovati: <span className="font-bold text-slate-900">{found.size}</span> · Forma{" "}
+              <span className="font-bold text-slate-900">{Math.min(round + 1, order.length)}</span> di {order.length}
             </p>
           </div>
           <button
             type="button"
-            onClick={restart}
+            onClick={() => tapRestart() && newGame()}
             className={`shrink-0 flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium border touch-manipulation ${
               restartArmed ? "bg-red-600 text-white border-red-600" : "bg-white text-slate-500 border-slate-300"
             }`}
@@ -324,205 +351,132 @@ export default function ShapeHunt({ scene, illustration, showTargets = false }: 
             {restartArmed ? "Tocca ancora" : "Ricomincia"}
           </button>
         </header>
-        <div className="h-2.5 rounded-full bg-slate-200 overflow-hidden">
-          <div className="h-full bg-green-500 transition-all" style={{ width: `${(found.size / total) * 100}%` }} />
-        </div>
 
-        <section className="flex-1 min-h-0 flex flex-col gap-4">
-          {allFound && phase.name !== "name" && (
-            <p className="rounded-xl bg-green-100 text-green-800 text-xl font-bold p-4 text-center">Hai trovato tutte le forme!</p>
-          )}
-          <PhasePanel
-            phase={phase}
-            word={word}
-            onConfirm={confirmBox}
-            onNewBox={newBox}
-            onAdjust={() => setPhase({ name: "adjust" })}
-            onRetryWord={retryWord}
-            onSubmitWord={submitWord}
-            onLetter={typeLetter}
-            onBackspace={backspace}
-          />
-        </section>
+        {phase.name === "finished" || !shape ? (
+          <>
+            <p className="rounded-xl bg-green-100 text-green-800 text-2xl font-bold p-5 text-center">Hai trovato tutti gli oggetti!</p>
+            <p className="text-2xl">
+              Oggetti trovati: <b>{found.size}</b>
+            </p>
+            <button type="button" className={`${primary} mt-auto`} onClick={newGame}>
+              Nuova partita
+            </button>
+          </>
+        ) : (
+          <>
+            <p className="text-3xl leading-tight">
+              <b>TROVA</b> {foundOfShape > 0 ? "un altro" : "un"} oggetto a forma di <b className="text-blue-700">{shape}</b>
+            </p>
+            {notice && <NoticeCard notice={notice} onAccept={teacherAccept} />}
+            {phase.name === "draw" ? (
+              <>
+                <p className="text-2xl leading-snug">
+                  <b>DISEGNA</b> un riquadro intorno all&apos;oggetto.
+                </p>
+                <button type="button" className={`${secondary} mt-auto`} onClick={claimNoneLeft}>
+                  Non ci sono altri oggetti {shaped(shape)}
+                </button>
+              </>
+            ) : (
+              <>
+                <p className="text-2xl leading-snug">
+                  <b>SCRIVI</b> il nome dell&apos;oggetto.
+                </p>
+                <div className="min-h-16 rounded-xl border-2 border-blue-500 bg-white px-4 py-3 text-3xl font-semibold tracking-wide break-all">
+                  {word}
+                  <span className="inline-block w-0.5 h-8 -mb-1 bg-blue-500 animate-pulse" />
+                </div>
+                <div className="mt-auto flex flex-col gap-3">
+                  <LetterKeyboard onLetter={typeLetter} onBackspace={backspace} />
+                  <div className="flex gap-3">
+                    <button type="button" className={`${secondary} flex-1`} onClick={() => lookAgain(null)}>
+                      Ridisegna
+                    </button>
+                    <button type="button" className={`${primary} flex-[2]`} disabled={!word.trim()} onClick={submit}>
+                      Fatto
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
+          </>
+        )}
       </aside>
     </div>
   );
 }
 
-interface PhasePanelProps {
-  phase: Phase;
-  word: string;
-  onConfirm: () => void;
-  onNewBox: () => void;
-  onAdjust: () => void;
-  onRetryWord: (target: SceneTarget, score: number) => void;
-  onSubmitWord: () => void;
-  onLetter: (letter: string) => void;
-  onBackspace: () => void;
-}
-
 const primary = "rounded-xl bg-blue-600 text-white text-xl font-bold px-5 py-4 disabled:opacity-40 touch-manipulation";
 const secondary = "rounded-xl bg-white text-slate-700 text-lg font-semibold px-5 py-3 border border-slate-300 touch-manipulation";
 
-function StarRow({ stars }: { stars: Stars }) {
+const TONE: Record<Notice["tone"], string> = {
+  good: "bg-green-50 border-green-300 text-green-800",
+  bad: "bg-orange-50 border-orange-300 text-orange-800",
+  reveal: "bg-amber-50 border-amber-300 text-amber-800",
+};
+
+function NoticeCard({ notice, onAccept }: { notice: Notice; onAccept: (accept: NonNullable<Notice["accept"]>) => void }) {
+  const { tone, title, text, word, attempt, accept } = notice;
   return (
-    <div className="flex gap-1" aria-label={`${stars} stelle su 3`}>
-      {[1, 2, 3].map((i) => (
-        <Star key={i} className={`w-10 h-10 ${i <= stars ? "fill-amber-400 text-amber-500" : "text-slate-300"}`} />
-      ))}
+    <div className={`rounded-xl border-2 px-4 py-3 flex flex-col gap-1 ${TONE[tone]}`} role="status">
+      <p className="text-xl">
+        <b>{title}</b> {text}
+      </p>
+      {word && <p className="text-3xl font-bold tracking-wide">{word}</p>}
+      {(attempt || accept) && (
+        <div className="flex items-center justify-between gap-2 mt-1">
+          {attempt ? <Attempts used={attempt} /> : <span />}
+          {accept && <TeacherAccept word={accept.written} onAccept={() => onAccept(accept)} />}
+        </div>
+      )}
     </div>
   );
 }
 
-// One star means the box is loose; the hint says which way to fix it.
-const LOOSE_HINT: Record<FitHint, string> = {
-  shrink: "Puoi stringere di più il riquadro.",
-  grow: "Il riquadro deve prendere tutta la forma.",
-  shift: "Sposta il riquadro intorno a tutta la forma.",
-};
-
-function precisionText(stars: Stars, hint: FitHint): string {
-  if (stars === 3) return "Riquadro perfetto!";
-  if (stars === 2) return "Riquadro buono.";
-  return LOOSE_HINT[hint];
+// Found objects stay outlined, with their name, so the class sees the vocabulary.
+// Names the app had to reveal are shown in amber.
+function FoundMarker({ target, discovery, sceneWidth }: { target: SceneTarget; discovery: Discovery; sceneWidth: number }) {
+  const { x, y, width, height } = target.box;
+  const color = discovery.how === "revealed" ? "#d97706" : "#16a34a";
+  const labelWidth = discovery.label.length * 12 + 24;
+  const labelY = y - 40 >= 0 ? y - 40 : y + height + 6;
+  const labelX = Math.min(Math.max(0, x + width / 2 - labelWidth / 2), sceneWidth - labelWidth);
+  return (
+    <g pointerEvents="none">
+      <rect x={x - 6} y={y - 6} width={width + 12} height={height + 12} rx={8} fill="none" stroke={color} strokeWidth={5} strokeDasharray="14 8" />
+      <rect x={labelX} y={labelY} width={labelWidth} height={32} rx={16} fill={color} />
+      <text x={labelX + labelWidth / 2} y={labelY + 22} textAnchor="middle" fontSize={20} fontWeight={600} fill="#fff">
+        {discovery.label}
+      </text>
+    </g>
+  );
 }
 
-function PhasePanel(p: PhasePanelProps) {
-  const { phase } = p;
-  const instruction = "text-2xl leading-snug";
+function Attempts({ used }: { used: number }) {
+  return (
+    <span className="flex items-center gap-2 text-base">
+      Tentativo {used} di {MAX_ATTEMPTS}
+      <span className="flex gap-1">
+        {Array.from({ length: MAX_ATTEMPTS }, (_, i) => (
+          <span key={i} className={`w-3 h-3 rounded-full ${i < used ? "bg-orange-500" : "bg-slate-300"}`} />
+        ))}
+      </span>
+    </span>
+  );
+}
 
-  switch (phase.name) {
-    case "draw":
-      return (
-        <p className={instruction}>
-          <b>CERCA</b> una forma.
-          <br />
-          <b>DISEGNA</b> un riquadro intorno alla forma.
-        </p>
-      );
-
-    case "adjust":
-      return (
-        <>
-          <p className={instruction}>
-            Il riquadro va bene? Puoi <b>SPOSTARE</b> gli angoli.
-          </p>
-          <div className="mt-auto flex flex-col gap-3">
-            <button type="button" className={primary} onClick={p.onConfirm}>
-              Conferma
-            </button>
-            <button type="button" className={secondary} onClick={p.onNewBox}>
-              Cancella il riquadro
-            </button>
-          </div>
-        </>
-      );
-
-    case "name":
-      return (
-        <>
-          <p className={instruction}>
-            <b>SCRIVI</b> il nome della forma.
-          </p>
-          <div className="min-h-16 rounded-xl border-2 border-blue-500 bg-white px-4 py-3 text-3xl font-semibold tracking-wide break-all">
-            {p.word}
-            <span className="inline-block w-0.5 h-8 -mb-1 bg-blue-500 animate-pulse" />
-          </div>
-          <div className="mt-auto flex flex-col gap-3">
-            <LetterKeyboard onLetter={p.onLetter} onBackspace={p.onBackspace} />
-            <div className="flex gap-3">
-              <button type="button" className={`${secondary} flex-1`} onClick={p.onAdjust}>
-                Indietro
-              </button>
-              <button type="button" className={`${primary} flex-[2]`} disabled={!p.word.trim()} onClick={p.onSubmitWord}>
-                Fatto
-              </button>
-            </div>
-          </div>
-        </>
-      );
-
-    case "result": {
-      const r = phase.result;
-      if (r.kind === "no-shape" || r.kind === "ambiguous") {
-        return (
-          <>
-            <p className={instruction}>
-              {r.kind === "no-shape" ? (
-                <>
-                  <b>Non trovo una forma qui.</b>
-                  <br />
-                  Prova ancora.
-                </>
-              ) : (
-                <>
-                  Il riquadro prende <b>più forme</b>.
-                  <br />
-                  Stringi il riquadro intorno a una forma.
-                </>
-              )}
-            </p>
-            <div className="mt-auto flex flex-col gap-3">
-              <button type="button" className={primary} onClick={p.onAdjust}>
-                Sistema il riquadro
-              </button>
-              <button type="button" className={secondary} onClick={p.onNewBox}>
-                Nuovo riquadro
-              </button>
-            </div>
-          </>
-        );
-      }
-      if (r.kind === "correct") {
-        return (
-          <>
-            <p className="text-3xl font-bold text-green-700">Esatto!</p>
-            <p className={instruction}>
-              È un <b>{r.target.shape}</b>.
-            </p>
-            <StarRow stars={r.stars} />
-            <p className="text-xl text-slate-600">{precisionText(r.stars, r.hint)}</p>
-            {r.previous !== undefined && (
-              <p className="text-lg text-slate-500">
-                {r.stars > r.previous ? "Meglio di prima!" : "Hai già trovato questa forma."}
-              </p>
-            )}
-            <div className="mt-auto flex flex-col gap-3">
-              <button type="button" className={primary} onClick={p.onNewBox}>
-                Avanti
-              </button>
-            </div>
-          </>
-        );
-      }
-      const { verdict, target } = r;
-      return (
-        <>
-          <p className="text-lg text-slate-500">
-            Hai scritto: <span className="font-semibold text-slate-700">{r.written.trim()}</span>
-          </p>
-          <p className={instruction}>
-            {verdict.kind === "spelling" && <b>Quasi! Si scrive:</b>}
-            {verdict.kind === "other-shape" && (
-              <>
-                No, non è un {verdict.written}.
-                <br />
-                Questa forma è un:
-              </>
-            )}
-            {verdict.kind === "unknown" && "Questa forma si chiama:"}
-          </p>
-          <p className="text-4xl font-bold tracking-wide text-blue-700">{target.shape}</p>
-          <div className="mt-auto flex flex-col gap-3">
-            <button type="button" className={primary} onClick={() => p.onRetryWord(target, r.score)}>
-              Scrivi di nuovo
-            </button>
-            <button type="button" className={secondary} onClick={p.onNewBox}>
-              Nuovo riquadro
-            </button>
-          </div>
-        </>
-      );
-    }
-  }
+function TeacherAccept({ word, onAccept }: { word: string; onAccept: () => void }) {
+  const [armed, tap] = useArmed();
+  return (
+    <button
+      type="button"
+      onClick={() => tap() && onAccept()}
+      className={`flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium border touch-manipulation ${
+        armed ? "bg-green-600 text-white border-green-600" : "bg-white text-slate-500 border-slate-300"
+      }`}
+    >
+      <UserCheck className="w-4 h-4" />
+      {armed ? `Tocca ancora: accetta «${normalizeWord(word)}»` : "Accetta (insegnante)"}
+    </button>
+  );
 }

@@ -31,8 +31,11 @@ export default function LetterKeyboard({ onLetter, onBackspace }: LetterKeyboard
         </div>
       ))}
       <div className="flex gap-1.5 px-[12%]">
-        <button type="button" className={key} onClick={() => onLetter(" ")}>
+        <button type="button" className={`${key} flex-[4]`} onClick={() => onLetter(" ")}>
           spazio
+        </button>
+        <button type="button" aria-label="Apostrofo" className={key} onClick={() => onLetter("'")}>
+          &apos;
         </button>
       </div>
     </div>

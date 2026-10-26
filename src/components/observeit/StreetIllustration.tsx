@@ -197,14 +197,19 @@ function BarWindow({ id }: { id: string }) {
   );
 }
 
-function SmallPediment({ id }: { id: string }) {
-  const g = geo(id, "polygon");
+// A thin moulded ledge over a window or door: deliberately not a taught shape.
+function Cornice({ x, y, width }: { x: number; y: number; width: number }) {
   return (
     <g>
-      <polygon points={pts(g.points)} fill={C.stone} />
-      <polygon points={pts(inset(g.points, 0.6))} fill={C.stoneShade} />
+      <path d={`M${x} ${y} h${width} l-6 9 h${-(width - 12)} Z`} fill={C.stone} />
+      <path d={`M${x + 6} ${y + 9} h${width - 12} l-3 5 h${-(width - 18)} Z`} fill={C.stoneShade} />
     </g>
   );
+}
+
+function WindowCornice({ id }: { id: string }) {
+  const g = geo(id, "rect");
+  return <Cornice x={g.x - 12} y={g.y - 20} width={g.width + 24} />;
 }
 
 // ---------- Church
@@ -261,15 +266,7 @@ function Clock() {
   );
 }
 
-function PortalPediment() {
-  const g = geo("timpano-portale", "polygon");
-  return (
-    <g>
-      <polygon points={pts(g.points)} fill="#cdbb97" />
-      <polygon points={pts(inset(g.points, 0.7))} fill="#f3ead8" />
-    </g>
-  );
-}
+
 
 // ---------- Street furniture
 
@@ -481,7 +478,7 @@ export default function StreetIllustration() {
       <path d="M552 214 L820 44 L1088 214" fill="none" stroke={C.stoneShade} strokeWidth={10} strokeLinejoin="round" />
       <Rose />
       <Clock />
-      <PortalPediment />
+      <Cornice x={740} y={376} width={160} />
       <Door id="portale" kind="portal" />
 
       {/* Right palazzo with bar */}
@@ -492,8 +489,8 @@ export default function StreetIllustration() {
       <line x1={1352} x2={1352} y1={94} y2={600} stroke="#9c9a92" strokeWidth={7} />
       <AtticWindow id="bar-finestrella-1" />
       <AtticWindow id="bar-finestrella-2" />
-      <SmallPediment id="bar-timpano-1" />
-      <SmallPediment id="bar-timpano-2" />
+      <WindowCornice id="bar-finestra-1" />
+      <WindowCornice id="bar-finestra-2" />
       <StoneWindow id="bar-finestra-1" shutters="closed" />
       <StoneWindow id="bar-finestra-2" shutters="closed" />
       <SignBoard id="insegna-bar" text="BAR" fill="#7a2b2b" color="#f6e7c8" />

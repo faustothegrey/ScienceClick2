@@ -1,7 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { boxFromPoints, clampBox, fitHint, iou, matchBox, snapToTarget, starsFor, MATCH_IOU, type Box } from "./geometry.ts";
-import { judgeWord, normalizeWord } from "./vocabulary.ts";
+import { boxFromPoints, clampBox, iou, matchBox, snapToTarget, type Box } from "./geometry.ts";
+import { judgeName, normalizeWord, SHAPE_NAMES } from "./vocabulary.ts";
+import { remaining, shapesIn, shuffled } from "./game.ts";
 import { streetScene } from "./scenes/street.ts";
 
 const box = (x: number, y: number, width: number, height: number): Box => ({ x, y, width, height });
@@ -28,11 +29,10 @@ test("small edge errors snap onto the target", () => {
   assert.deepEqual(snapToTarget(box(60, 100, 80, 40), t), box(60, 100, 80, 40));
 });
 
-test("a small target framed with finger-sized errors still gets 3 stars", () => {
+test("a small target framed with finger-sized errors still matches", () => {
   // Street plate: 125×36.
   const match = matchBox(box(407, 463, 140, 50), streetScene.targets);
   assert.equal(match.kind === "match" && match.target.id, "targa-via");
-  if (match.kind === "match") assert.equal(starsFor(match.score), 3);
 });
 
 test("matching picks the nested target the box actually fits", () => {
@@ -42,10 +42,9 @@ test("matching picks the nested target the box actually fits", () => {
   assert.equal(sign.kind === "match" && sign.target.id, "cartello-pedoni");
 });
 
-test("a window framed together with its open shutters still matches, loosely", () => {
+test("a window framed together with its open shutters still matches", () => {
   const m = matchBox(box(28, 230, 164, 144), streetScene.targets);
   assert.equal(m.kind === "match" && m.target.id, "palazzo-finestra-1");
-  if (m.kind === "match") assert.equal(starsFor(m.score), 1);
 });
 
 test("a box around a car wheel's rim still finds the wheel", () => {
@@ -65,9 +64,8 @@ test("a box straddling two equal fits is ambiguous", () => {
     { id: "a", box: box(0, 0, 100, 100) },
     { id: "b", box: box(100, 0, 100, 100) },
   ];
-  const m = matchBox(box(50, 0, 100, 100), targets);
   // Each overlaps by 1/3: below threshold, so no match rather than a guess.
-  assert.equal(m.kind, "none");
+  assert.equal(matchBox(box(50, 0, 100, 100), targets).kind, "none");
   const close = matchBox(box(0, 0, 100, 100), [
     { id: "a", box: box(0, 0, 100, 100) },
     { id: "b", box: box(0, 0, 100, 95) },
@@ -75,25 +73,38 @@ test("a box straddling two equal fits is ambiguous", () => {
   assert.equal(close.kind, "ambiguous");
 });
 
-test("stars bands", () => {
-  assert.equal(starsFor(1), 3);
-  assert.equal(starsFor(0.75), 2);
-  assert.equal(starsFor(MATCH_IOU), 1);
-});
-
 test("normalizeWord strips case, spaces and articles", () => {
-  assert.equal(normalizeWord("  Un   CERCHIO "), "cerchio");
-  assert.equal(normalizeWord("il quadrato"), "quadrato");
-  assert.equal(normalizeWord("l'cerchio"), "cerchio");
+  assert.equal(normalizeWord("  Un   OROLOGIO "), "orologio");
+  assert.equal(normalizeWord("la porta"), "porta");
+  assert.equal(normalizeWord("l'orologio"), "orologio");
+  assert.equal(normalizeWord("le finestre"), "finestre");
+  assert.equal(normalizeWord("La ruota dell' auto"), "ruota dell'auto");
 });
 
-test("judgeWord never silently accepts a wrong word", () => {
-  assert.deepEqual(judgeWord("cerchio", "cerchio"), { kind: "correct" });
-  assert.deepEqual(judgeWord("cerkio", "cerchio"), { kind: "spelling" });
-  assert.deepEqual(judgeWord("triangolo", "cerchio"), { kind: "other-shape", written: "triangolo" });
-  assert.deepEqual(judgeWord("rettangolo", "quadrato"), { kind: "other-shape", written: "rettangolo" });
-  assert.deepEqual(judgeWord("ruota", "cerchio"), { kind: "unknown" });
-  assert.deepEqual(judgeWord("", "cerchio"), { kind: "unknown" });
+test("judgeName accepts any listed name and never silently accepts a wrong one", () => {
+  const names = ["finestra", "finestrella"];
+  assert.deepEqual(judgeName("finestra", names), { kind: "correct" });
+  assert.deepEqual(judgeName("una finestrella", names), { kind: "correct" });
+  assert.deepEqual(judgeName("finesta", names), { kind: "spelling", closest: "finestra" });
+  assert.deepEqual(judgeName("finestre", names), { kind: "spelling", closest: "finestra" });
+  assert.deepEqual(judgeName("porta", names), { kind: "wrong" });
+  assert.deepEqual(judgeName("   ", names), { kind: "wrong" });
+});
+
+test("the no-parking sign accepts every reasonable description", () => {
+  const sign = streetScene.targets.find((t) => t.id === "cartello-divieto")!;
+  for (const answer of ["cartello", "un cartello stradale", "Segnale stradale", "il divieto di sosta", "divieto"]) {
+    assert.deepEqual(judgeName(answer, sign.names), { kind: "correct" }, answer);
+  }
+  assert.deepEqual(judgeName("ruota", sign.names), { kind: "wrong" });
+});
+
+test("game: shapes in the scene, shuffling, what is left", () => {
+  assert.deepEqual([...shapesIn(streetScene)].sort(), [...SHAPE_NAMES].sort());
+  assert.deepEqual([...shuffled(SHAPE_NAMES, () => 0)].sort(), [...SHAPE_NAMES].sort());
+  const circles = streetScene.targets.filter((t) => t.shape === "cerchio");
+  assert.equal(remaining(streetScene, "cerchio", new Set()).length, circles.length);
+  assert.equal(remaining(streetScene, "cerchio", new Set(circles.map((t) => t.id))).length, 0);
 });
 
 test("street scene: unique ids, targets inside the scene, shapes look like their names", () => {
@@ -110,16 +121,16 @@ test("street scene: unique ids, targets inside the scene, shapes look like their
   }
 });
 
+test("street scene: every object has normalized names", () => {
+  for (const t of streetScene.targets) {
+    assert.ok(t.names.length > 0, t.id);
+    for (const name of t.names) assert.equal(normalizeWord(name), name, `${t.id}: ${name}`);
+  }
+});
+
 test("street scene: every target matches itself unambiguously", () => {
   for (const t of streetScene.targets) {
     const m = matchBox(t.box, streetScene.targets);
     assert.equal(m.kind === "match" && m.target.id, t.id, t.id);
   }
-});
-
-test("fitHint says which way to fix a loose box", () => {
-  const t = box(100, 100, 100, 100);
-  assert.equal(fitHint(box(60, 60, 180, 180), t), "shrink");
-  assert.equal(fitHint(box(130, 130, 40, 40), t), "grow");
-  assert.equal(fitHint(box(150, 100, 100, 100), t), "shift");
 });

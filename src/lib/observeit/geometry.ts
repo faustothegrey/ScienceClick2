@@ -1,4 +1,4 @@
-// Pure geometry for ObserveIt: boxes, overlap, matching and precision stars.
+// Pure geometry for ObserveIt: boxes, overlap and matching.
 // All values are in scene units (the SVG viewBox), never screen pixels.
 
 export interface Point {
@@ -23,7 +23,7 @@ export const MATCH_IOU = 0.5;
 // A second target this close to the best one makes the box ambiguous.
 export const AMBIGUITY_MARGIN = 0.1;
 // Edges this close to the target's edges count as exact, so tiny finger errors
-// don't cost stars. Absolute, so small targets aren't punished more than big ones.
+// don't count. Absolute, so small targets aren't punished more than big ones.
 export const EDGE_SLACK = 12;
 
 export function boxFromPoints(a: Point, b: Point): Box {
@@ -65,7 +65,7 @@ export function snapToTarget(box: Box, target: Box, slack = EDGE_SLACK): Box {
   return { x: x1, y: y1, width: x2 - x1, height: y2 - y1 };
 }
 
-// Overlap after forgiving small edge errors; used for both matching and stars.
+// Overlap after forgiving small edge errors.
 export function fitScore(box: Box, target: Box): number {
   return iou(snapToTarget(box, target), target);
 }
@@ -86,24 +86,4 @@ export function matchBox<T extends BoxTarget>(box: Box, targets: readonly T[]): 
     return { kind: "ambiguous", candidates: ranked.filter((r) => best.score - r.score < AMBIGUITY_MARGIN).map((r) => r.target) };
   }
   return { kind: "match", target: best.target, score: best.score };
-}
-
-export type Stars = 1 | 2 | 3;
-
-export function starsFor(score: number): Stars {
-  if (score >= 0.85) return 3;
-  if (score >= 0.7) return 2;
-  return 1;
-}
-
-// What to change about a box that matched but fits loosely.
-export type FitHint = "shrink" | "grow" | "shift";
-
-export function fitHint(box: Box, target: Box, slack = EDGE_SLACK): FitHint {
-  const b = snapToTarget(box, target, slack);
-  const outside = b.x <= target.x && b.y <= target.y && b.x + b.width >= target.x + target.width && b.y + b.height >= target.y + target.height;
-  if (outside) return "shrink";
-  const inside = b.x >= target.x && b.y >= target.y && b.x + b.width <= target.x + target.width && b.y + b.height <= target.y + target.height;
-  if (inside) return "grow";
-  return "shift";
 }
