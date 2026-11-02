@@ -48,3 +48,6 @@ public/**/match.json
 
 # source materials
 sources/
+
+# Shared WordleIt runtime state
+/.data/
