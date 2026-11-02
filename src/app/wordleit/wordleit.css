@@ -14,3 +14,6 @@ body:has(.wordleit) .rotate-prompt ~ * { visibility: visible; }
 .wordleit .present { color: white; background: #a16207; border-color: #a16207; }
 .wordleit .absent { color: white; background: #64748b; border-color: #64748b; }
 @media (prefers-reduced-motion: no-preference) { .wordleit-tile.filled { animation: wordleit-pop .1s ease-out; } @keyframes wordleit-pop { from { transform: scale(.94); } to { transform: scale(1); } } }
+
+.wordleit-legend { display: inline-flex; align-items: center; gap: 5px; }
+.wordleit-legend i { display: inline-block; width: 14px; height: 14px; border-radius: 3px; }

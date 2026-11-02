@@ -48,7 +48,8 @@ export default function WordleGame() {
   useEffect(() => {
     function handle(event: KeyboardEvent) {
       if (event.ctrlKey || event.metaKey || event.altKey) return;
-      if ((event.target instanceof HTMLButtonElement || event.target instanceof HTMLAnchorElement) && event.key === "Enter") return;
+      if (event.key === "Enter" && event.repeat) { event.preventDefault(); return; }
+      if ((event.target instanceof HTMLButtonElement || event.target instanceof HTMLAnchorElement) && event.key === "Enter" && !event.target.closest("[data-wordleit-keyboard]")) return;
       if (/^[a-z]$/i.test(event.key) || ["Enter", "Backspace"].includes(event.key)) { event.preventDefault(); key(event.key.toUpperCase()); }
       if (event.key === "Escape") setHelp(false);
     }
@@ -56,11 +57,6 @@ export default function WordleGame() {
     return () => window.removeEventListener("keydown", handle);
   });
 
-  const keyboard: Record<string, Mark> = {};
-  game?.guesses.forEach(guess => scoreGuess(guess, game.answer).forEach((mark, i) => {
-    const prior = keyboard[guess[i]];
-    if (!prior || mark === "correct" || (mark === "present" && prior === "absent")) keyboard[guess[i]] = mark;
-  }));
   function changeMode(mode: "daily" | "practice") {
     if (mode === game?.mode) return;
     setGame(mode === "daily" ? readDaily() : { date: today(), mode, answer: ANSWERS[Math.floor(Math.random() * ANSWERS.length)], guesses: [] });
@@ -102,11 +98,11 @@ export default function WordleGame() {
           </div>;
         })}
       </div>
-      <div className="mt-4 flex flex-wrap justify-center gap-x-4 gap-y-2 text-xs text-slate-500" aria-label="Legenda"><span>🟩 Al posto giusto</span><span>🟨 In un altro posto</span><span>⬜ Non presente</span></div>
-      <div className="mt-6 w-full space-y-1.5" role="group" aria-label="Tastiera">
+      <div className="mt-4 flex flex-wrap justify-center gap-x-4 gap-y-2 text-xs text-slate-500" aria-label="Legenda"><span className="wordleit-legend"><i className="correct" aria-hidden="true" />Al posto giusto</span><span className="wordleit-legend"><i className="present" aria-hidden="true" />In un altro posto</span><span className="wordleit-legend"><i className="absent" aria-hidden="true" />Non presente</span></div>
+      <div className="mt-6 w-full space-y-1.5" role="group" aria-label="Tastiera" data-wordleit-keyboard>
         {rows.map((row, index) => <div key={row} className="flex justify-center gap-1 sm:gap-1.5">
           {index === 2 && <button className="wordleit-key wide" disabled={!game || over} onClick={() => key("ENTER")}>INVIO</button>}
-          {row.split("").map(letter => <button key={letter} aria-label={`${letter}${keyboard[letter] ? `, ${keyboard[letter] === "correct" ? "corretta" : keyboard[letter] === "present" ? "presente" : "assente"}` : ""}`} className={`wordleit-key ${keyboard[letter] || ""}`} disabled={!game || over} onClick={() => key(letter)}>{letter}</button>)}
+          {row.split("").map(letter => <button key={letter} aria-label={letter} className="wordleit-key" disabled={!game || over} onClick={() => key(letter)}>{letter}</button>)}
           {index === 2 && <button className="wordleit-key wide" aria-label="Cancella ultima lettera" disabled={!game || over} onClick={() => key("BACKSPACE")}><Delete size={21} /></button>}
         </div>)}
       </div>
