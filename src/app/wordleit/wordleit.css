@@ -1,0 +1,16 @@
+/* WordleIt is designed for portrait and touch input as well as classroom screens. */
+body:has(.wordleit) .rotate-prompt { display: none; }
+body:has(.wordleit) .rotate-prompt ~ * { visibility: visible; }
+.wordleit button, .wordleit a { -webkit-tap-highlight-color: transparent; }
+.wordleit button { cursor: pointer; }
+.wordleit button:focus-visible, .wordleit a:focus-visible { outline: 3px solid #047857; outline-offset: 3px; }
+.wordleit-tile { width: clamp(46px, 11vw, 58px); height: clamp(46px, 11vw, 58px); display: flex; align-items: center; justify-content: center; border: 2px solid #dce3df; border-radius: 7px; background: white; font-size: 1.65rem; font-weight: 800; }
+.wordleit-tile.filled { border-color: #64748b; }
+.wordleit-key { display: flex; align-items: center; justify-content: center; height: 50px; flex: 1; max-width: 46px; padding: 0; border-radius: 6px; background: #e2e8e5; font-size: .875rem; font-weight: 700; touch-action: manipulation; }
+.wordleit-key.wide { flex: 1.5; max-width: 66px; font-size: .65rem; }
+.wordleit-key:hover { filter: brightness(.95); }
+.wordleit-key:disabled { cursor: default; }
+.wordleit .correct { color: white; background: #15803d; border-color: #15803d; }
+.wordleit .present { color: white; background: #a16207; border-color: #a16207; }
+.wordleit .absent { color: white; background: #64748b; border-color: #64748b; }
+@media (prefers-reduced-motion: no-preference) { .wordleit-tile.filled { animation: wordleit-pop .1s ease-out; } @keyframes wordleit-pop { from { transform: scale(.94); } to { transform: scale(1); } } }

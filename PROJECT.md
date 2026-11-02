@@ -23,7 +23,7 @@ completion indicator.
 
 ## Current Work
 
-- The site has two sub-apps, SnapIt (`/snapit`) and ObserveIt (`/observeit`), linked from the home page at `/` (`src/app/page.tsx`; add new sub-apps to its `SUB_APPS` list). Before working on ObserveIt, read [design/observeit-handoff.md](./design/observeit-handoff.md).
+- The site has three sub-apps, SnapIt (`/snapit`), ObserveIt (`/observeit`), and WordleIt (`/wordleit`), linked from the home page at `/` (`src/app/page.tsx`; add new sub-apps to its `SUB_APPS` list). Before working on ObserveIt, read [design/observeit-handoff.md](./design/observeit-handoff.md).
 
 ## Agent Workflow Defaults
 
@@ -49,3 +49,7 @@ Use these defaults for future AI agent sessions working in this repository:
 
 - Persistence note:
 - If a future agent creates temporary worktrees or cmux panes for a task, that cleanup is part of the task and should not be left for the user.
+
+## WordleIt
+
+Italian five-letter word game with six attempts, a daily puzzle, and unlimited practice. The curated accepted vocabulary, answer list, and duplicate-letter scoring live in `src/lib/wordleit/game.ts`. Daily puzzles use the local calendar date and save progress in browser localStorage. WordleIt supports portrait phones without the landscape prompt used by the other subapps.

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Shapes, Tags, type LucideIcon } from "lucide-react";
+import { ArrowRight, Shapes, Tags, Grid2X2, type LucideIcon } from "lucide-react";
 import { SNAPIT_BASE } from "@/lib/snapitRoutes";
 
 interface SubApp {
@@ -12,6 +12,13 @@ interface SubApp {
 
 // One card per sub-app. Add new sub-apps here.
 const SUB_APPS: SubApp[] = [
+  {
+    name: "WordleIt",
+    href: "/wordleit",
+    description: "Una parola italiana, cinque lettere e sei tentativi. Segui gli indizi e trova la soluzione!",
+    icon: Grid2X2,
+    accent: "bg-violet-100 text-violet-700",
+  },
   {
     name: "ObserveIt",
     href: "/observeit",
