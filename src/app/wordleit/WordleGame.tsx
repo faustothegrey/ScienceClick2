@@ -111,15 +111,16 @@ export default function WordleGame() {
         {(game?.mode === "practice" || over) && <button onClick={practice} className="flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold hover:bg-slate-50"><RotateCcw size={16} />Nuova parola</button>}
       </div>
       {over && game?.mode === "daily" && <p className="mt-4 text-sm text-slate-500">La prossima parola ti aspetta domani.</p>}
-      <p className="mt-6 text-center text-xs leading-5 text-slate-400">Un piccolo esercizio di logica e italiano.<br />Vocabolario selezionato · Nessun account necessario</p>
+      <p className="mt-6 text-center text-xs leading-5 text-slate-400">Un piccolo esercizio di logica e italiano.<br />Dizionario Morph-it! · Nessun account necessario</p>
     </div>
     {help && <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-5" onClick={() => setHelp(false)}>
       <section role="dialog" aria-modal="true" aria-labelledby="wordleit-help" className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl" onClick={e => e.stopPropagation()}>
         <h2 id="wordleit-help" className="text-2xl font-bold">Come si gioca</h2>
         <p className="mt-3 text-slate-600">Indovina una parola italiana di 5 lettere in 6 tentativi. Scrivi con la tastiera o tocca le lettere, poi premi INVIO.</p>
         <ul className="mt-4 space-y-3 text-sm"><li>🟩 La lettera è nella posizione giusta.</li><li>🟨 La lettera c’è, ma in un’altra posizione.</li><li>⬜ La lettera non c’è, o compare già negli altri indizi.</li></ul>
-        <p className="mt-4 text-sm text-slate-500">Le lettere possono ripetersi. Usiamo un vocabolario selezionato di parole comuni senza accenti: alcune parole potrebbero non essere accettate. La parola del giorno è uguale per tutti; in allenamento puoi giocare quanto vuoi.</p>
-        <button autoFocus onClick={() => setHelp(false)} onKeyDown={e => { if (e.key === "Tab") e.preventDefault(); }} className="mt-5 w-full rounded-xl bg-emerald-700 py-3 font-semibold text-white">Ho capito, giochiamo!</button>
+        <p className="mt-4 text-sm text-slate-500">Le lettere possono ripetersi. Accettiamo le parole di cinque lettere senza accenti del dizionario Morph-it!, incluse forme flesse e coniugazioni. I nomi propri sono esclusi; il dizionario può avere lacune. Le soluzioni sono selezionate tra parole comuni. La parola del giorno è uguale per tutti; in allenamento puoi giocare quanto vuoi.</p>
+        <a href="/wordleit/dictionary/README.md" target="_blank" rel="noreferrer" onKeyDown={e => { if (e.key === "Tab" && e.shiftKey) { e.preventDefault(); (e.currentTarget.nextElementSibling as HTMLElement)?.focus(); } }} className="mt-3 block text-sm text-emerald-700 underline">Fonte e licenza del dizionario</a>
+        <button autoFocus onClick={() => setHelp(false)} onKeyDown={e => { if (e.key === "Tab" && !e.shiftKey) { e.preventDefault(); if (e.currentTarget.previousElementSibling instanceof HTMLElement) e.currentTarget.previousElementSibling.focus(); } }} className="mt-5 w-full rounded-xl bg-emerald-700 py-3 font-semibold text-white">Ho capito, giochiamo!</button>
       </section>
     </div>}
   </main>;

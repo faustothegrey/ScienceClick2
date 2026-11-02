@@ -12,3 +12,10 @@ test("answers are valid five-letter words and daily selection is deterministic",
   assert.equal(dailyAnswer("2026-11-02"), dailyAnswer("2026-11-02"));
   assert.notEqual(dailyAnswer("2026-11-02"), dailyAnswer("2026-11-03"));
 });
+
+test("dictionary accepts common words, plurals and conjugations", () => {
+  assert.ok(WORDS.length > 3000);
+  for (const word of ["DIETA", "DIETE", "MANGI", "DORMO", "SEDIE", "QUASI"]) assert.ok(WORDS.includes(word), word);
+  for (const word of WORDS) assert.match(word, /^[A-Z]{5}$/);
+  assert.ok(!WORDS.includes("ZZZZZ"));
+});

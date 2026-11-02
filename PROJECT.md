@@ -52,4 +52,4 @@ Use these defaults for future AI agent sessions working in this repository:
 
 ## WordleIt
 
-Italian five-letter word game with six attempts, a daily puzzle, and unlimited practice. The curated accepted vocabulary, answer list, and duplicate-letter scoring live in `src/lib/wordleit/game.ts`. Daily puzzles use the local calendar date and save progress in browser localStorage. WordleIt supports portrait phones without the landscape prompt used by the other subapps.
+Italian five-letter word game with six attempts, a daily puzzle, and unlimited practice. The curated answer list and duplicate-letter scoring live in `src/lib/wordleit/game.ts`. Accepted guesses use Morph-it! 0.4.8, filtered to five lowercase ASCII letters, excluding proper nouns and abbreviations, then uppercased. Regenerate `dictionary.ts` with `python3 scripts/update-wordleit-dictionary.py`; the archive checksum is pinned. Attribution and licensing are in `public/wordleit/dictionary/`. Daily puzzles use the local calendar date and save progress in browser localStorage. WordleIt supports portrait phones without the landscape prompt used by the other subapps.
