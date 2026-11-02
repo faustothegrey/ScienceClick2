@@ -3,10 +3,11 @@
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import confetti from "canvas-confetti";
 import { RotateCcw, UserCheck } from "lucide-react";
-import { boxFromPoints, matchBox, type Box, type Point } from "@/lib/observeit/geometry";
-import { MAX_ATTEMPTS, remaining, shapesIn, shuffled, type Discovery } from "@/lib/observeit/game";
-import { judgeName, normalizeWord, type ShapeName } from "@/lib/observeit/vocabulary";
+import { boxFromPoints, type Box, type Point } from "@/lib/observeit/geometry";
+import { MAX_ATTEMPTS, type Discovery } from "@/lib/observeit/game";
+import { normalizeWord, type ShapeName } from "@/lib/observeit/vocabulary";
 import type { Scene, SceneTarget } from "@/lib/observeit/scene";
+import type { HuntAction, Notice, SharedHunt } from "@/lib/observeit/shared";
 import LetterKeyboard from "./LetterKeyboard";
 
 type Corner = "nw" | "ne" | "sw" | "se";
@@ -14,39 +15,15 @@ const CORNERS: Corner[] = ["nw", "ne", "sw", "se"];
 
 // Boxes smaller than this (scene units) are treated as an accidental tap.
 const MIN_BOX = 16;
-const MAX_WORD = 30;
-
 type Drag =
   | { pointerId: number; mode: "draw"; origin: Point }
   | { pointerId: number; mode: "move"; origin: Point; start: Box }
   | { pointerId: number; mode: Corner; start: Box };
 
-// Shapes are never pictured: linking the word to the shape is the student's job.
-// The game never stops to ask "continue?": each outcome becomes a notice and play
-// moves on by itself.
-type Phase =
-  | { name: "draw" }
-  // Box drawn (still adjustable): write the object's name.
-  | { name: "name" }
-  | { name: "finished" };
-
-interface Notice {
-  tone: "good" | "bad" | "reveal";
-  title: string;
-  text?: string;
-  // Shown large: the object's name.
-  word?: string;
-  attempt?: number;
-  // Lets the teacher accept the student's word for this object.
-  accept?: { target: SceneTarget; written: string };
-}
-
 interface ShapeHuntProps {
   scene: Scene;
   // SVG content drawn in the scene's viewBox.
   illustration: ReactNode;
-  // Shapes in the order they are asked; chosen by the server so it matches on hydration.
-  initialOrder: ShapeName[];
   // Authoring aid: outline every target.
   showTargets?: boolean;
 }
@@ -84,23 +61,76 @@ function useArmed(): [boolean, () => boolean] {
   return [armed, tap];
 }
 
-export default function ShapeHunt({ scene, illustration, initialOrder, showTargets = false }: ShapeHuntProps) {
+export default function ShapeHunt({ scene, illustration, showTargets = false }: ShapeHuntProps) {
   const svgRef = useRef<SVGSVGElement>(null);
   const drag = useRef<Drag | null>(null);
-  const [order, setOrder] = useState(initialOrder);
-  const [round, setRound] = useState(0);
-  const [box, setBox] = useState<Box | null>(null);
-  const [phase, setPhase] = useState<Phase>({ name: "draw" });
-  const [word, setWord] = useState("");
-  const [notice, setNotice] = useState<Notice | null>(null);
-  const [found, setFound] = useState<Map<string, Discovery>>(new Map());
-  // Wrong names so far, per object.
-  const [attempts, setAttempts] = useState<Map<string, number>>(new Map());
+  const [game, setGame] = useState<SharedHunt | null>(null);
+  const [connected, setConnected] = useState(false);
+  const [preview, setPreview] = useState<Box | null | undefined>(undefined);
+  const latest = useRef<SharedHunt | null>(null);
+  const queue = useRef(Promise.resolve());
+  const previewBox = useRef<Box | null>(null);
+  const lastBoxSent = useRef(0);
+  const mounted = useRef(false);
+  const [error, setError] = useState("");
+  function accept(next: SharedHunt) {
+    if (!mounted.current) return;
+    if (!latest.current || next.revision >= latest.current.revision) {
+      if (latest.current && next.turn !== latest.current.turn) { drag.current = null; setPreview(undefined); }
+      if (next.phase.name === "finished" && latest.current?.phase.name !== "finished") confetti({ particleCount: 180, spread: 100, origin: { y: 0.6 } });
+      latest.current = next; setGame(next);
+    }
+    setConnected(true);
+  }
+  useEffect(() => {
+    mounted.current = true;
+    let stopped = false;
+    let timer: ReturnType<typeof setTimeout>;
+    const controller = new AbortController();
+    async function poll() {
+      try {
+        const response = await fetch("/observeit/api/game", { cache: "no-store", signal: AbortSignal.any([controller.signal, AbortSignal.timeout(5000)]) });
+        if (!response.ok) throw new Error();
+        const next: SharedHunt = await response.json();
+        if (!stopped) accept(next);
+      } catch { if (!stopped) { setConnected(false); drag.current = null; setPreview(undefined); } }
+      if (!stopped) timer = setTimeout(poll, 300);
+    }
+    void poll();
+    return () => { stopped = true; mounted.current = false; controller.abort(); clearTimeout(timer); };
+  }, []);
+  function send(action: HuntAction, done?: () => void) {
+    const turn = latest.current?.turn;
+    if (!turn || !connected) return;
+    setError("");
+    queue.current = queue.current.then(async () => {
+      try {
+        const response = await fetch("/observeit/api/game", { method: "POST", signal: AbortSignal.timeout(5000), headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action, turn }) });
+        if (!response.ok) throw new Error();
+        accept(await response.json());
+      } catch {
+        if (mounted.current) { setConnected(false); drag.current = null; setPreview(undefined); setError("Connessione interrotta. Controlla l’ultima azione."); }
+      } finally { if (mounted.current) done?.(); }
+    });
+  }
+  const order = game?.order ?? [];
+  const round = game?.round ?? 0;
+  const box = preview !== undefined ? preview : game?.box ?? null;
+  const phase = game?.phase ?? { name: "draw" };
+  const word = game?.word ?? "";
+  const notice = game?.notice ?? null;
+  const found = new Map(Object.entries(game?.found ?? {}));
+  function setBox(next: Box | null) {
+    previewBox.current = next; setPreview(next);
+    if (Date.now() - lastBoxSent.current > 100) {
+      lastBoxSent.current = Date.now(); send({ type: "box", box: next, final: false });
+    }
+  }
   const [restartArmed, tapRestart] = useArmed();
 
   const shape = order[round] as ShapeName | undefined;
   const foundOfShape = shape ? scene.targets.filter((t) => t.shape === shape && found.has(t.id)).length : 0;
-  const canEditBox = phase.name === "draw" || phase.name === "name";
+  const canEditBox = connected && (phase.name === "draw" || phase.name === "name");
 
   function toScene(e: ReactPointerEvent): Point | null {
     const ctm = svgRef.current?.getScreenCTM();
@@ -124,6 +154,7 @@ export default function ShapeHunt({ scene, illustration, initialOrder, showTarge
     if (e.pointerType === "mouse" && e.button !== 0) return;
     const p = toScene(e);
     if (!p) return;
+    previewBox.current = box;
     const handle = (e.target as Element).closest("[data-handle]")?.getAttribute("data-handle") as Corner | null;
     if (box && handle) {
       drag.current = { pointerId: e.pointerId, mode: handle, start: box };
@@ -133,7 +164,7 @@ export default function ShapeHunt({ scene, illustration, initialOrder, showTarge
       // Dragging elsewhere redraws the box, keeping whatever was already written.
       drag.current = { pointerId: e.pointerId, mode: "draw", origin: p };
       setBox({ x: p.x, y: p.y, width: 0, height: 0 });
-      setNotice(null);
+
     }
     try {
       e.currentTarget.setPointerCapture(e.pointerId);
@@ -166,101 +197,20 @@ export default function ShapeHunt({ scene, illustration, initialOrder, showTarge
     const d = drag.current;
     if (!d || e.pointerId !== d.pointerId) return;
     drag.current = null;
-    const tooSmall = !box || box.width < MIN_BOX || box.height < MIN_BOX;
-    if (d.mode === "draw") {
-      if (cancelled || tooSmall) {
-        setBox(null);
-        setPhase({ name: "draw" });
-      } else if (phase.name === "draw") {
-        // No confirmation step: go straight to writing the name.
-        setWord("");
-        setPhase({ name: "name" });
-      }
-    } else if (cancelled || tooSmall) {
-      setBox(d.start);
-    }
+    const current = previewBox.current;
+    const tooSmall = !current || current.width < MIN_BOX || current.height < MIN_BOX;
+    const finalBox = d.mode === "draw" ? (cancelled || tooSmall ? null : current) : (cancelled || tooSmall ? d.start : current);
+    previewBox.current = finalBox; setPreview(finalBox);
+    send({ type: "box", box: finalBox, final: true }, () => { if (!drag.current) setPreview(undefined); });
   }
 
-  // --- Flow
-
-  // Ends the current object: clear the box and look for the next one.
-  function lookAgain(next: Notice | null) {
-    setBox(null);
-    setWord("");
-    setPhase({ name: "draw" });
-    setNotice(next);
-  }
-
-  function discover(target: SceneTarget, discovery: Discovery) {
-    setFound(new Map(found).set(target.id, discovery));
-  }
-
-  function submit() {
-    if (phase.name !== "name" || !box || !shape || !word.trim()) return;
-    const m = matchBox(box, scene.targets);
-    if (m.kind === "none") return lookAgain({ tone: "bad", title: "Non trovo un oggetto qui." });
-    if (m.kind === "ambiguous") {
-      // Keep box and word: tightening the box is enough.
-      return setNotice({ tone: "bad", title: "Il riquadro prende più oggetti.", text: "Stringi il riquadro intorno a un oggetto." });
-    }
-    const target = m.target;
-    if (target.shape !== shape) return lookAgain({ tone: "bad", title: `Questo oggetto non è ${shaped(shape)}.` });
-    if (found.has(target.id)) return lookAgain({ tone: "bad", title: "Hai già trovato questo oggetto." });
-
-    const verdict = judgeName(word, target.names);
-    if (verdict.kind === "correct") {
-      const label = normalizeWord(word);
-      discover(target, { label, how: "named" });
-      return lookAgain({ tone: "good", title: "Esatto!", word: label });
-    }
-    const attempt = (attempts.get(target.id) ?? 0) + 1;
-    setAttempts(new Map(attempts).set(target.id, attempt));
-    const accept = { target, written: word };
-    if (attempt >= MAX_ATTEMPTS) {
-      discover(target, { label: target.names[0], how: "revealed" });
-      return lookAgain({ tone: "reveal", title: "Questo oggetto si chiama:", word: target.names[0], attempt, accept });
-    }
-    // Straight back to writing; the word stays so it can be corrected.
-    setNotice(
-      verdict.kind === "spelling"
-        ? { tone: "bad", title: "Quasi!", text: "Controlla come si scrive.", attempt, accept }
-        : { tone: "bad", title: "No.", text: "Prova un'altra parola.", attempt, accept },
-    );
-  }
-
-  // The teacher overrules the app: the student's word counts for this object.
-  function teacherAccept({ target, written }: { target: SceneTarget; written: string }) {
-    const label = normalizeWord(written);
-    discover(target, { label, how: "accepted" });
-    lookAgain({ tone: "good", title: "Accettato dall'insegnante", word: label });
-  }
-
-  function claimNoneLeft() {
-    if (!shape) return;
-    if (remaining(scene, shape, found).length > 0) {
-      return lookAgain({ tone: "bad", title: "Guarda bene!", text: `C'è ancora almeno un oggetto ${shaped(shape)}.` });
-    }
-    if (round + 1 >= order.length) {
-      setRound(order.length);
-      lookAgain(null);
-      setPhase({ name: "finished" });
-      confetti({ particleCount: 180, spread: 100, origin: { y: 0.6 } });
-    } else {
-      setRound(round + 1);
-      lookAgain({ tone: "good", title: "Giusto!", text: `Hai trovato tutti gli oggetti ${shaped(shape)}.` });
-    }
-  }
-
-  function newGame() {
-    setOrder(shuffled(shapesIn(scene)));
-    setRound(0);
-    setFound(new Map());
-    setAttempts(new Map());
-    lookAgain(null);
-  }
-
-  const typeLetter = (letter: string) => setWord((w) => (w.length < MAX_WORD ? w + letter : w));
-  const backspace = () => setWord((w) => w.slice(0, -1));
+  function lookAgain() { send({ type: "clear" }); }
+  function submit() { if (!drag.current) send({ type: "submit" }); }
+  function teacherAccept() { send({ type: "accept" }); }
+  function claimNoneLeft() { send({ type: "none" }); }
+  function newGame() { send({ type: "restart" }); }
+  const typeLetter = (letter: string) => send({ type: "letter", letter });
+  const backspace = () => send({ type: "backspace" });
 
   // Physical keyboard, for testing on the laptop.
   function onKey(e: KeyboardEvent) {
@@ -268,8 +218,8 @@ export default function ShapeHunt({ scene, illustration, initialOrder, showTarge
     if (/^[a-zà-ú' ]$/i.test(e.key)) typeLetter(e.key.toLowerCase());
     else if (e.key === "Backspace") backspace();
     // preventDefault below also stops Enter from pressing a focused button.
-    else if (e.key === "Enter") submit();
-    else if (e.key === "Escape") lookAgain(null);
+    else if (e.key === "Enter") { if (!e.repeat) submit(); }
+    else if (e.key === "Escape") lookAgain();
     else return;
     e.preventDefault();
   }
@@ -331,7 +281,9 @@ export default function ShapeHunt({ scene, illustration, initialOrder, showTarge
         </svg>
       </main>
 
-      <aside className="w-[clamp(340px,30vw,520px)] shrink-0 bg-slate-50 text-slate-800 flex flex-col p-5 gap-3 overflow-y-auto">
+      <aside aria-busy={!connected} className="w-[clamp(340px,30vw,520px)] shrink-0 bg-slate-50 text-slate-800 flex flex-col p-5 gap-3 overflow-y-auto">
+        <p role="status" className="text-sm text-slate-500">{connected ? "Partita condivisa · Giochiamo insieme" : "Connessione… Comandi in pausa"}{error && ` · ${error}`}</p>
+        <fieldset disabled={!connected} className="contents">
         <header className="flex items-start justify-between gap-3">
           <div>
             <h1 className="text-2xl font-bold">{scene.title}</h1>
@@ -352,7 +304,7 @@ export default function ShapeHunt({ scene, illustration, initialOrder, showTarge
           </button>
         </header>
 
-        {phase.name === "finished" || !shape ? (
+        {!game ? <p className="text-xl">Caricamento della partita…</p> : phase.name === "finished" || !shape ? (
           <>
             <p className="rounded-xl bg-green-100 text-green-800 text-2xl font-bold p-5 text-center">Hai trovato tutti gli oggetti!</p>
             <p className="text-2xl">
@@ -389,7 +341,7 @@ export default function ShapeHunt({ scene, illustration, initialOrder, showTarge
                 <div className="mt-auto flex flex-col gap-3">
                   <LetterKeyboard onLetter={typeLetter} onBackspace={backspace} />
                   <div className="flex gap-3">
-                    <button type="button" className={`${secondary} flex-1`} onClick={() => lookAgain(null)}>
+                    <button type="button" className={`${secondary} flex-1`} onClick={() => lookAgain()}>
                       Ridisegna
                     </button>
                     <button type="button" className={`${primary} flex-[2]`} disabled={!word.trim()} onClick={submit}>
@@ -401,6 +353,7 @@ export default function ShapeHunt({ scene, illustration, initialOrder, showTarge
             )}
           </>
         )}
+        </fieldset>
       </aside>
     </div>
   );

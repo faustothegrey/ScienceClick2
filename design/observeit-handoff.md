@@ -46,3 +46,7 @@ Codex review points 1 (Enter also pressing the focused button) and 2 (one-star h
   - `src/lib/observeit/`: pure logic, scene data and tests;
   - `src/components/observeit/`: board UI, keyboard and illustration;
   - `src/app/observeit/`: the route.
+
+## Shared game update (2026-11-02)
+
+ObserveIt now shares live gameplay across connected browsers, as requested by the teacher. Game rules have moved into `src/lib/observeit/shared.ts` and are tested through drawing, naming, teacher acceptance, all shapes, and restart. The shared server store and API persist progress in `.data/observeit.json`. See PROJECT.md for sync and single-server deployment constraints. This supersedes the previous no-persistence scope and per-request shape shuffling; the server chooses one order for the shared game. The debug target outlines remain a per-window authoring option.
