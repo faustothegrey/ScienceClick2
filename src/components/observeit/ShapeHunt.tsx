@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
+import ClassroomJoin from "@/components/ClassroomJoin";
 import confetti from "canvas-confetti";
 import { RotateCcw, UserCheck } from "lucide-react";
 import { boxFromPoints, type Box, type Point } from "@/lib/observeit/geometry";
@@ -215,6 +216,7 @@ export default function ShapeHunt({ scene, illustration, showTargets = false }: 
 
   // Physical keyboard, for testing on the laptop.
   function onKey(e: KeyboardEvent) {
+      if (e.target instanceof Element && e.target.closest("dialog[open]")) return;
     if (e.ctrlKey || e.metaKey || e.altKey || phase.name !== "name") return;
     if (/^[a-zà-ú' ]$/i.test(e.key)) typeLetter(e.key.toLowerCase());
     else if (e.key === "Backspace") backspace();
@@ -285,6 +287,7 @@ export default function ShapeHunt({ scene, illustration, showTargets = false }: 
       <aside aria-busy={!connected} className="w-[clamp(340px,30vw,520px)] shrink-0 bg-slate-50 text-slate-800 flex flex-col p-5 gap-3 overflow-y-auto">
         <p role="status" className="text-sm text-slate-500">{connected ? "Partita condivisa · Giochiamo insieme" : "Connessione non disponibile. Comandi in pausa"}{error && ` · ${error}`}</p>
         {!connected && <button type="button" className="rounded-lg bg-blue-600 px-3 py-2 text-white font-semibold" onClick={() => setRetry(n => n + 1)}>Riprova connessione</button>}
+        <ClassroomJoin path="/observeit" />
         <fieldset disabled={!connected} className="contents">
         <header className="flex items-start justify-between gap-3">
           <div>

@@ -1,3 +1,4 @@
+import ClassroomJoin from "@/components/ClassroomJoin";
 import Link from "next/link";
 import { ArrowRight, Shapes, Tags, Grid2X2, type LucideIcon } from "lucide-react";
 import { SNAPIT_BASE } from "@/lib/snapitRoutes";
@@ -43,6 +44,7 @@ export default function Home() {
         <p className="mt-3 text-lg text-slate-600">Attività interattive per imparare le scienze e l&apos;italiano.</p>
       </header>
 
+      <div className="mt-6"><ClassroomJoin /></div>
       <ul className="mt-10 sm:mt-14 w-full max-w-3xl grid gap-5 sm:grid-cols-2">
         {SUB_APPS.map(({ name, href, description, icon: Icon, accent }) => (
           <li key={name}>

@@ -1,5 +1,6 @@
 "use client";
 
+import ClassroomJoin from "@/components/ClassroomJoin";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, Delete, HelpCircle, RotateCcw, Share2 } from "lucide-react";
@@ -64,6 +65,7 @@ export default function WordleGame() {
   }
   useEffect(() => {
     function handle(event: KeyboardEvent) {
+      if (event.target instanceof Element && event.target.closest("dialog[open]")) return;
       if (event.ctrlKey || event.metaKey || event.altKey) return;
       if (event.key === "Enter" && event.repeat) { event.preventDefault(); return; }
       if ((event.target instanceof HTMLButtonElement || event.target instanceof HTMLAnchorElement) && event.key === "Enter" && !event.target.closest("[data-wordleit-keyboard]")) return;
@@ -86,8 +88,9 @@ export default function WordleGame() {
   }
 
   return <main lang="it" className="wordleit min-h-dvh bg-[#f8faf8] text-slate-800">
-    <header className="mx-auto flex max-w-3xl items-center justify-between border-b border-slate-200 px-4 py-4">
+    <header className="mx-auto flex max-w-3xl flex-wrap items-center justify-between gap-2 border-b border-slate-200 px-4 py-4">
       <Link href="/" className="flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-slate-950"><ArrowLeft size={17} /><span>ScienceClick</span></Link>
+      <ClassroomJoin path="/wordleit" />
       <button onClick={() => setHelp(true)} className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-slate-100"><HelpCircle size={19} />Come si gioca</button>
     </header>
     <div className="mx-auto flex max-w-xl flex-col items-center px-3 pb-8 pt-6 sm:pt-8">

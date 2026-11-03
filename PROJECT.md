@@ -61,3 +61,7 @@ ObserveIt uses one shared game for all browsers on the same server. `/observeit/
 ## Shared-game deployment
 
 Shared games now use Redis REST storage when configured (`UPSTASH_REDIS_REST_URL/TOKEN` or `KV_REST_API_URL/TOKEN`), with atomic compare-and-set retries across instances. Local development retains filesystem state. On Vercel, Redis is required; filesystem-only shared games cannot run there. See `design/shared-games-deployment.md` for integration and verification steps. This supersedes the earlier single-server limitation when Redis is configured.
+
+## Joining a local classroom
+
+Run `npm run classroom` on the teacher’s laptop, then open the app and click **Invita la classe** on the home page, WordleIt, or ObserveIt. The panel shows a local-network URL and a QR code generated locally. Students use the same Wi-Fi and open the displayed URL; no external QR service or database is needed. The teacher’s laptop and server must stay running. The link is recalculated whenever the panel is opened, so a new Wi-Fi address does not leave a stale link. Multiple detected network addresses appear in a selector. School Wi-Fi must allow connections between devices, and the laptop firewall must permit the server port. The QR and link address the same server/game, with the existing shared game state.

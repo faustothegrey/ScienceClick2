@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "classroom": "npm run dev -- --hostname 0.0.0.0",
     "dev": "set -a; [ -f .env ] && . ./.env; set +a; next dev",
     "build": "next build",
     "start": "set -a; [ -f .env ] && . ./.env; set +a; next start",
@@ -16,6 +17,7 @@
     "canvas-confetti": "^1.9.4",
     "lucide-react": "^0.563.0",
     "next": "16.1.6",
+    "qrcode": "^1.5.4",
     "react": "19.2.3",
     "react-dom": "19.2.3"
   },
@@ -23,6 +25,7 @@
     "@tailwindcss/postcss": "^4",
     "@types/canvas-confetti": "^1.9.0",
     "@types/node": "^20",
+    "@types/qrcode": "^1.5.6",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
