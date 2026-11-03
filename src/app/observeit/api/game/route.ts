@@ -1,3 +1,4 @@
+import { sharedStorageError } from "@/lib/sharedGameStorage";
 import { NextRequest, NextResponse } from "next/server";
 import { sharedHunt } from "@/lib/observeit/sharedStore";
 import { validHuntAction } from "@/lib/observeit/shared";
@@ -7,7 +8,7 @@ export const dynamic = "force-dynamic";
 const headers = { "Cache-Control": "no-store" };
 export async function GET() {
   try { return NextResponse.json(await sharedHunt(), { headers }); }
-  catch { return NextResponse.json({ error: "Partita non disponibile." }, { status: 503, headers }); }
+  catch (error) { console.error("Shared game storage unavailable", error instanceof Error ? error.name : "UnknownError"); return NextResponse.json({ error: sharedStorageError(error) }, { status: 503, headers }); }
 }
 export async function POST(request: NextRequest) {
   try {
@@ -16,5 +17,5 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     if (!validHuntAction(body?.action, streetScene) || typeof body?.turn !== "string" || body.turn.length > 100) return NextResponse.json({ error: "Azione non valida." }, { status: 400 });
     return NextResponse.json(await sharedHunt(body.action, body.turn), { headers });
-  } catch (e) { return NextResponse.json({ error: "Impossibile aggiornare la partita." }, { status: e instanceof SyntaxError ? 400 : 503, headers }); }
+  } catch (e) { return NextResponse.json({ error: sharedStorageError(e) }, { status: e instanceof SyntaxError ? 400 : 503, headers }); }
 }

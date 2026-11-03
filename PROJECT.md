@@ -57,3 +57,7 @@ Italian five-letter word game with six attempts, a daily puzzle, and unlimited p
 ## Shared ObserveIt
 
 ObserveIt uses one shared game for all browsers on the same server. `/observeit/api/game` syncs the target order, selection box (including live drawing), typed name, feedback, discoveries, attempts, teacher acceptance, and restart. The client polls every 300ms and sends drawing previews at most every 100ms. Local pointer previews keep drawing smooth. Runtime state is stored at `.data/observeit.json`, with serialized actions and atomic writes. As with WordleIt, this supports one persistent Node server; multiple replicas or ephemeral deployments need a shared database/locking. Turn tokens reject late actions after a submission, reset, or change of target. Two-tap restart and teacher acceptance guards remain local UI safeguards.
+
+## Shared-game deployment
+
+Shared games now use Redis REST storage when configured (`UPSTASH_REDIS_REST_URL/TOKEN` or `KV_REST_API_URL/TOKEN`), with atomic compare-and-set retries across instances. Local development retains filesystem state. On Vercel, Redis is required; filesystem-only shared games cannot run there. See `design/shared-games-deployment.md` for integration and verification steps. This supersedes the earlier single-server limitation when Redis is configured.

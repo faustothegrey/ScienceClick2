@@ -73,6 +73,7 @@ export default function ShapeHunt({ scene, illustration, showTargets = false }: 
   const lastBoxSent = useRef(0);
   const mounted = useRef(false);
   const [error, setError] = useState("");
+  const [retry, setRetry] = useState(0);
   function accept(next: SharedHunt) {
     if (!mounted.current) return;
     if (!latest.current || next.revision >= latest.current.revision) {
@@ -90,15 +91,15 @@ export default function ShapeHunt({ scene, illustration, showTargets = false }: 
     async function poll() {
       try {
         const response = await fetch("/observeit/api/game", { cache: "no-store", signal: AbortSignal.any([controller.signal, AbortSignal.timeout(5000)]) });
-        if (!response.ok) throw new Error();
+        if (!response.ok) { const body = await response.json(); throw new Error(body.error || "Partita non disponibile."); }
         const next: SharedHunt = await response.json();
         if (!stopped) accept(next);
-      } catch { if (!stopped) { setConnected(false); drag.current = null; setPreview(undefined); } }
+      } catch (error) { if (!stopped) { setError(error instanceof Error && error.name === "Error" ? error.message : "Impossibile connettersi. Riprova tra poco."); setConnected(false); drag.current = null; setPreview(undefined); } }
       if (!stopped) timer = setTimeout(poll, 300);
     }
     void poll();
     return () => { stopped = true; mounted.current = false; controller.abort(); clearTimeout(timer); };
-  }, []);
+  }, [retry]);
   function send(action: HuntAction, done?: () => void) {
     const turn = latest.current?.turn;
     if (!turn || !connected) return;
@@ -106,7 +107,7 @@ export default function ShapeHunt({ scene, illustration, showTargets = false }: 
     queue.current = queue.current.then(async () => {
       try {
         const response = await fetch("/observeit/api/game", { method: "POST", signal: AbortSignal.timeout(5000), headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action, turn }) });
-        if (!response.ok) throw new Error();
+        if (!response.ok) { const body = await response.json(); throw new Error(body.error || "Partita non disponibile."); }
         accept(await response.json());
       } catch {
         if (mounted.current) { setConnected(false); drag.current = null; setPreview(undefined); setError("Connessione interrotta. Controlla l’ultima azione."); }
@@ -282,7 +283,8 @@ export default function ShapeHunt({ scene, illustration, showTargets = false }: 
       </main>
 
       <aside aria-busy={!connected} className="w-[clamp(340px,30vw,520px)] shrink-0 bg-slate-50 text-slate-800 flex flex-col p-5 gap-3 overflow-y-auto">
-        <p role="status" className="text-sm text-slate-500">{connected ? "Partita condivisa · Giochiamo insieme" : "Connessione… Comandi in pausa"}{error && ` · ${error}`}</p>
+        <p role="status" className="text-sm text-slate-500">{connected ? "Partita condivisa · Giochiamo insieme" : "Connessione non disponibile. Comandi in pausa"}{error && ` · ${error}`}</p>
+        {!connected && <button type="button" className="rounded-lg bg-blue-600 px-3 py-2 text-white font-semibold" onClick={() => setRetry(n => n + 1)}>Riprova connessione</button>}
         <fieldset disabled={!connected} className="contents">
         <header className="flex items-start justify-between gap-3">
           <div>

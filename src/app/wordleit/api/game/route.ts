@@ -1,3 +1,4 @@
+import { sharedStorageError } from "@/lib/sharedGameStorage";
 import { NextRequest, NextResponse } from "next/server";
 import { sharedGame } from "@/lib/wordleit/sharedStore";
 import type { Action } from "@/lib/wordleit/shared";
@@ -6,7 +7,7 @@ export const dynamic = "force-dynamic";
 const headers = { "Cache-Control": "no-store" };
 export async function GET() {
   try { return NextResponse.json(await sharedGame(), { headers }); }
-  catch { return NextResponse.json({ error: "Partita non disponibile." }, { status: 503, headers }); }
+  catch (error) { console.error("Shared game storage unavailable", error instanceof Error ? error.name : "UnknownError"); return NextResponse.json({ error: sharedStorageError(error) }, { status: 503, headers }); }
 }
 export async function POST(request: NextRequest) {
   try {
@@ -18,6 +19,6 @@ export async function POST(request: NextRequest) {
     if (!valid || typeof body.boardId !== "string" || body.boardId.length > 100) return NextResponse.json({ error: "Azione non valida." }, { status: 400 });
     return NextResponse.json(await sharedGame(a as Action, body.boardId), { headers });
   } catch (error) {
-    return NextResponse.json({ error: "Impossibile aggiornare la partita." }, { status: error instanceof SyntaxError ? 400 : 503, headers });
+    return NextResponse.json({ error: sharedStorageError(error) }, { status: error instanceof SyntaxError ? 400 : 503, headers });
   }
 }

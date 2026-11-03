@@ -12,6 +12,8 @@ const colors: Record<Mark, string> = { correct: "🟩", present: "🟨", absent:
 export default function WordleGame() {
   const [game, setGame] = useState<SharedView | null>(null);
   const [notice, setNotice] = useState("");
+  const [connectionError, setConnectionError] = useState("");
+  const [retry, setRetry] = useState(0);
   const [connected, setConnected] = useState(false);
   const [help, setHelp] = useState(false);
   const latest = useRef<SharedView | null>(null);
@@ -30,15 +32,15 @@ export default function WordleGame() {
     async function poll() {
       try {
         const response = await fetch("/wordleit/api/game", { cache: "no-store", signal: AbortSignal.any([controller.signal, AbortSignal.timeout(5000)]) });
-        if (!response.ok) throw new Error();
+        if (!response.ok) { const body = await response.json(); throw new Error(body.error || "Partita non disponibile."); }
         const next: SharedView = await response.json();
         if (!stopped) accept(next);
-      } catch { if (!stopped) setConnected(false); }
+      } catch (error) { if (!stopped) { setConnected(false); setConnectionError(error instanceof Error && error.name === "Error" ? error.message : "Impossibile connettersi. Riprova tra poco."); } }
       if (!stopped) timer = setTimeout(poll, 400);
     }
     void poll();
     return () => { stopped = true; mounted.current = false; controller.abort(); clearTimeout(timer); };
-  }, []);
+  }, [retry]);
   const won = !!game?.won;
   const over = !!game?.over;
   const input = game?.input ?? "";
@@ -49,7 +51,7 @@ export default function WordleGame() {
     queue.current = queue.current.then(async () => {
       try {
         const response = await fetch("/wordleit/api/game", { method: "POST", signal: AbortSignal.timeout(5000), headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action, boardId }) });
-        if (!response.ok) throw new Error();
+        if (!response.ok) { const body = await response.json(); throw new Error(body.error || "Partita non disponibile."); }
         accept(await response.json());
       } catch {
         if (mounted.current) { setConnected(false); setNotice("Connessione interrotta. L’ultima azione potrebbe non essere stata salvata."); }
@@ -93,6 +95,7 @@ export default function WordleGame() {
       <h1 className="mt-2 text-4xl font-extrabold tracking-tight sm:text-5xl">Wordle<span className="text-emerald-600">It</span></h1>
       <p className="mt-2 text-sm text-slate-500">Trova la parola italiana in 6 tentativi.</p>
       <p role="status" className="mt-2 text-center text-xs text-slate-500">{connected ? "● Partita condivisa · Tutti vedono e giocano sulla stessa griglia" : "Connessione alla partita… Comandi in pausa."}</p>
+      {!connected && connectionError && <div role="alert" className="mt-3 text-center text-sm text-red-700"><p>{connectionError}</p><button className="mt-2 rounded-lg border border-red-300 px-3 py-2 font-semibold" onClick={() => setRetry(n => n + 1)}>Riprova connessione</button></div>}
       <div className="mt-5 flex rounded-xl bg-slate-200/60 p-1" aria-label="Modalità di gioco">
         {(["daily", "practice"] as const).map(mode => <button key={mode} disabled={!connected} onClick={() => changeMode(mode)} aria-pressed={game?.mode === mode} className={`rounded-lg px-5 py-2 text-sm font-semibold transition ${game?.mode === mode ? "bg-white text-emerald-800 shadow-sm" : "text-slate-500 hover:text-slate-800"}`}>{mode === "daily" ? "Parola del giorno" : "Allenamento"}</button>)}
       </div>
