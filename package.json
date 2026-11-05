@@ -4,9 +4,9 @@
   "private": true,
   "scripts": {
     "classroom": "npm run dev -- --hostname 0.0.0.0",
-    "dev": "set -a; [ -f .env ] && . ./.env; set +a; next dev",
+    "dev": "next dev",
     "build": "next build",
-    "start": "set -a; [ -f .env ] && . ./.env; set +a; next start",
+    "start": "next start",
     "lint": "eslint",
     "test": "node --test \"src/**/*.test.ts\""
   },
